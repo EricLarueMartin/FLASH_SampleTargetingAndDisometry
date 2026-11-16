@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLASH Motion</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-width: 760px;
+            min-height: 100%;
+            font-family: Arial, sans-serif;
+            color: #202428;
+            background: #eef1f2;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 1px solid #8c969b;
+            border-radius: 6px;
+            padding: 9px 14px;
+            color: #202428;
+            background: #ffffff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #e6f2f5;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 3px solid #3f95a8;
+            outline-offset: 2px;
+        }
+
+        input,
+        select {
+            border: 1px solid #9ba4a8;
+            border-radius: 4px;
+            padding: 7px 8px;
+            background: #ffffff;
+        }
+
+        h2 {
+            margin: 0 0 16px;
+            font-size: 1.25rem;
+        }
+
+        .app-shell {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(380px, 0.9fr);
+            min-height: calc(100vh - 44px);
+        }
+
+        .run-banner {
+            padding: 8px 16px;
+            color: #fff;
+            background: #b45309;
+            font-weight: 700;
+        }
+
+        .run-banner[hidden] { display: none; }
+
+        .save-note {
+            margin-left: 8px;
+            color: #5d666a;
+            font-size: 0.85rem;
+        }
+
+        .video-pane {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 16px;
+            background: #171a1c;
+        }
+
+        .video-frame {
+            position: sticky;
+            top: 16px;
+            width: 100%;
+        }
+
+        #video {
+            display: block;
+            width: 100%;
+            max-height: calc(100vh - 32px);
+            object-fit: contain;
+            border: 1px solid #596065;
+            background: #000000;
+        }
+
+        .motor-warning {
+            position: absolute;
+            top: 24px;
+            left: 0;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 64px;
+            padding: 12px 20px;
+            border-top: 4px solid #fff2a8;
+            border-bottom: 4px solid #fff2a8;
+            color: #ffffff;
+            background: rgba(177, 20, 20, 0.96);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65);
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .motor-warning[hidden] {
+            display: none;
+        }
+
+        .camera-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            color: #d7dde0;
+            font-size: 0.95rem;
+        }
+
+        .camera-status {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .camera-status::before {
+            content: "";
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            margin-right: 8px;
+            border-radius: 50%;
+            background: #8c969b;
+            vertical-align: middle;
+        }
+
+        .camera-status.ok::before { background: #4cc46f; }
+        .camera-status.wait::before { background: #e7c24a; }
+        .camera-status.bad::before { background: #e05757; }
+
+        .camera-bar button {
+            padding: 6px 12px;
+        }
+
+        .camera-holders {
+            margin-top: 8px;
+            padding: 10px 12px;
+            border: 1px solid #b88a2e;
+            border-radius: 6px;
+            color: #f4e7c8;
+            background: #3a2f17;
+            font-size: 0.9rem;
+        }
+
+        .camera-holders[hidden] {
+            display: none;
+        }
+
+        .camera-holders ul {
+            margin: 6px 0 10px;
+            padding-left: 18px;
+        }
+
+        .camera-holders code {
+            word-break: break-all;
+        }
+
+        .control-pane {
+            min-width: 0;
+            padding: 16px;
+            background: #f7f8f8;
+        }
+
+        .tab-list {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 0 0 12px;
+            background: #f7f8f8;
+            border-bottom: 1px solid #c8ced1;
+        }
+
+        .tab-button {
+            border-color: transparent;
+            border-bottom: 3px solid transparent;
+            border-radius: 6px 6px 0 0;
+            padding: 10px 12px 8px;
+            background: transparent;
+            font-weight: 600;
+        }
+
+        .tab-button[aria-selected="true"] {
+            border-bottom-color: #16829a;
+            color: #075f72;
+            background: #e4f1f3;
+        }
+
+        .tab-panel {
+            display: none;
+            padding-top: 18px;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .section {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #d4d9db;
+        }
+
+        .section:last-child {
+            border-bottom: 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 14px;
+            min-height: 30px;
+        }
+
+        .circle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #4d8995;
+            border-radius: 50%;
+            background: #9ed9e4;
+            cursor: pointer;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .circle:hover {
+            background: #4cb5c9;
+        }
+
+        .circle.active {
+            border-color: #24733b;
+            background: #55c878;
+        }
+
+        .circle.active:hover {
+            background: #3bac5e;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 28px;
+        }
+
+        .field {
+            display: grid;
+            gap: 5px;
+            margin-bottom: 12px;
+        }
+
+        .field input {
+            width: 100%;
+        }
+
+        .arrow-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: min(100%, 300px);
+            margin: 16px auto 0;
+        }
+
+        .arrow-pad button {
+            min-height: 44px;
+        }
+
+        .arrow-up {
+            grid-column: 2;
+        }
+
+        .arrow-left {
+            grid-column: 1;
+        }
+
+        .arrow-right {
+            grid-column: 3;
+        }
+
+        .arrow-down {
+            grid-column: 2;
+        }
+
+        .info {
+            line-height: 1.6;
+        }
+
+        .info span {
+            font-weight: bold;
+        }
+
+        .toggle-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        #toggle-motor-0,
+        #toggle-motor-1 {
+            color: #202428;
+        }
+
+        .offset-readout {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .hint {
+            color: #5d666a;
+            line-height: 1.45;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #aeb6b9;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #e7ebec;
+        }
+
+        #add-correction {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        #add-correction button {
+            align-self: end;
+        }
+
+        #terminal {
+            width: 100%;
+            height: 420px;
+            overflow-y: auto;
+            border: 1px solid #626a6e;
+            border-radius: 4px;
+            padding: 10px;
+            color: #e8eeee;
+            background: #202527;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        #terminal p {
+            margin: 0 0 5px;
+            overflow-wrap: anywhere;
+        }
+
+        .command-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 980px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="/motion/static/nav.css">
+    <script src="/motion/static/socket.io.min.js"></script>
+    <script src="/motion/static/geometry.js"></script>
+</head>
+<body>
+    <nav class="site-nav" aria-label="FLASH pages">
+        <span class="site-title">FLASH</span>
+        <a href="/">DoseCam</a>
+        <a href="/motion/" aria-current="page">Motion</a>
+        <a href="/run/">Run</a>
+        <a href="/settings/">Settings</a>
+        <span class="site-nav-status" id="nav-status"></span>
+    </nav>
+    <div class="run-banner" id="run-banner" role="alert" hidden>A run is in progress on the Run page - manual moves are blocked. Use ABORT on the Run page to stop it.</div>
+    <main class="app-shell">
+        <section class="video-pane" aria-label="Camera feed">
+            <div class="video-frame">
+                <img id="video" src="/motion/video_feed" alt="Live sample positioning camera feed">
+                <div class="motor-warning" id="motor-warning" role="alert" hidden></div>
+                <div class="camera-bar">
+                    <span class="camera-status" id="camera-status" aria-live="polite">Camera: checking...</span>
+                    <button type="button" id="camera-reset">Reset camera</button>
+                </div>
+                <div class="camera-holders" id="camera-holders" role="alert" hidden></div>
+            </div>
+        </section>
+
+        <section class="control-pane">
+            <div class="tab-list" role="tablist" aria-label="Controls">
+                <button class="tab-button" id="tab-positioning" role="tab" aria-selected="true" aria-controls="panel-positioning" data-tab="positioning">Positioning</button>
+                <button class="tab-button" id="tab-motors" role="tab" aria-selected="false" aria-controls="panel-motors" data-tab="motors">Motors</button>
+                <button class="tab-button" id="tab-targeting" role="tab" aria-selected="false" aria-controls="panel-targeting" data-tab="targeting">Targeting</button>
+                <button class="tab-button" id="tab-y-trim" role="tab" aria-selected="false" aria-controls="panel-y-trim" data-tab="y-trim">Y Trim</button>
+                <button class="tab-button" id="tab-terminal" role="tab" aria-selected="false" aria-controls="panel-terminal" data-tab="terminal">Terminal</button>
+            </div>
+
+            <div class="tab-panel active" id="panel-positioning" role="tabpanel" aria-labelledby="tab-positioning">
+                <div id="sections">
+                    <div class="section" id="section-1">
+                        <div class="section-header">
+                            <label for="select-1">Section 1</label>
+                            <select id="select-1" onchange="changeHolder(1)">
+                                <option value="3x2">3x2 Well Plate</option>
+                                <option value="4x3" selected>4x3 Well Plate</option>
+                                <option value="6x4">6x4 Well Plate</option>
+                                <option value="12x8">12x8 Well Plate</option>
+                                <option value="tubes">Test Tube Rack</option>
+                                <option value="puptubes">Pup Tube Rack</option>
+                                <option value="l4l5tubes">L4/L5 Tube Rack</option>
+                                <option value="microtubes">Micro Tube Rack</option>
+                            </select>
+                        </div>
+                        <div class="grid" id="grid-1"></div>
+                    </div>
+
+                    <div class="section" id="section-2">
+                        <div class="section-header">
+                            <label for="select-2">Section 2</label>
+                            <select id="select-2" onchange="changeHolder(2)">
+                                <option value="3x2">3x2 Well Plate</option>
+                                <option value="4x3" selected>4x3 Well Plate</option>
+                                <option value="6x4">6x4 Well Plate</option>
+                                <option value="12x8">12x8 Well Plate</option>
+                                <option value="tubes">Test Tube Rack</option>
+                                <option value="puptubes">Pup Tube Rack</option>
+                                <option value="l4l5tubes">L4/L5 Tube Rack</option>
+                                <option value="microtubes">Micro Tube Rack</option>
+                            </select>
+                        </div>
+                        <div class="grid" id="grid-2"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="tab-panel" id="panel-motors" role="tabpanel" aria-labelledby="tab-motors" hidden>
+                <div class="two-column">
+                    <div>
+                        <h2>Move Motors</h2>
+                        <div class="field">
+                            <label for="x-distance">X distance (Motor 0, mm)</label>
+                            <input id="x-distance" type="number" value="25.4" step="0.1">
+                        </div>
+                        <div class="field">
+                            <label for="y-distance">Y distance (Motor 1, mm)</label>
+                            <input id="y-distance" type="number" value="25.4" step="0.1">
+                        </div>
+                        <div class="arrow-pad" aria-label="Jog motors">
+                            <button class="arrow-up" onclick="moveMotor('up')">&#9650; Up</button>
+                            <button class="arrow-left" onclick="moveMotor('left')">&#9668; Left</button>
+                            <button class="arrow-right" onclick="moveMotor('right')">Right &#9658;</button>
+                            <button class="arrow-down" onclick="moveMotor('down')">&#9660; Down</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2>Motor Status</h2>
+                        <div class="info">
+                            <p>Motor 0 position: <span id="pos-0">0</span> steps</p>
+                            <p>Motor 1 position: <span id="pos-1">0</span> steps</p>
+                            <p>Motor 0 speed: <span id="speed-0">0</span> steps/s</p>
+                            <p>Motor 1 speed: <span id="speed-1">0</span> steps/s</p>
+                        </div>
+                        <div class="toggle-buttons">
+                            <button id="toggle-motor-0" onclick="toggleMotor(0)">Checking...</button>
+                            <button id="toggle-motor-1" onclick="toggleMotor(1)">Checking...</button>
+                        </div>
+                        <button onclick="sendUpdateCommand()">Update Status</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="panel-targeting" role="tabpanel" aria-labelledby="tab-targeting" hidden>
+                <h2>Target Null Adjust</h2>
+                <p class="hint">Adjust the global target offset. This changes every plate and tube target without moving a motor.</p>
+
+                <div class="offset-readout">
+                    <div class="field">
+                        <label for="target-offset-x">X offset (mm)</label>
+                        <input id="target-offset-x" type="number" value="0" step="0.1" onchange="applyTargetOffsetInputs()">
+                    </div>
+                    <div class="field">
+                        <label for="target-offset-y">Y offset (mm)</label>
+                        <input id="target-offset-y" type="number" value="0" step="0.1" onchange="applyTargetOffsetInputs()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="panel-y-trim" role="tabpanel" aria-labelledby="tab-y-trim" hidden>
+                <div id="corrections">
+                    <h2>Y Corrections</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>X Position</th>
+                                <th>Y Correction</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corrections-table"></tbody>
+                    </table>
+                    <div id="add-correction">
+                        <div class="field">
+                            <label for="correction-x">X position</label>
+                            <input id="correction-x" type="number">
+                        </div>
+                        <div class="field">
+                            <label for="correction-y">Y correction</label>
+                            <input id="correction-y" type="number">
+                        </div>
+                        <button onclick="addCorrection()">Add Correction</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="panel-terminal" role="tabpanel" aria-labelledby="tab-terminal" hidden>
+                <h2>Terminal</h2>
+                <div id="terminal" aria-live="polite"></div>
+                <div class="command-row">
+                    <input id="command-input" type="text" placeholder="Enter command" aria-label="Command">
+                    <button onclick="sendCommand()">Send</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const socket = io();
+        const G = window.FlashGeometry;
+        const stepPerInch = G.stepPerInch;
+        const mmPerInch = G.mmPerInch;
+        const positions = G.holderTypes;
+        // Loadout lives on the server (shared with the Run page and other browsers).
+        let loadout = { sections: { '1': '4x3', '2': '4x3' }, targetOffsetMm: { x: 0, y: 0 }, yCorrections: [] };
+        let yCorrections = loadout.yCorrections;
+        let targetOffsetMm = loadout.targetOffsetMm;
+
+        async function saveLoadout(patch) {
+            const note = document.getElementById('nav-status');
+            try {
+                const r = await fetch('/motion/api/loadout', {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
+                });
+                const data = await r.json();
+                if (!r.ok) throw new Error(data.error || r.status);
+                applyLoadout(data);
+                note.textContent = 'Loadout saved';
+            } catch (err) {
+                note.textContent = `Loadout NOT saved: ${err.message}`;
+            }
+        }
+
+        function applyLoadout(data) {
+            loadout = data;
+            yCorrections = loadout.yCorrections;
+            targetOffsetMm = loadout.targetOffsetMm;
+            for (const section of [1, 2]) {
+                document.getElementById(`select-${section}`).value = loadout.sections[String(section)];
+            }
+            syncTargetOffsetInputs();
+            renderCorrections();
+            refreshAllGrids();
+        }
+
+        const motorStates = { 0: null, 1: null };
+        const currentPositions = { 0: 0, 1: 0 };
+
+        function mmToSteps(mm) {
+            return G.mmToSteps(mm);
+        }
+
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach((button) => {
+                const isActive = button.dataset.tab === tabName;
+                button.setAttribute('aria-selected', isActive);
+            });
+
+            document.querySelectorAll('.tab-panel').forEach((panel) => {
+                const isActive = panel.id === `panel-${tabName}`;
+                panel.classList.toggle('active', isActive);
+                panel.hidden = !isActive;
+            });
+        }
+
+        function toggleMotor(motor) {
+            const command = motorStates[motor] === 'ENABLED' ? `disable ${motor}` : `enable ${motor}`;
+            socket.emit('send_command', { command });
+        }
+
+        function updateMotorState(motor, state) {
+            motorStates[motor] = state;
+            const button = document.getElementById(`toggle-motor-${motor}`);
+            button.textContent = state;
+            button.style.backgroundColor = state === 'ENABLED' ? '#83d69a' : '#ee9b9b';
+            updateMotorWarning();
+        }
+
+        function updateMotorWarning() {
+            const disabledMotors = Object.entries(motorStates)
+                .filter(([, state]) => state === 'DISABLED')
+                .map(([motor]) => `Motor ${motor}`);
+            const warning = document.getElementById('motor-warning');
+
+            if (disabledMotors.length === 0) {
+                warning.hidden = true;
+                warning.textContent = '';
+                return;
+            }
+
+            const label = disabledMotors.length === 1
+                ? `${disabledMotors[0]} is disabled`
+                : `${disabledMotors.join(' and ')} are disabled`;
+            warning.textContent = `WARNING: ${label}`;
+            warning.hidden = false;
+        }
+
+        function getTargetPosition(section, col, row, type) {
+            return G.targetPosition(loadout, section, col, row, type);
+        }
+
+        function moveToPosition(section, col, row, type) {
+            const target = getTargetPosition(section, col, row, type);
+            socket.emit('send_command', { command: `moveabs 0 ${target.x}` });
+            socket.emit('send_command', { command: `moveabs 1 ${target.y}` });
+        }
+
+        function updateActiveTargets() {
+            document.querySelectorAll('.circle').forEach((circle) => {
+                const targetX = parseInt(circle.dataset.targetX, 10);
+                const targetY = parseInt(circle.dataset.targetY, 10);
+                const isActive = targetX === currentPositions[0] && targetY === currentPositions[1];
+                circle.classList.toggle('active', isActive);
+            });
+        }
+
+        function updateGrid(section) {
+            const grid = document.getElementById(`grid-${section}`);
+            const type = document.getElementById(`select-${section}`).value;
+            const config = positions[type];
+            const isWellPlate = type === '3x2' || type === '4x3' || type === '6x4' || type === '12x8';
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${config.cols}, 30px)`;
+            grid.style.gridTemplateRows = `repeat(${config.rows}, 30px)`;
+
+            for (let row = 0; row < config.rows; row++) {
+                for (let col = 0; col < config.cols; col++) {
+                    const target = getTargetPosition(section, col, row, type);
+                    const circle = document.createElement('div');
+                    circle.className = 'circle';
+                    circle.dataset.targetX = target.x;
+                    circle.dataset.targetY = target.y;
+                    circle.title = `X ${target.x}, Y ${target.y}`;
+                    if (isWellPlate) {
+                        circle.textContent = `${String.fromCharCode(65 + row)}${col + 1}`;
+                    }
+                    circle.onclick = () => moveToPosition(section, col, row, type);
+                    grid.appendChild(circle);
+                }
+            }
+
+            updateActiveTargets();
+        }
+
+        function changeHolder(section) {
+            const sections = Object.assign({}, loadout.sections);
+            sections[String(section)] = document.getElementById(`select-${section}`).value;
+            updateGrid(section);
+            saveLoadout({ sections });
+        }
+
+        function refreshAllGrids() {
+            for (let section = 1; section <= 2; section++) {
+                updateGrid(section);
+            }
+        }
+
+        function syncTargetOffsetInputs() {
+            document.getElementById('target-offset-x').value = targetOffsetMm.x.toFixed(3);
+            document.getElementById('target-offset-y').value = targetOffsetMm.y.toFixed(3);
+        }
+
+        function applyTargetOffsetInputs() {
+            saveLoadout({ targetOffsetMm: {
+                x: parseFloat(document.getElementById('target-offset-x').value) || 0,
+                y: parseFloat(document.getElementById('target-offset-y').value) || 0,
+            } });
+        }
+
+        function renderCorrections() {
+            const table = document.getElementById('corrections-table');
+            table.innerHTML = '';
+            yCorrections.forEach((correction, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${correction.x}</td><td>${correction.y}</td><td><button onclick="removeCorrection(${index})">Remove</button></td>`;
+                table.appendChild(row);
+            });
+        }
+
+        function addCorrection() {
+            const x = parseFloat(document.getElementById('correction-x').value);
+            const y = parseFloat(document.getElementById('correction-y').value);
+            if (Number.isNaN(x) || Number.isNaN(y)) return;
+
+            const next = yCorrections.concat([{ x, y }]).sort((a, b) => a.x - b.x);
+            saveLoadout({ yCorrections: next });
+        }
+
+        function removeCorrection(index) {
+            const next = yCorrections.slice();
+            next.splice(index, 1);
+            saveLoadout({ yCorrections: next });
+        }
+
+        socket.on('loadout', (data) => applyLoadout(data));
+        socket.on('run_status', (data) => {
+            const active = ['running', 'waiting_operator', 'aborting'].includes(data.state);
+            document.getElementById('run-banner').hidden = !active;
+        });
+
+        socket.on('serial_output', (data) => {
+            const terminal = document.getElementById('terminal');
+            const message = document.createElement('p');
+            message.textContent = data.message;
+            terminal.appendChild(message);
+            terminal.scrollTop = terminal.scrollHeight;
+
+            if (data.message.startsWith('GETPOS')) {
+                const [, motor, position] = data.message.split(' ');
+                document.getElementById(`pos-${motor}`).textContent = position;
+                currentPositions[parseInt(motor, 10)] = parseInt(position, 10);
+                updateActiveTargets();
+            } else if (data.message.startsWith('GETSPEED')) {
+                const [, motor, speed] = data.message.split(' ');
+                document.getElementById(`speed-${motor}`).textContent = speed;
+            } else if (data.message.startsWith('GETENABLED')) {
+                const [, motor, state] = data.message.split(' ');
+                updateMotorState(parseInt(motor, 10), state);
+            } else if (data.message.startsWith('ENABLE') || data.message.startsWith('DISABLE')) {
+                const [command, motor] = data.message.split(' ');
+                updateMotorState(parseInt(motor, 10), command === 'ENABLE' ? 'ENABLED' : 'DISABLED');
+            }
+        });
+
+        function moveMotor(direction) {
+            const xDistanceMm = parseFloat(document.getElementById('x-distance').value) || 0;
+            const yDistanceMm = parseFloat(document.getElementById('y-distance').value) || 0;
+            const xDistance = Math.round(mmToSteps(xDistanceMm));
+            const yDistance = Math.round(mmToSteps(yDistanceMm));
+            let command;
+
+            if (direction === 'up') command = `move 1 ${yDistance}`;
+            if (direction === 'down') command = `move 1 ${-yDistance}`;
+            if (direction === 'left') command = `move 0 ${-xDistance}`;
+            if (direction === 'right') command = `move 0 ${xDistance}`;
+
+            if (command) socket.emit('send_command', { command });
+        }
+
+        function sendCommand() {
+            const commandInput = document.getElementById('command-input');
+            const command = commandInput.value.trim();
+            if (!command) return;
+
+            socket.emit('send_command', { command });
+            commandInput.value = '';
+        }
+
+        function sendUpdateCommand() {
+            socket.emit('send_command', { command: 'UPDATE' });
+        }
+
+        // ---- camera status and reset -------------------------------------
+        const cameraLabels = {
+            streaming: 'streaming',
+            starting: 'starting...',
+            idle: 'idle',
+            stopped: 'stopped',
+            stalled: 'stalled - restarting',
+            error: 'OFFLINE',
+        };
+
+        function reconnectVideo() {
+            if (document.hidden) return;   // reopened when the tab is shown again
+            const video = document.getElementById('video');
+            video.src = `/motion/video_feed?t=${Date.now()}`;
+        }
+
+        // Browsers allow only ~6 connections per site, and DoseCam, Motion and Run now share
+        // one site. A hidden tab gives its video connection back so other pages don't stall.
+        document.addEventListener('visibilitychange', () => {
+            const video = document.getElementById('video');
+            if (document.hidden) {
+                video.removeAttribute('src');
+            } else {
+                reconnectVideo();
+            }
+        });
+
+        async function refreshCameraStatus() {
+            const el = document.getElementById('camera-status');
+            try {
+                const response = await fetch('/motion/camera/status', { cache: 'no-store' });
+                const s = await response.json();
+                let text = `Camera: ${cameraLabels[s.state] || s.state}`;
+                if (s.state === 'streaming') {
+                    text += ` \u00b7 ${s.fps} fps \u00b7 ${s.viewers} viewer${s.viewers === 1 ? '' : 's'}`;
+                } else if (s.last_error) {
+                    text += ` \u2014 ${s.last_error}`;
+                }
+                if (s.retry_in_s) text += ` (retry in ${Math.ceil(s.retry_in_s)}s)`;
+                el.textContent = text;
+                el.className = 'camera-status ' + (s.state === 'streaming' ? 'ok'
+                    : (s.state === 'starting' || s.state === 'idle') ? 'wait' : 'bad');
+            } catch (err) {
+                el.textContent = 'Camera: web server not responding';
+                el.className = 'camera-status bad';
+            }
+        }
+
+        function showCameraHolders(holders) {
+            const box = document.getElementById('camera-holders');
+            const others = holders.filter((h) => !h.is_our_worker);
+            if (others.length === 0) {
+                box.hidden = true;
+                box.replaceChildren();
+                return;
+            }
+            const intro = document.createElement('div');
+            intro.textContent = 'Another program still has the camera open:';
+            const list = document.createElement('ul');
+            others.forEach((h) => {
+                const item = document.createElement('li');
+                const code = document.createElement('code');
+                code.textContent = h.command || '?';
+                item.append(`PID ${h.pid} (${h.user}): `, code);
+                if (h.stoppable === false) item.append(` \u2014 ${h.note}`);
+                list.appendChild(item);
+            });
+            const cancelButton = document.createElement('button');
+            cancelButton.type = 'button';
+            cancelButton.textContent = 'Leave it';
+            cancelButton.addEventListener('click', () => { box.hidden = true; });
+            const children = [intro, list];
+            if (others.some((h) => h.stoppable !== false)) {
+                const stopButton = document.createElement('button');
+                stopButton.type = 'button';
+                stopButton.textContent = 'Stop it and reset camera';
+                stopButton.style.marginRight = '8px';
+                stopButton.addEventListener('click', () => resetCamera(true));
+                children.push(stopButton);
+            } else {
+                const note = document.createElement('div');
+                note.textContent = 'None of these can be stopped from this page.';
+                note.style.marginBottom = '8px';
+                children.push(note);
+            }
+            children.push(cancelButton);
+            box.replaceChildren(...children);
+            box.hidden = false;
+        }
+
+        async function resetCamera(stopOthers = false) {
+            const button = document.getElementById('camera-reset');
+            const box = document.getElementById('camera-holders');
+            button.disabled = true;
+            button.textContent = 'Resetting...';
+            try {
+                const response = await fetch('/motion/camera/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stop_others: stopOthers }),
+                });
+                const report = await response.json();
+                const blocked = (report.could_not_stop || []).filter((h) => !h.is_our_worker);
+                if (blocked.length) {
+                    box.textContent = 'Could not stop: ' + blocked
+                        .map((h) => `PID ${h.pid} (${h.user}) - ${h.result}`).join('; ')
+                        + '. Ask someone with admin access to stop it, or restart the Pi.';
+                    box.hidden = false;
+                } else {
+                    showCameraHolders(report.other_holders || []);
+                }
+            } catch (err) {
+                box.textContent = `Reset failed: ${err}`;
+                box.hidden = false;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Reset camera';
+                reconnectVideo();
+                refreshCameraStatus();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const video = document.getElementById('video');
+            video.addEventListener('error', () => setTimeout(reconnectVideo, 3000));
+            document.getElementById('camera-reset').addEventListener('click', () => resetCamera(false));
+            refreshCameraStatus();
+            setInterval(refreshCameraStatus, 2000);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.tab-button').forEach((button) => {
+                button.addEventListener('click', () => openTab(button.dataset.tab));
+            });
+            document.getElementById('command-input').addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') sendCommand();
+            });
+            refreshAllGrids();
+            syncTargetOffsetInputs();
+            fetch('/motion/api/loadout', { cache: 'no-store' }).then((r) => r.json()).then(applyLoadout)
+                .catch((err) => { document.getElementById('nav-status').textContent = `Loadout not loaded: ${err}`; });
+            sendUpdateCommand();
+        });
+    </script>
+</body>
+</html>

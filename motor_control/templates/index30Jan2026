@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor Control with Video Feed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: grid;
+            grid-template-areas:
+                "video controls"
+                "sections corrections";
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        #video {
+            grid-area: video;
+            width: 100%;
+            height: auto;
+            border: 2px solid black;
+        }
+        #controls {
+            grid-area: controls;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #sections {
+            grid-area: sections;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            border: 2px solid black;
+            padding: 10px;
+        }
+        #corrections {
+            grid-area: corrections;
+            border: 2px solid black;
+            padding: 10px;
+        }
+        #terminal {
+            width: 100%;
+            height: 200px;
+            overflow-y: auto;
+            border: 2px solid black;
+            margin-bottom: 10px;
+            background: #f0f0f0;
+            font-family: monospace;
+            padding: 5px;
+        }
+        #command-input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        #x-distance, #y-distance {
+            width: 100px;
+            text-align: center;
+            margin: 5px 0;
+        }
+        #toggle-motor-0, #toggle-motor-1 {
+            padding: 10px 20px;
+            font-size: 14px;
+            margin: 5px 0;
+            border: none;
+            cursor: pointer;
+            color: white;
+        }
+        .arrow-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .arrow-buttons button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 18px;
+        }
+        .info {
+            margin: 10px 0;
+            text-align: left;
+            width: 100%;
+        }
+        .info span {
+            font-weight: bold;
+        }
+        .section {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .grid {
+            display: grid;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+        .circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: lightblue;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .circle:hover {
+            background-color: deepskyblue;
+        }
+        #corrections table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #corrections th, #corrections td {
+            border: 1px solid black;
+            padding: 5px;
+            text-align: center;
+        }
+        #add-correction {
+            margin-top: 10px;
+        }
+    </style>
+    <script src="/static/socket.io.min.js"></script>
+</head>
+<body>
+    <img id="video" src="/video_feed">
+
+    <div id="controls">
+        <div id="terminal"></div>
+        <input id="command-input" type="text" placeholder="Enter command">
+        <button onclick="sendCommand()">Send</button>
+
+        <div id="move-motors" style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 20px;">
+            <div id="motor-controls-left" style="flex: 1; text-align: center;">
+                <h2>Move Motors</h2>
+                <label for="x-distance">X Distance (Motor 0):</label>
+                <input id="x-distance" type="number" value="15837.6" maxlength="10" style="margin-bottom: 10px;">
+                <br>
+                <label for="y-distance">Y Distance (Motor 1):</label>
+                <input id="y-distance" type="number" value="15837.6" maxlength="10">
+                <div class="arrow-buttons" style="margin-top: 10px;">
+                    <button onclick="moveMotor('up')">&#9650; Up</button>
+                </div>
+                <div class="arrow-buttons">
+                    <button onclick="moveMotor('left')">&#9668; Left</button>
+                    <button onclick="moveMotor('right')">&#9658; Right</button>
+                </div>
+                <div class="arrow-buttons">
+                    <button onclick="moveMotor('down')">&#9660; Down</button>
+                </div>
+            </div>
+
+            <div id="motor-controls-right" style="flex: 1; text-align: center;">
+                <h2>Motor Status</h2>
+                <div class="info">
+                    <p>Motor 0 Position: <span id="pos-0">0</span> steps</p>
+                    <p>Motor 1 Position: <span id="pos-1">0</span> steps</p>
+                    <p>Motor 0 Speed: <span id="speed-0">0</span> steps/s</p>
+                    <p>Motor 1 Speed: <span id="speed-1">0</span> steps/s</p>
+                </div>
+                <div class="toggle-buttons">
+                    <button id="toggle-motor-0" onclick="toggleMotor(0)">Checking...</button>
+                    <button id="toggle-motor-1" onclick="toggleMotor(1)">Checking...</button>
+                </div>
+                <button onclick="sendUpdateCommand()" style="margin-top: 20px;">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sections">
+        <div class="section" id="section-1">
+            <label for="select-1">Section 1:</label>
+            <select id="select-1" onchange="updateGrid(1)">
+                <option value="3x2">3x2 Well Plate</option>
+                <option value="4x3" selected>4x3 Well Plate</option>
+                <option value="6x4">6x4 Well Plate</option>
+                <option value="12x8">12x8 Well Plate</option>
+                <option value="tubes">Test Tube Rack</option>
+                <option value="puptubes">Pup Tube Rack</option>
+                <option value="l4l5tubes">L4/L5 Tube Rack</option>
+                <option value="microtubes">Micro Tube Rack</option>
+            </select>
+            <div class="grid" id="grid-1"></div>
+        </div>
+        <div class="section" id="section-2">
+            <label for="select-2">Section 2:</label>
+            <select id="select-2" onchange="updateGrid(2)">
+                <option value="3x2">3x2 Well Plate</option>
+                <option value="4x3" selected>4x3 Well Plate</option>
+                <option value="6x4">6x4 Well Plate</option>
+                <option value="12x8">12x8 Well Plate</option>
+                <option value="tubes">Test Tube Rack</option>
+                <option value="puptubes">Pup Tube Rack</option>
+                <option value="l4l5tubes">L4/L5 Tube Rack</option>
+                <option value="microtubes">Micro Tube Rack</option>
+            </select>
+            <div class="grid" id="grid-2"></div>
+        </div>
+        <div class="section" id="section-3">
+            <label for="select-3">Section 3:</label>
+            <select id="select-3" onchange="updateGrid(3)">
+                <option value="3x2">3x2 Well Plate</option>
+                <option value="4x3" selected>4x3 Well Plate</option>
+                <option value="6x4">6x4 Well Plate</option>
+                <option value="12x8">12x8 Well Plate</option>
+                <option value="tubes">Test Tube Rack</option>
+                <option value="puptubes">Pup Tube Rack</option>
+                <option value="l4l5tubes">L4/L5 Tube Rack</option>
+                <option value="microtubes">Micro Tube Rack</option>
+            </select>
+            <div class="grid" id="grid-3"></div>
+        </div>
+        <div class="section" id="section-4">
+            <label for="select-4">Section 4:</label>
+            <select id="select-4" onchange="updateGrid(4)">
+                <option value="3x2">3x2 Well Plate</option>
+                <option value="4x3" selected>4x3 Well Plate</option>
+                <option value="6x4">6x4 Well Plate</option>
+                <option value="12x8">12x8 Well Plate</option>
+                <option value="tubes">Test Tube Rack</option>
+                <option value="puptubes">Pup Tube Rack</option>
+                <option value="l4l5tubes">L4/L5 Tube Rack</option>
+                <option value="microtubes">Micro Tube Rack</option>
+            </select>
+            <div class="grid" id="grid-4"></div>
+        </div>
+    </div>
+
+    <div id="corrections">
+        <h2>Y Corrections</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>X Position</th>
+                    <th>Y Correction</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="corrections-table"></tbody>
+        </table>
+        <div id="add-correction">
+            <label for="correction-x">X:</label>
+            <input id="correction-x" type="number">
+            <br>
+            <label for="correction-y">Y:</label>
+            <input id="correction-y" type="number">
+            <br>
+            <button onclick="addCorrection()">Add Correction</button>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        const stepPerInch = 15837.6;
+        const sectionSpacing = 5.5 * stepPerInch;
+        const yCorrections = [];
+
+        const positions = {
+	    '3x2': { cols: 3, rows: 2, 
+		xSpacing: 1.5 * stepPerInch, 
+		ySpacing: 1.5 * stepPerInch, 
+		xOffset: 0, 
+		yOffset: 0.25 * stepPerInch },
+            '4x3': { cols: 4, rows: 3, 
+		xSpacing: 1.0 * stepPerInch, 
+		ySpacing: 1.0 * stepPerInch, 
+		xOffset: 0, 
+		yOffset: 0 },
+            '6x4': { cols: 6, rows: 4,
+                xSpacing: 19.2 * stepPerInch / 25.4,
+                ySpacing: 19.2 * stepPerInch / 25.4,
+                xOffset: -9.9 * stepPerInch / 25.4,
+                yOffset: -3.4 * stepPerInch / 25.4},
+            '12x8': { cols: 12, rows: 8,
+                xSpacing: 9 * stepPerInch / 25.4,
+                ySpacing: 9 * stepPerInch / 25.4,
+                xOffset: -11.4 * stepPerInch / 25.4,
+                yOffset: -6.1 * stepPerInch / 25.4},
+            'tubes': { cols: 3, rows: 1, 
+		xSpacing: 1.5 * stepPerInch, 
+		ySpacing: 1.5 * stepPerInch, 
+		xOffset: 0, 
+		yOffset: -5 * stepPerInch / 25.4 },
+            'puptubes': { cols: 3, rows: 1, 
+		xSpacing: 1.5 * stepPerInch, 
+		ySpacing: 1.5 * stepPerInch, 
+		xOffset: -7 * stepPerInch / 25.4, 
+		yOffset: 31 * stepPerInch / 25.4 },
+            'l4l5tubes': { cols: 3, rows: 1, 
+		xSpacing: 1.5 * stepPerInch, 
+		ySpacing: 1.5 * stepPerInch, 
+		xOffset: 0, 
+		yOffset: 30 * stepPerInch / 25.4 },
+            'microtubes': { 
+                cols: 4, 
+                rows: 2, 
+                xSpacing: 1.0 * stepPerInch, 
+                ySpacing: 1.5 * stepPerInch, 
+                xOffset: 0, 
+                yOffset: 0.026 * stepPerInch 
+            }        };
+
+        const originOffsets = {
+            1: { x: 0, y: 0 },
+            2: { x: sectionSpacing, y: 0 },
+            3: { x: 2 * sectionSpacing, y: 0 },
+            4: { x: 3 * sectionSpacing, y: 0 }
+        };
+
+        const motorStates = { 0: null, 1: null };
+
+        function toggleMotor(motor) {
+            const command = motorStates[motor] === "ENABLED" ? `disable ${motor}` : `enable ${motor}`;
+            socket.emit("send_command", { command: command });
+        }
+
+        function updateMotorState(motor, state) {
+            motorStates[motor] = state;
+            const button = document.getElementById(`toggle-motor-${motor}`);
+            button.textContent = state;
+            button.style.backgroundColor = state === "ENABLED" ? "lightgreen" : "lightcoral";
+        }
+
+        function getYCorrection(x) {
+            if (yCorrections.length === 0) return 0;
+            yCorrections.sort((a, b) => a.x - b.x);
+            for (let i = 0; i < yCorrections.length - 1; i++) {
+                const p1 = yCorrections[i];
+                const p2 = yCorrections[i + 1];
+                if (x >= p1.x && x <= p2.x) {
+                    const slope = (p2.y - p1.y) / (p2.x - p1.x);
+                    return p1.y + slope * (x - p1.x);
+                }
+            }
+            return yCorrections[yCorrections.length - 1].y;
+        }
+
+	function moveToPosition(section, col, row, type) {
+            const config = positions[type];
+            // Use xSpacing for column movement (X axis)
+            const x = originOffsets[section].x + config.xOffset + col * config.xSpacing;
+            // Use ySpacing for row movement (Y axis)
+            const baseY = originOffsets[section].y + config.yOffset + (config.rows - 1 - row) * config.ySpacing;
+            const correctedY = baseY + getYCorrection(x);
+
+            const commandX = `moveabs 0 ${Math.round(x)}`;
+            const commandY = `moveabs 1 ${Math.round(correctedY)}`;
+
+            socket.emit('send_command', { command: commandX });
+            socket.emit('send_command', { command: commandY });
+        }
+
+        function updateGrid(section) {
+            const grid = document.getElementById(`grid-${section}`);
+            grid.innerHTML = '';
+            const type = document.getElementById(`select-${section}`).value;
+            const config = positions[type];
+
+            grid.style.gridTemplateColumns = `repeat(${config.cols}, auto)`;
+            grid.style.gridTemplateRows = `repeat(${config.rows}, auto)`;
+
+            for (let row = 0; row < config.rows; row++) {
+                for (let col = 0; col < config.cols; col++) {
+                    const circle = document.createElement('div');
+                    circle.className = 'circle';
+                    circle.onclick = () => moveToPosition(section, col, row, type);
+                    grid.appendChild(circle);
+                }
+            }
+        }
+
+        function addCorrection() {
+            const x = parseFloat(document.getElementById('correction-x').value);
+            const y = parseFloat(document.getElementById('correction-y').value);
+            if (!isNaN(x) && !isNaN(y)) {
+                yCorrections.push({ x, y });
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${x}</td><td>${y}</td><td><button onclick="removeCorrection(${x})">Remove</button></td>`;
+                document.getElementById('corrections-table').appendChild(row);
+            }
+        }
+
+        function removeCorrection(x) {
+            const index = yCorrections.findIndex(correction => correction.x === x);
+            if (index !== -1) {
+                yCorrections.splice(index, 1);
+                const table = document.getElementById('corrections-table');
+                table.deleteRow(index);
+            }
+        }
+
+        for (let i = 1; i <= 4; i++) {
+            updateGrid(i);
+        }
+
+        socket.on('serial_output', (data) => {
+            console.log("Received from server:", data.message);
+            const terminal = document.getElementById('terminal');
+            const message = document.createElement('p');
+            message.textContent = data.message;
+            terminal.appendChild(message);
+            terminal.scrollTop = terminal.scrollHeight;
+
+            if (data.message.startsWith('GETPOS')) {
+                const [_, motor, position] = data.message.split(' ');
+                document.getElementById(`pos-${motor}`).textContent = position;
+            } else if (data.message.startsWith('GETSPEED')) {
+                const [_, motor, speed] = data.message.split(' ');
+                document.getElementById(`speed-${motor}`).textContent = speed;
+            } else if (data.message.startsWith("GETENABLED")) {
+                const [_, motor, state] = data.message.split(" ");
+                updateMotorState(parseInt(motor), state);
+            } else if (data.message.startsWith('ENABLE') || data.message.startsWith('DISABLE')) {
+                const [command, motor] = data.message.split(' ');
+                const state = command === 'ENABLE' ? 'ENABLED' : 'DISABLED';
+                updateMotorState(parseInt(motor), state);
+            }
+        });
+
+        function moveMotor(direction) {
+            const xDistance = parseInt(document.getElementById('x-distance').value) || 0;
+            const yDistance = parseInt(document.getElementById('y-distance').value) || 0;
+
+            let command;
+            switch (direction) {
+                case 'up':
+                    command = `move 1 ${yDistance}`;
+                    break;
+                case 'down':
+                    command = `move 1 ${-yDistance}`;
+                    break;
+                case 'left':
+                    command = `move 0 ${-xDistance}`;
+                    break;
+                case 'right':
+                    command = `move 0 ${xDistance}`;
+                    break;
+            }
+            if (command) {
+                socket.emit('send_command', { command: command });
+            }
+        }
+
+        function sendCommand() {
+            const commandInput = document.getElementById('command-input');
+            const command = commandInput.value.trim();
+            if (command) {
+                socket.emit('send_command', { command: command });
+                commandInput.value = '';
+            }
+        }
+
+        function sendUpdateCommand() {
+            const command = "UPDATE";
+            socket.emit('send_command', { command });
+        }
+
+        document.addEventListener('DOMContentLoaded', sendUpdateCommand);
+    </script>
+</body>
+</html>
+

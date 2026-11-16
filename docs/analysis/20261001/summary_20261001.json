@@ -1,0 +1,88 @@
+{
+  "scintillator_200_100": {
+    "run": "Scint/run_20261001_194704_633291_000002",
+    "frames": 165,
+    "well_hit_frames": 76,
+    "per_pulse_median": {
+      "centroid_full_xy": [
+        841.7,
+        453.8
+      ],
+      "sigma_major_px": 34.28,
+      "sigma_minor_px": 19.03,
+      "theta_deg": 72.7,
+      "peak_raw_dn_3x3median": 206.0,
+      "black_level_dn": 60.32,
+      "peak_net_dn": 145.7,
+      "peak_fraction_of_adc_range_above_black": 0.151
+    },
+    "pulse_to_pulse_mad": {
+      "centroid_x_px": 1.23,
+      "centroid_y_px": 3.03,
+      "sigma_major_px": 0.57,
+      "sigma_minor_px": 0.57,
+      "theta_deg": 0.92,
+      "integrated_light_frac": 0.05
+    },
+    "max_peak_raw_dn": 226.0,
+    "frame_max_dn_median_including_sensor_hits": 683.0,
+    "matched_filter_single_shot_snr": 59.0
+  },
+  "polycarbonate_al_200_100": {
+    "run": "Al_PC/run_20261001_194433_457037_000001",
+    "frames": 138,
+    "blocks": "frames 0-~47 no spot (target out), ~48-~72 transitional/offset spot, remainder well placed (67 frames)",
+    "mean_spot_fit": {
+      "amp_dn": 1.356,
+      "amp_err": 0.026,
+      "x0_full": 848.8,
+      "y0_full": 443.9,
+      "sigma_major_full_px": 33.9,
+      "sigma_minor_full_px": 20.4,
+      "theta_deg": 75.0,
+      "offset": 0.055,
+      "resid_rms": 0.212,
+      "crop_max": 1.708,
+      "crop_p50": 0.135,
+      "global_argmax_binned_yx": [
+        111,
+        213
+      ]
+    },
+    "single_shot": {
+      "M_amp_mean": 1.367,
+      "M_amp_sd": 0.226,
+      "L_amp_mean_loo": -0.0,
+      "L_amp_sd_loo": 0.151,
+      "H_amp_mean_at_M_position": 1.404,
+      "single_shot_snr_M": 9.0
+    }
+  },
+  "polycarbonate_al_220_100": {
+    "run": "Al_PC/run_20261001_195317_467474_000005",
+    "mean_spot_fit": {
+      "amp_dn": 1.487,
+      "amp_err": 0.029,
+      "x0_full": 847.5,
+      "y0_full": 443.2,
+      "sigma_major_full_px": 31.1,
+      "sigma_minor_full_px": 18.6,
+      "theta_deg": 73.4,
+      "offset": -0.028,
+      "resid_rms": 0.216,
+      "crop_max": 1.719,
+      "crop_p50": 0.048,
+      "global_argmax_binned_yx": [
+        113,
+        214
+      ]
+    },
+    "single_shot": {
+      "amp_mean": 1.377,
+      "amp_sd": 0.116,
+      "frames_below_half_mean": 0
+    }
+  },
+  "pc_to_scint_peak_ratio": 0.0111,
+  "notes": "Pixels are camera pixels; no mm scale or viewing-angle correction applied. 'Off' references are target-out-of-beam frames, not dark frames."
+}

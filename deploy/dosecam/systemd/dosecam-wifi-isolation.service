@@ -1,0 +1,13 @@
+[Unit]
+Description=Keep DoseCam Wi-Fi clients isolated from routed lab networks
+Before=NetworkManager.service dose-cam.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-/usr/sbin/nft delete table inet dosecam_wifi
+ExecStart=/usr/sbin/nft -f /etc/dosecam-wifi.nft
+ExecStop=/usr/sbin/nft delete table inet dosecam_wifi
+
+[Install]
+WantedBy=multi-user.target

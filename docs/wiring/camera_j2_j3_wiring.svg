@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1050" viewBox="0 0 1600 1050">
+  <defs><style>
+    text{font-family:Segoe UI,Arial,sans-serif;fill:#172033}.title{font-size:42px;font-weight:700}.sub{font-size:23px;fill:#526078}.board{fill:#2b7a4b;stroke:#16432d;stroke-width:6}.silk{fill:none;stroke:#e8f4ea;stroke-width:4}.head{font-size:28px;font-weight:750}.label{font-size:23px;font-weight:650}.small{font-size:20px}.pin{fill:#d8dce0;stroke:#4d555c;stroke-width:4}.used{stroke:#e43d30;stroke-width:8}.wire{fill:none;stroke-linecap:round;stroke-width:24}.ribbon{fill:#252a30;stroke:#0b0d10;stroke-width:4}.warn{fill:#fff2cd;stroke:#d18b00;stroke-width:4}
+  </style></defs>
+  <rect width="1600" height="1050" fill="#f7f9fc"/>
+  <text x="800" y="62" class="title" text-anchor="middle">InnoMaker IMX296 Camera — Trigger Headers</text>
+  <text x="800" y="102" class="sub" text-anchor="middle">BACK / COMPONENT VIEW • ribbon cable DOWN • J3 is the external shutter input</text>
+
+  <rect x="330" y="165" width="790" height="690" rx="26" class="board"/>
+  <circle cx="700" cy="475" r="190" fill="#222a31" stroke="#0c1014" stroke-width="12"/>
+  <circle cx="700" cy="475" r="112" fill="#5d7890" stroke="#b8c8d4" stroke-width="8"/>
+  <circle cx="700" cy="475" r="42" fill="#121921"/>
+  <text x="700" y="710" fill="#e8f4ea" class="head" text-anchor="middle">IMX296 MODULE</text>
+  <rect x="540" y="815" width="320" height="70" rx="8" class="ribbon"/>
+  <path d="M590 885 V1015 M635 885 V1015 M680 885 V1015 M725 885 V1015 M770 885 V1015 M815 885 V1015" stroke="#c6a64b" stroke-width="18"/>
+  <text x="700" y="1035" class="small" text-anchor="middle">RIBBON CABLE DOWN</text>
+
+  <rect x="920" y="225" width="145" height="118" rx="10" class="silk"/>
+  <text x="993" y="205" fill="#e8f4ea" class="head" text-anchor="middle">J2 STROBE</text>
+  <circle cx="962" cy="282" r="23" class="pin"/><circle cx="1025" cy="282" r="23" class="pin"/>
+  <text x="993" y="376" fill="#e8f4ea" class="small" text-anchor="middle">UNUSED</text>
+
+  <rect x="920" y="430" width="145" height="118" rx="10" class="silk"/>
+  <text x="993" y="410" fill="#e8f4ea" class="head" text-anchor="middle">J3 EXT TRIG</text>
+  <circle cx="962" cy="488" r="27" class="pin used"/><circle cx="1025" cy="488" r="27" class="pin used"/>
+  <text x="962" y="535" fill="#e8f4ea" class="small" text-anchor="middle">Trig+</text>
+  <text x="1025" y="535" fill="#e8f4ea" class="small" text-anchor="middle">Trig−</text>
+
+  <path d="M962 488 C1220 475 1280 350 1510 350" class="wire" stroke="#f2f4f5"/>
+  <path d="M962 488 C1220 475 1280 350 1510 350" fill="none" stroke="#66727a" stroke-width="3"/>
+  <text x="1480" y="270" class="label" text-anchor="end">WHITE → ESP GPIO13</text>
+  <text x="1480" y="305" class="small" text-anchor="end">external shutter / J3 Trig+</text>
+  <path d="M1025 488 C1215 560 1300 690 1510 690" class="wire" stroke="#151515"/>
+  <text x="1480" y="770" class="label" text-anchor="end">BLACK → Pi physical pin 39 GND</text>
+  <text x="1480" y="805" class="small" text-anchor="end">J3 Trig− • pin closest to PCB edge</text>
+
+  <path d="M1120 155 V855" stroke="#e43d30" stroke-width="6" stroke-dasharray="18 14"/>
+  <text x="1150" y="190" class="label" fill="#c52f25">PCB EDGE</text>
+  <path d="M1085 488 H1120" stroke="#e43d30" stroke-width="7" marker-end="url(#none)"/>
+  <rect x="90" y="770" width="400" height="160" rx="18" class="warn"/>
+  <text x="125" y="817" class="head">CHECK BEFORE POWER</text>
+  <text x="125" y="860" class="small">Use J3, not J2.</text>
+  <text x="125" y="897" class="small">Black Trig− is next to the PCB edge.</text>
+</svg>

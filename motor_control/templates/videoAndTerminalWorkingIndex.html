@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor Control with Video Feed</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: row;
+            font-family: Arial, sans-serif;
+        }
+        #video {
+            width: 640px;
+            height: 480px;
+            border: 2px solid black;
+            margin-right: 20px;
+        }
+        #controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 300px;
+        }
+        #terminal {
+            width: 100%;
+            height: 200px;
+            overflow-y: auto;
+            border: 2px solid black;
+            margin-bottom: 10px;
+            background: #f0f0f0;
+            font-family: monospace;
+            padding: 5px;
+        }
+        #command-input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        #x-distance, #y-distance {
+            width: 100px;
+            text-align: center;
+            margin: 5px 0;
+        }
+        .arrow-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .arrow-buttons button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 18px;
+        }
+        .motor-info {
+            margin-top: 10px;
+            text-align: left;
+            width: 100%;
+        }
+        .motor-info span {
+            display: block;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <img id="video" src="/video_feed">
+
+    <div id="controls">
+        <div id="terminal"></div>
+        <input id="command-input" type="text" placeholder="Enter command">
+        <button onclick="sendCommand()">Send</button>
+
+        <h2>Move Motors</h2>
+        <label for="x-distance">X Distance (Motor 0):</label>
+        <input id="x-distance" type="number" value="4064" maxlength="10">
+        <label for="y-distance">Y Distance (Motor 1):</label>
+        <input id="y-distance" type="number" value="4064" maxlength="10">
+
+        <div class="arrow-buttons">
+            <button onclick="moveMotor('up')">&#9650; Up</button>
+        </div>
+        <div class="arrow-buttons">
+            <button onclick="moveMotor('left')">&#9668; Left</button>
+            <button onclick="moveMotor('right')">&#9658; Right</button>
+        </div>
+        <div class="arrow-buttons">
+            <button onclick="moveMotor('down')">&#9660; Down</button>
+        </div>
+
+        <div class="motor-info">
+            <span id="x-position">X Position: 0</span>
+            <span id="y-position">Y Position: 0</span>
+            <span id="x-speed">X Speed: 0</span>
+            <span id="y-speed">Y Speed: 0</span>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+
+        // Display serial output in terminal
+        socket.on('serial_output', (data) => {
+            const terminal = document.getElementById('terminal');
+            const message = document.createElement('p');
+            message.textContent = data.message;
+            terminal.appendChild(message);
+            terminal.scrollTop = terminal.scrollHeight;
+
+            // Parse and display position and speed updates
+            const matchSpeed = data.message.match(/GETSPEED (\d) ([\-\d.]+)/);
+            const matchPosition = data.message.match(/GETPOS (\d) ([\-\d]+)/);
+            if (matchSpeed) {
+                const motor = matchSpeed[1];
+                const speed = matchSpeed[2];
+                document.getElementById(motor === '0' ? 'x-speed' : 'y-speed').textContent = 
+                    `${motor === '0' ? 'X' : 'Y'} Speed: ${speed}`;
+            }
+            if (matchPosition) {
+                const motor = matchPosition[1];
+                const position = matchPosition[2];
+                document.getElementById(motor === '0' ? 'x-position' : 'y-position').textContent = 
+                    `${motor === '0' ? 'X' : 'Y'} Position: ${position}`;
+            }
+        });
+
+        // Send command to Flask
+        function sendCommand() {
+            const commandInput = document.getElementById('command-input');
+            const command = commandInput.value.trim();
+            if (command) {
+                socket.emit('send_command', { command: command });
+                commandInput.value = '';
+            }
+        }
+
+        // Handle motor movement
+        function moveMotor(direction) {
+            const xDistance = parseInt(document.getElementById('x-distance').value) || 0;
+            const yDistance = parseInt(document.getElementById('y-distance').value) || 0;
+
+            let command;
+            switch (direction) {
+                case 'up':
+                    command = `move 1 ${yDistance}`;
+                    break;
+                case 'down':
+                    command = `move 1 ${-yDistance}`;
+                    break;
+                case 'left':
+                    command = `move 0 ${-xDistance}`;
+                    break;
+                case 'right':
+                    command = `move 0 ${xDistance}`;
+                    break;
+            }
+            if (command) {
+                socket.emit('send_command', { command: command });
+            }
+        }
+    </script>
+</body>
+</html>
+

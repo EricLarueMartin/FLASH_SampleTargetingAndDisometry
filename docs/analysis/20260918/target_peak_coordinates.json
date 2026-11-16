@@ -1,0 +1,44 @@
+[
+  {
+    "position": "A1",
+    "x": 800,
+    "y": 499,
+    "peak_dn": 67.0,
+    "tied_maxima": 136
+  },
+  {
+    "position": "A2",
+    "x": 809,
+    "y": 516,
+    "peak_dn": 68.0,
+    "tied_maxima": 1
+  },
+  {
+    "position": "A3",
+    "x": 811,
+    "y": 503,
+    "peak_dn": 74.0,
+    "tied_maxima": 2
+  },
+  {
+    "position": "B1",
+    "x": 795,
+    "y": 501,
+    "peak_dn": 69.0,
+    "tied_maxima": 35
+  },
+  {
+    "position": "B2",
+    "x": 798,
+    "y": 509,
+    "peak_dn": 70.0,
+    "tied_maxima": 14
+  },
+  {
+    "position": "B3",
+    "x": 799,
+    "y": 530,
+    "peak_dn": 64.5,
+    "tied_maxima": 1
+  }
+]

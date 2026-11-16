@@ -1,0 +1,8 @@
+# Allow access to the Pi itself, but do not route Wi-Fi traffic to/from Ethernet.
+table inet dosecam_wifi {
+    chain forward {
+        type filter hook forward priority -10; policy accept;
+        iifname "wlan0" drop
+        oifname "wlan0" drop
+    }
+}

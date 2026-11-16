@@ -1,0 +1,986 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>DoseCam</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="preload" href="/static/setup.js" as="script">
+  <style>
+    :root {
+      color-scheme: light;
+      --border: #c9d1d9;
+      --ink: #17202a;
+      --muted: #5d6b7a;
+      --accent: #1f6feb;
+      --bg: #f7f9fb;
+      --panel: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+    h1 { margin: 0; font-size: 20px; font-weight: 650; }
+    main { padding: 16px 20px 24px; }
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .tab {
+      appearance: none;
+      border: 0;
+      border-bottom: 3px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 14px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 650;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .hidden { display: none !important; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 380px) minmax(320px, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    .controls {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+    .group {
+      display: grid;
+      gap: 8px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .group:last-child { border-bottom: 0; }
+    label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .switch-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .switch {
+      position: relative;
+      width: 48px;
+      min-width: 48px;
+      height: 28px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      min-height: 0;
+    }
+    .slider {
+      position: absolute;
+      inset: 0;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: #d8dee6;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      left: 2px;
+      top: 2px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+      transition: transform 0.15s ease;
+    }
+    .switch input:checked + .slider {
+      background: var(--accent);
+    }
+    .switch input:checked + .slider::before {
+      transform: translateX(20px);
+    }
+    input, select {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 9px;
+      font-size: 15px;
+      background: #fff;
+    }
+    input[type="checkbox"] {
+      width: 18px;
+      min-height: 18px;
+    }
+    #tab-options .controls {
+      width: min(100%, 760px);
+      max-width: 760px;
+    }
+    #tab-options .group {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      column-gap: 20px;
+      row-gap: 16px;
+      align-items: end;
+    }
+    #tab-options .group-title {
+      grid-column: 1 / -1;
+      margin: 0 0 2px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .setting {
+      display: grid;
+      gap: 6px;
+      max-width: 340px;
+    }
+    #tab-options label {
+      width: max-content;
+      max-width: 240px;
+    }
+    #tab-options .setting label {
+      width: 100%;
+      max-width: 100%;
+    }
+    #tab-options input,
+    #tab-options select {
+      width: 180px;
+      max-width: 100%;
+    }
+    .help {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    #tab-options .button-row {
+      width: max-content;
+      max-width: 100%;
+      align-self: end;
+    }
+    #tab-options .switch-label {
+      width: 260px;
+    }
+    #tab-options #espMsg {
+      grid-column: 1 / -1;
+    }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 12px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 15px;
+      cursor: pointer;
+    }
+    button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+      font-weight: 650;
+    }
+    button:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
+    .button-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .status {
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(110px, 1fr));
+      gap: 6px 12px;
+      max-width: 380px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .stats.hidden {
+      display: none;
+    }
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat strong {
+      color: var(--ink);
+      font-weight: 650;
+    }
+    .stats-note {
+      grid-column: 1 / -1;
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .focus-indicator {
+      display: grid;
+      gap: 6px;
+      max-width: 380px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+    .focus-indicator-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .focus-indicator-header strong { color: var(--ink); }
+    .focus-meter {
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #d8dee6;
+    }
+    .focus-meter-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #d97706, #1f6feb, #16803a);
+      transition: width 0.2s ease;
+    }
+    .focus-indicator-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .icon-button {
+      width: 40px;
+      min-width: 40px;
+      padding: 6px;
+      display: inline-grid;
+      place-items: center;
+    }
+    .icon-button svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .preview-wrap {
+      position: relative;
+      overflow: hidden;
+      height: calc(100vh - 154px);
+      min-height: 320px;
+      border: 1px solid var(--border);
+      background: #050505;
+      display: grid;
+      place-items: center;
+      user-select: none;
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .preview-wrap.native-drag {
+      cursor: default;
+      touch-action: auto;
+    }
+    .preview-toolbar {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 3;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .preview-toolbar.hidden {
+      display: none;
+    }
+    .preview-toolbar button {
+      min-height: 32px;
+      padding: 5px 10px;
+      background: rgba(255,255,255,0.92);
+    }
+    .zoom-selection {
+      position: absolute;
+      z-index: 2;
+      display: none;
+      border: 2px solid #58a6ff;
+      background: rgba(88,166,255,0.18);
+      pointer-events: none;
+    }
+    .file-list {
+      display: grid;
+      gap: 6px;
+      width: min(100%, 1320px);
+      max-width: 1320px;
+    }
+    .file-viewer {
+      display: grid;
+      gap: 10px;
+      max-width: 1180px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .file-viewer.hidden {
+      display: none;
+    }
+    .file-viewer-header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .file-viewer-title {
+      min-width: 0;
+      color: var(--muted);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+    .file-viewer-body {
+      display: grid;
+      grid-template-columns: minmax(360px, 1fr) minmax(220px, 320px);
+      gap: 14px;
+      align-items: start;
+    }
+    .frame-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .frame-nav input {
+      width: 86px;
+      min-height: 34px;
+    }
+    .frame-nav .icon-button {
+      min-height: 34px;
+      width: 36px;
+      min-width: 36px;
+      padding: 6px;
+    }
+    .file-viewer-stage {
+      position: relative;
+      overflow: hidden;
+      height: min(58vh, 620px);
+      min-height: 280px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #050505;
+      user-select: none;
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .file-viewer-stage.native-drag {
+      cursor: default;
+      touch-action: auto;
+    }
+    #fileViewerImage {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      object-fit: contain;
+      transform-origin: top left;
+      pointer-events: none;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+    .file-viewer-stage.native-drag #fileViewerImage {
+      pointer-events: auto;
+      -webkit-user-drag: auto;
+      user-select: auto;
+    }
+    .viewer-side {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+    .viewer-side .stats {
+      max-width: none;
+    }
+    .file-viewer.text-mode .file-viewer-body {
+      grid-template-columns: 1fr;
+    }
+    .file-viewer.text-mode .file-viewer-stage,
+    .file-viewer.text-mode .frame-nav,
+    .file-viewer.text-mode #btnViewerRestore {
+      display: none;
+    }
+    .text-viewer {
+      grid-column: 1 / -1;
+      max-height: 45vh;
+      overflow: auto;
+      margin: 0;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      white-space: pre-wrap;
+      font: 13px/1.4 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    }
+    .directory-picker {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(23, 32, 42, 0.38);
+    }
+    .directory-picker.hidden {
+      display: none;
+    }
+    .dialog {
+      width: min(720px, 100%);
+      max-height: min(720px, calc(100vh - 40px));
+      display: grid;
+      grid-template-rows: auto auto minmax(180px, 1fr) auto;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.22);
+    }
+    .dialog-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    .dialog-header h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+    .directory-list {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px;
+      display: grid;
+      align-content: start;
+      gap: 4px;
+    }
+    .directory-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 38px;
+      padding: 5px 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .directory-row:last-child {
+      border-bottom: 0;
+    }
+    .file-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 160px 90px 460px;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .file-row.directory {
+      font-weight: 650;
+    }
+    .file-row.file-head {
+      padding: 4px 0;
+      color: var(--muted, #5d666a);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .file-date {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .file-row.directory .file-date {
+      font-weight: 400;
+    }
+    .file-row .button-row {
+      flex-wrap: nowrap;
+      justify-content: flex-end;
+    }
+    .file-name {
+      overflow-wrap: anywhere;
+    }
+    .path-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .path-pill {
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 6px 9px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+    #preview {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      transform-origin: top left;
+      pointer-events: none;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+    .preview-wrap.native-drag #preview {
+      pointer-events: auto;
+      -webkit-user-drag: auto;
+      user-select: auto;
+    }
+    @media (max-width: 820px) {
+      header { align-items: flex-start; flex-direction: column; }
+      main { padding: 12px; }
+      .layout { grid-template-columns: 1fr; }
+      .preview-wrap {
+        height: calc(100vh - 420px);
+        min-height: 260px;
+      }
+      #tab-options .controls,
+      #tab-options label,
+      #tab-options .switch-label,
+      #tab-options .button-row {
+        width: 100%;
+        max-width: none;
+      }
+      #tab-options .group {
+        grid-template-columns: 1fr;
+      }
+      #tab-options input,
+      #tab-options select {
+        width: 100%;
+      }
+      .file-viewer-body {
+        grid-template-columns: 1fr;
+      }
+      .file-row {
+        grid-template-columns: 1fr;
+      }
+      .file-row.file-head {
+        display: none;
+      }
+      .file-row .button-row {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+    }
+
+    /* --- beam profile fit (added 2026-10-14) --- */
+    .beamfit {
+      margin-top: 10px; padding: 10px 12px; border: 1px solid var(--border);
+      border-radius: 8px; background: var(--panel);
+    }
+    .beamfit-head {
+      font-weight: 600; color: var(--ink); margin-bottom: 8px;
+      display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+    }
+    .beamfit-units { font-weight: 400; color: var(--muted); font-size: 12px; }
+    .beamfit-row {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      margin-bottom: 7px;
+    }
+    .beamfit-row label {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 13px; color: var(--muted);
+    }
+    .beamfit-row input[type="number"] { width: 5.5em; }
+    .beamfit-row input[type="text"] { min-width: 14em; flex: 1 1 14em; }
+    .beamfit-narrow { width: 4em !important; }
+    .beamfit-mini { font-size: 12px; padding: 4px 9px; }
+    .beamfit-out { margin-top: 8px; }
+    .beamfit-out.hidden { display: none; }
+    .beamfit-table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    .beamfit-table th {
+      text-align: left; font-weight: 500; color: var(--muted);
+      padding: 2px 10px 2px 0; white-space: nowrap; vertical-align: top;
+    }
+    .beamfit-table td {
+      padding: 2px 0; color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+    .beamfit-table tr:nth-child(even) td,
+    .beamfit-table tr:nth-child(even) th { background: var(--bg); }
+    .beamfit-gy { color: var(--muted); }
+    .beamfit-verdict {
+      margin-left: 6px; padding: 1px 7px; border-radius: 4px;
+      font-size: 12px; font-weight: 500;
+    }
+    .beamfit-verdict.good { background: #e4f4e8; color: #1a7f37; }
+    .beamfit-verdict.warn { background: #fdf3df; color: #8a6400; }
+    .beamfit-verdict.bad  { background: #fbe6e6; color: #b42318; }
+    .beamfit-band {
+      position: absolute; z-index: 3; display: none; pointer-events: none;
+      border: 2px solid #ffbe28; background: rgba(255, 190, 40, 0.16);
+    }
+    .beamfit-drawing, .beamfit-drawing * { cursor: crosshair !important; }
+    .cal-source {
+      font-size: 12.5px; color: var(--muted); padding: 6px 9px; margin-bottom: 4px;
+      border: 1px solid var(--border); border-radius: 6px; background: var(--bg);
+    }
+    .cal-source b { color: var(--ink); font-weight: 600; }
+    .beamfit-foot { margin-top: 6px; font-size: 12px; color: var(--muted); }
+    .beamfit-warn {
+      margin-top: 8px; padding: 6px 9px; border-radius: 6px; font-size: 12.5px;
+      background: #fdf3df; color: #8a6400; border: 1px solid #f0d58a;
+    }
+    .beamfit-armed { border-color: #ffbe28 !important; background: #fff6dd !important; }
+  </style>
+</head>
+<body>
+  <!-- Shared FLASH site navigation (DoseCam is served at /, FLASH pages by motor_control). -->
+  <nav class="site-nav" aria-label="FLASH pages" style="display:flex;align-items:center;gap:4px;height:44px;padding:0 12px;background:#12303a;color:#e6f1f3;font-family:Arial,sans-serif">
+    <span style="font-weight:800;letter-spacing:.08em;margin-right:12px">FLASH</span>
+    <a href="/" aria-current="page" style="color:#0b3a46;background:#e6f1f3;text-decoration:none;padding:7px 12px;border-radius:6px;font-weight:600">DoseCam</a>
+    <a href="/motion/" style="color:#cfe5ea;text-decoration:none;padding:7px 12px;border-radius:6px;font-weight:600">Motion</a>
+    <a href="/run/" style="color:#cfe5ea;text-decoration:none;padding:7px 12px;border-radius:6px;font-weight:600">Run</a>
+    <a href="/settings/" style="color:#cfe5ea;text-decoration:none;padding:7px 12px;border-radius:6px;font-weight:600">Settings</a>
+  </nav>
+  <header>
+    <h1>DoseCam</h1>
+    <div id="status" class="status"></div>
+  </header>
+
+  <div id="archiveProgress" class="group hidden" style="margin:12px 20px" role="status" aria-live="polite">
+    <strong>Preparing ZIP download</strong>
+    <div id="archiveMessage"></div>
+    <progress id="archiveBar" max="100" value="0" style="width:100%"></progress>
+    <button id="archiveCancel" type="button">Cancel compression</button>
+    <a id="archiveDownload" class="hidden">Download ZIP</a>
+  </div>
+  <main>
+    <nav class="tabs" aria-label="Views">
+      <button class="tab active" data-tab="capture">Capture</button>
+      <button class="tab" data-tab="files">Files</button>
+      <button class="tab" data-tab="options">Options</button>
+    </nav>
+
+    <section id="tab-capture" class="tab-panel active">
+      <div class="layout">
+        <div class="controls">
+          <div class="group">
+            <label>Save base
+              <div class="button-row">
+                <input id="batch_base" value="default/run">
+                <button id="btnBrowseSaveBase" class="icon-button" type="button" title="Choose save folder" aria-label="Choose save folder">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 6.5h6l2 2h10v9.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
+                    <path d="M3 8.5h18"></path>
+                  </svg>
+                </button>
+              </div>
+            </label>
+            <label>Capture mode
+              <select id="capture_mode">
+                <option value="targeting" selected>Targeting</option>
+                <option value="dosimetry">Dosimetry</option>
+                <option value="focusing">Focusing (live video)</option>
+              </select>
+            </label>
+            <p class="help">Selecting Focusing switches the preview to live video using the Targeting gate-width value as its per-frame exposure time. Select Targeting or Dosimetry to stop focus video and return the camera to external-trigger operation.</p>
+            <label>Max frames <input id="batch_frames" type="number" value="10000" step="1" min="1" max="10000"></label>
+            <p class="help">Armed acquisition keeps accepting external camera triggers until this frame count is reached or Stop / Finalize is pressed.</p>
+            <label>Expected max rate (fps) <input id="batch_fps" type="number" value="50" step="1" min="1" max="60"></label>
+            <label class="check"><input id="batch_include_log" type="checkbox"> Save rpicam log</label>
+            <div class="button-row">
+              <button id="btnBatchStart" class="primary">Arm</button>
+              <button id="btnCap" class="primary">Capture</button>
+              <button id="btnUpdatePreview">Update Image</button>
+              <button id="btnBatchCancel" disabled>Stop / Finalize</button>
+              <button id="btnDownloadBase">Download Run Files</button>
+              <button id="btnDownloadBasePngZip">Download Run PNG ZIP</button>
+            </div>
+            <div id="captureMsg" class="status"></div>
+            <div id="focusMsg" class="status"></div>
+            <div id="focusIndicator" class="focus-indicator hidden" aria-live="polite">
+              <div class="focus-indicator-header">
+                <strong id="focusQuality">Measuring sharpness...</strong>
+                <span id="focusScore"></span>
+              </div>
+              <div class="focus-meter" role="meter" aria-label="Focus quality relative to best seen" aria-valuemin="0" aria-valuemax="100">
+                <div id="focusMeterFill" class="focus-meter-fill"></div>
+              </div>
+              <p class="focus-indicator-note">Turn the focus ring to maximize the score. The bar compares the current image with the sharpest frame seen in this focus session.</p>
+            </div>
+            <div id="frameStats" class="stats hidden" aria-label="Last frame raw statistics"></div>
+            <div id="beamFitMain"></div>
+            <div id="batchMsg" class="status"></div>
+            <div id="batchFiles" class="status"></div>
+          </div>
+        </div>
+
+        <div class="preview-wrap">
+          <div class="preview-toolbar hidden">
+            <button id="btnRestoreView">Restore View</button>
+          </div>
+          <div id="zoomSelection" class="zoom-selection"></div>
+          <img id="preview" alt="" draggable="false">
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-files" class="tab-panel">
+      <div class="controls">
+        <div class="group">
+          <div class="path-bar">
+            <div id="filesPath" class="path-pill">/</div>
+          </div>
+          <div class="button-row">
+            <button id="btnUpFiles">Up</button>
+            <button id="btnRefreshFiles">Refresh</button>
+            <button id="btnDownloadDir">Download Directory</button>
+            <button id="btnDownloadDirPngZip">Download Directory PNG ZIP</button>
+          </div>
+          <label class="check"><input id="confirm_delete" type="checkbox" checked> Confirm before delete</label>
+          <div id="filesMsg" class="status"></div>
+        </div>
+        <div id="filesList" class="file-list"></div>
+        <div id="fileViewer" class="file-viewer hidden">
+          <div class="file-viewer-header">
+            <div id="fileViewerTitle" class="file-viewer-title"></div>
+            <div class="button-row">
+              <button id="btnViewerClose" type="button">Close Viewer</button>
+            </div>
+          </div>
+          <div id="fileViewerMsg" class="status"></div>
+          <div class="file-viewer-body">
+            <div id="fileViewerStage" class="file-viewer-stage">
+              <div id="fileViewerZoomSelection" class="zoom-selection"></div>
+              <img id="fileViewerImage" alt="" draggable="false">
+            </div>
+            <div class="viewer-side">
+              <div id="fileViewerNav" class="frame-nav">
+                <button id="btnViewerFirst" class="icon-button" type="button" title="First frame" aria-label="First frame">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14"></path><path d="m19 6-8 6 8 6Z"></path></svg>
+                </button>
+                <button id="btnViewerPrev" class="icon-button" type="button" title="Previous frame" aria-label="Previous frame">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                </button>
+                <label>Frame <input id="viewerFrameInput" type="number" min="1" value="1"></label>
+                <button id="btnViewerGo" type="button">Go</button>
+                <button id="btnViewerNext" class="icon-button" type="button" title="Next frame" aria-label="Next frame">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                </button>
+                <button id="btnViewerLatest" class="icon-button" type="button" title="Last frame" aria-label="Last frame">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 18 8-6-8-6Z"></path><path d="M18 5v14"></path></svg>
+                </button>
+              </div>
+              <button id="btnViewerRestore" type="button" class="hidden">Restore View</button>
+              <div id="fileViewerStats" class="stats hidden" aria-label="Saved raw frame statistics"></div>
+              <div id="beamFitViewer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-options" class="tab-panel">
+      <div class="controls">
+        <div class="group">
+          <h2 class="group-title">Display</h2>
+          <div class="setting">
+            <label>Image rotation
+              <select id="image_rotation">
+                <option value="0">0 deg</option>
+                <option value="90">90 deg</option>
+                <option value="180" selected>180 deg</option>
+                <option value="270">270 deg</option>
+              </select>
+            </label>
+            <p class="help">Rotates the web preview and exported preview images. Saved RAW dosimetry files keep the original sensor values.</p>
+          </div>
+          <div class="setting">
+            <label>Preview drag action
+              <select id="preview_drag_mode">
+                <option value="zoom" selected>Zoom window</option>
+                <option value="native">Native copy image</option>
+              </select>
+            </label>
+            <p class="help">Choose whether dragging on the preview selects a zoom region or uses the browser's normal image drag behavior.</p>
+          </div>
+        </div>
+
+        <div class="group">
+          <h2 class="group-title">Timing</h2>
+          <div class="setting">
+            <label>Delay (us) <input id="esp_delay" type="number" value="200" step="1" min="0"></label>
+            <p class="help">ESP delay from the accepted input trigger edge to the camera shutter pulse. This is the laser-charge-to-scintillation timing offset.</p>
+          </div>
+          <div class="setting">
+            <label>Targeting gate width (us) <input id="targeting_gate_width" type="number" value="1000" step="1" min="30"></label>
+            <p class="help">Shutter pulse width used when Capture mode is Targeting. Use a wider gate when aligning and focusing. Minimum enforced value is 30 us.</p>
+          </div>
+          <div class="setting">
+            <label>Dosimetry gate width (us) <input id="dosimetry_gate_width" type="number" value="100" step="1" min="30"></label>
+            <p class="help">Shutter pulse width used when Capture mode is Dosimetry. This should be tight enough to capture the scintillation signal with low background. Minimum enforced value is 30 us.</p>
+          </div>
+        </div>
+
+        <div class="group">
+          <h2 class="group-title">Dose calibration</h2>
+          <div class="setting">
+            <div id="cal_source" class="cal-source"></div>
+            <label>DN per Gy <input id="cal_dn_per_gy" type="number" step="any" min="0"></label>
+            <label>Calibration uncertainty (%, 1&sigma;) <input id="cal_err_pct" type="number" step="any" min="0" max="99"></label>
+            <label>Note <input id="cal_note" type="text" maxlength="300" placeholder="source of a custom calibration"></label>
+            <div class="button-row">
+              <button id="cal_save" type="button">Save calibration</button>
+              <button id="cal_reset" type="button">Reset to default</button>
+            </div>
+            <p class="help">Background-subtracted fitted peak in DN that corresponds to 1 Gy, applied per pixel to beam-fit results (amplitude, offset, noise). Fit integrals become Gy&middot;px&sup2;. The default comes from the 2026-10-13 film cross-calibration; a saved value overrides it on this Pi for every browser.</p>
+          </div>
+          <div class="setting">
+            <label class="check"><input id="cal_include_err" type="checkbox" checked> Include calibration uncertainty in Gy errors</label>
+            <p class="help">Fit results always show the 1&sigma; statistical fit error. When checked, Gy values also include the calibration uncertainty, added in quadrature.</p>
+          </div>
+          <div class="setting">
+            <label>Display units
+              <select id="cal_display_units">
+                <option value="DN">DN (raw)</option>
+                <option value="Gy">Gy (calibrated)</option>
+              </select>
+            </label>
+            <p class="help" id="cal_units_help">Choose the primary unit for beam-fit results; the other unit is shown in parentheses.</p>
+            <div id="cal_status" class="status"></div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h2 class="group-title">Wi-Fi</h2>
+          <p class="help">Host a network for phone focusing, or join another Wi-Fi network. Only one mode can run at a time. Changing Wi-Fi may disconnect your phone; reconnect using the new settings.</p>
+          <div class="setting">
+            <label class="switch-label">Host Wi-Fi access point <span class="switch"><input id="wifi_ap_enabled" type="checkbox"><span class="slider"></span></span></label>
+            <label>Hotspot name (SSID) <input id="wifi_ap_ssid" value="DoseCam" maxlength="32"></label>
+            <label>Hotspot password <input id="wifi_ap_password" type="password" autocomplete="new-password" placeholder="Blank keeps saved password"></label>
+            <label>Hotspot IP address <input id="wifi_ap_ip" value="192.168.50.1" inputmode="decimal"></label>
+            <p class="help">Your phone receives an address automatically. Open the hotspot IP in its browser. The Pi hostname stays pi-06-ioc.</p>
+            <button id="wifi_ap_apply" type="button">Apply hotspot settings</button>
+          </div>
+          <div class="setting">
+            <label class="switch-label">Connect to another Wi-Fi <span class="switch"><input id="wifi_client_enabled" type="checkbox"><span class="slider"></span></span></label>
+            <label>Network name (SSID) <input id="wifi_client_ssid" maxlength="32" autocomplete="off"></label>
+            <label>Network password <input id="wifi_client_password" type="password" autocomplete="new-password" placeholder="Blank keeps saved password"></label>
+            <p class="help">For personal networks with a shared password (WPA/WPA2). The network assigns the Pi's IP automatically; Ethernet remains preferred. Enterprise login and captive portals are not supported here.</p>
+            <button id="wifi_client_apply" type="button">Apply and connect</button>
+          </div>
+          <button id="wifi_refresh" type="button">Refresh Wi-Fi status</button>
+          <div id="wifi_status" class="status" role="status"></div>
+          <a id="wifi_url" class="hidden" target="_blank" rel="noopener"></a>
+        </div>
+
+        <div class="group">
+          <h2 class="group-title">ESP Trigger Logic</h2>
+          <div class="setting">
+            <label class="switch-label">
+              Shutter output enabled
+              <span class="switch">
+                <input id="output_enabled" type="checkbox" checked>
+                <span class="slider"></span>
+              </span>
+            </label>
+            <p class="help">When enabled, the ESP sends the delayed shutter pulse to the camera after a trigger. When disabled, trigger inputs are ignored for camera output. Capture and Arm turn this back on for normal operation.</p>
+          </div>
+          <div class="setting">
+            <label class="switch-label">
+              Input trigger active high
+              <span class="switch">
+                <input id="input_trigger_active_high" type="checkbox" checked>
+                <span class="slider"></span>
+              </span>
+            </label>
+            <p class="help">Sets which ESP input edge starts the delay. Active high means a rising edge triggers; active low means a falling edge triggers.</p>
+          </div>
+          <div id="espMsg" class="status"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="saveDirPicker" class="directory-picker hidden" role="dialog" aria-modal="true" aria-labelledby="saveDirTitle">
+    <div class="dialog">
+      <div class="dialog-header">
+        <h2 id="saveDirTitle">Choose Save Folder</h2>
+        <button id="btnCloseSaveDir" type="button">Close</button>
+      </div>
+      <div class="path-bar">
+        <div id="saveDirPath" class="path-pill">/</div>
+      </div>
+      <div id="saveDirList" class="directory-list"></div>
+      <div class="button-row">
+        <button id="btnSaveDirUp" type="button">Up</button>
+        <button id="btnSaveDirNew" type="button">New Folder</button>
+        <button id="btnUseSaveDir" class="primary" type="button">Use This Folder</button>
+      </div>
+      <div id="saveDirMsg" class="status"></div>
+    </div>
+  </div>
+
+  <script src="/static/setup.js"></script>
+  <script src="/static/wifi.js"></script>
+  <script src="/static/archives.js"></script>
+<script src="/static/beamfit.js?v=20261026a"></script>
+</body>
+</html>

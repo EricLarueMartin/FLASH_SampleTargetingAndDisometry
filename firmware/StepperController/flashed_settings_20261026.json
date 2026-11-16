@@ -1,0 +1,40 @@
+{
+  "_provenance": "Read back with the LIST command from the ESP32 stepper controller on pi-06-ioc (/dev/serial/by-id/usb-1a86_USB_Single_Serial_5185027606-if00), 2026-10-26, read-only. This is the settings JSON of the FLASHED firmware, which differs from the stale repo copy (MyConfig.h: one stepper). Passwords redacted before committing; the board still holds them.",
+  "deviceName": "LATTE Stepper Controller",
+  "WiFi": [
+    { "ssid": "DukeOpen" },
+    { "ssid": "nerdery", "password": "<REDACTED>" }
+  ],
+  "hostName": "LATTESMC",
+  "softAPssid": "LATTESMC",
+  "softAPpassword": "<REDACTED>",
+  "enableSoftAP": true,
+  "enableWiFi": true,
+  "softAPwithWiFi": true,
+  "userName": "LEGEND",
+  "password": "<REDACTED>",
+  "units": "cm",
+  "moveByUnits": false,
+  "steppers": [
+    {
+      "label": "X",
+      "stepPin": 14, "stepInvert": false,
+      "directionPin": 32, "directionInvert": false,
+      "enablePin": 15, "enableInvert": true,
+      "acceleration": 1600, "speed": 3200,
+      "lowLimit": 0, "lowPin": 34, "invertLow": false,
+      "invertHigh": false, "highLimit": 30000, "highPin": 39,
+      "steps": 4064, "minPulseWidth": 5
+    },
+    {
+      "label": "Y",
+      "stepPin": 33, "stepInvert": false,
+      "directionPin": 27, "directionInvert": false,
+      "enablePin": 12, "enableInvert": true,
+      "acceleration": 1600, "speed": 3200,
+      "lowLimit": 0, "lowPin": 36, "invertLow": false,
+      "invertHigh": false, "highLimit": 30000, "highPin": 4,
+      "steps": 4064, "minPulseWidth": 5
+    }
+  ]
+}

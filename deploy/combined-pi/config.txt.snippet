@@ -1,0 +1,8 @@
+# Camera section for /boot/firmware/config.txt on the combined Pi (elm-ioc-00).
+# Replace the existing camera_auto_detect line; keep the file's other settings
+# (elm-ioc-00 also carries dtoverlay=dwc2,dr_mode=host - leave that alone).
+# OV5647 is already on CAM/DISP 1 on elm-ioc-00; the IMX296 goes on the free CAM/DISP 0.
+# Confirm after boot with: sudo dmesg | grep -i 'Using sensor'
+camera_auto_detect=0
+dtoverlay=imx296,cam0
+dtoverlay=ov5647,cam1

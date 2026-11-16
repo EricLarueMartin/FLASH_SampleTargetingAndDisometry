@@ -1,0 +1,33 @@
+/* Site navigation shared by /motion/ and /run/ (DoseCam carries a copy inline). */
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 44px;
+    padding: 0 12px;
+    background: #12303a;
+    color: #e6f1f3;
+    font-family: Arial, sans-serif;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+.site-nav .site-title {
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    margin-right: 12px;
+}
+.site-nav a {
+    color: #cfe5ea;
+    text-decoration: none;
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+.site-nav a:hover { background: #1d4552; color: #fff; }
+.site-nav a[aria-current="page"] { background: #e6f1f3; color: #0b3a46; }
+.site-nav-status {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: #a9c6cd;
+}

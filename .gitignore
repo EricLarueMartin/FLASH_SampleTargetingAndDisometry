@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# DoseCam runtime data (raw frames, previews, logs) - data, not source
+dose_cam/captures/
+dose_cam/*.jpg
+dose_cam/*.jpeg
+dose_cam/*.png
+dose_cam/*.raw
+dose_cam/*.tiff
+dose_cam/*.log
+captures_backup_*/
+
+# Copies of files Claude delivered into the chat
+Claude outputs/
+
+# KiCad per-user state, caches and automatic backups
+*-backups/
+*.kicad_prl
+fp-info-cache
+_autosave-*
+*.lck
+
+# Purchase records are not versioned
+*invoice*.pdf
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

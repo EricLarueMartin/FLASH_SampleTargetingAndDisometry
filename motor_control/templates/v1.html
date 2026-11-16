@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor Control with Video Feed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+        }
+        #video {
+            width: 640px;
+            height: 480px;
+            border: 2px solid black;
+            margin-right: 20px;
+        }
+        #controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 350px;
+            margin-right: 20px;
+        }
+        #sections {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 400px;
+        }
+        #terminal {
+            width: 100%;
+            height: 200px;
+            overflow-y: auto;
+            border: 2px solid black;
+            margin-bottom: 10px;
+            background: #f0f0f0;
+            font-family: monospace;
+            padding: 5px;
+        }
+        #command-input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        #x-distance, #y-distance {
+            width: 100px;
+            text-align: center;
+            margin: 5px 0;
+        }
+        .arrow-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .arrow-buttons button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 18px;
+        }
+        .info {
+            margin: 10px 0;
+            text-align: left;
+            width: 100%;
+        }
+        .info span {
+            font-weight: bold;
+        }
+        .section {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .grid {
+            display: grid;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+        .circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: lightblue;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .circle:hover {
+            background-color: deepskyblue;
+        }
+        #corrections {
+            margin-top: 20px;
+        }
+        #corrections table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #corrections th, #corrections td {
+            border: 1px solid black;
+            padding: 5px;
+            text-align: center;
+        }
+        #add-correction {
+            margin-top: 10px;
+        }
+    </style>
+    <script src="/static/socket.io.min.js"></script>
+</head>
+<body>
+    <img id="video" src="/video_feed">
+
+    <div id="controls">
+        <div id="terminal"></div>
+        <input id="command-input" type="text" placeholder="Enter command">
+        <button onclick="sendCommand()">Send</button>
+
+        <h2>Move Motors</h2>
+        <label for="x-distance">X Distance (Motor 0):</label>
+        <input id="x-distance" type="number" value="4064" maxlength="10">
+        <label for="y-distance">Y Distance (Motor 1):</label>
+        <input id="y-distance" type="number" value="4064" maxlength="10">
+
+        <div class="arrow-buttons">
+            <button onclick="moveMotor('up')">&#9650; Up</button>
+        </div>
+        <div class="arrow-buttons">
+            <button onclick="moveMotor('left')">&#9668; Left</button>
+            <button onclick="moveMotor('right')">&#9658; Right</button>
+        </div>
+        <div class="arrow-buttons">
+            <button onclick="moveMotor('down')">&#9660; Down</button>
+        </div>
+
+        <div class="info">
+            <p>Motor 0 Position: <span id="pos-0">0</span> steps</p>
+            <p>Motor 1 Position: <span id="pos-1">0</span> steps</p>
+            <p>Motor 0 Speed: <span id="speed-0">0</span> steps/s</p>
+            <p>Motor 1 Speed: <span id="speed-1">0</span> steps/s</p>
+        </div>
+
+        <div id="corrections">
+            <h2>Y Corrections</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>X Position</th>
+                        <th>Y Correction</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="corrections-table"></tbody>
+            </table>
+            <div id="add-correction">
+                <label for="correction-x">X:</label>
+                <input id="correction-x" type="number">
+                <label for="correction-y">Y:</label>
+                <input id="correction-y" type="number">
+                <button onclick="addCorrection()">Add Correction</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sections">
+        <!-- Section 1 -->
+        <div class="section" id="section-1">
+            <label for="select-1">Section 1:</label>
+            <select id="select-1" onchange="updateGrid(1)">
+                <option value="3x2">3x2 Well Plate</option>
+                <option value="4x3" selected>4x3 Well Plate</option>
+                <option value="tubes">Test Tube Rack</option>
+            </select>
+            <div class="grid" id="grid-1"></div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="section" id="section-2">
+            <label for="select-2">Section 2:</label>
+            <select id="select-2" onchange="updateGrid(2)">
+                <option value="3x2">3x2 Well Plate</option>
+                <option value="4x3">4x3 Well Plate</option>
+                <option value="tubes">Test Tube Rack</option>
+            </select>
+            <div class="grid" id="grid-2"></div>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="section" id="section-3">
+            <label for="select-3">Section 3:</label>
+            <select id="select-3" onchange="updateGrid(3)">
+                <option value="3x2">3x2 Well Plate</option>
+                <option value="4x3">4x3 Well Plate</option>
+                <option value="tubes">Test Tube Rack</option>
+            </select>
+            <div class="grid" id="grid-3"></div>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="section" id="section-4">
+            <label for="select-4">Section 4:</label>
+            <select id="select-4" onchange="updateGrid(4)">
+                <option value="3x2">3x2 Well Plate</option>
+                <option value="4x3">4x3 Well Plate</option>
+                <option value="tubes">Test Tube Rack</option>
+            </select>
+            <div class="grid" id="grid-4"></div>
+        </div>
+    </div>
+
+<script>
+    const socket = io();
+    const stepPerInch = 4064;
+    const sectionSpacing = 5.5 * stepPerInch;
+    const yCorrections = [];
+
+    const positions = {
+        '3x2': { cols: 3, rows: 2, spacing: 1.5 * stepPerInch, xOffset: 0.5 * stepPerInch, yOffset: 0.5 * stepPerInch },
+        '4x3': { cols: 4, rows: 3, spacing: 1.0 * stepPerInch, xOffset: 0, yOffset: 0 },
+        'tubes': { cols: 3, rows: 1, spacing: 1.5 * stepPerInch, xOffset: 0.5 * stepPerInch, yOffset: 0 }
+    };
+
+    const originOffsets = {
+        1: { x: 0, y: 0 },
+        2: { x: sectionSpacing, y: 0 },
+        3: { x: 2 * sectionSpacing, y: 0 },
+        4: { x: 3 * sectionSpacing, y: 0 }
+    };
+
+    function getYCorrection(x) {
+        if (yCorrections.length === 0) return 0;
+        yCorrections.sort((a, b) => a.x - b.x);
+        for (let i = 0; i < yCorrections.length - 1; i++) {
+            const p1 = yCorrections[i];
+            const p2 = yCorrections[i + 1];
+            if (x >= p1.x && x <= p2.x) {
+                const slope = (p2.y - p1.y) / (p2.x - p1.x);
+                return p1.y + slope * (x - p1.x);
+            }
+        }
+        return yCorrections[yCorrections.length - 1].y;
+    }
+
+    function moveToPosition(section, col, row, type) {
+        const config = positions[type];
+        const x = originOffsets[section].x + config.xOffset + col * config.spacing;
+        const baseY = originOffsets[section].y + config.yOffset + (config.rows - 1 - row) * config.spacing;
+        const correctedY = baseY + getYCorrection(x);
+
+        const commandX = `moveabs 0 ${Math.round(x)}`;
+        const commandY = `moveabs 1 ${Math.round(correctedY)}`;
+
+        socket.emit('send_command', { command: commandX });
+        socket.emit('send_command', { command: commandY });
+    }
+
+    function updateGrid(section) {
+        const grid = document.getElementById(`grid-${section}`);
+        grid.innerHTML = '';
+        const type = document.getElementById(`select-${section}`).value;
+        const config = positions[type];
+
+        grid.style.gridTemplateColumns = `repeat(${config.cols}, auto)`;
+        grid.style.gridTemplateRows = `repeat(${config.rows}, auto)`;
+
+        for (let row = 0; row < config.rows; row++) {
+            for (let col = 0; col < config.cols; col++) {
+                const circle = document.createElement('div');
+                circle.className = 'circle';
+                circle.onclick = () => moveToPosition(section, col, row, type);
+                grid.appendChild(circle);
+            }
+        }
+    }
+
+    function addCorrection() {
+        const x = parseFloat(document.getElementById('correction-x').value);
+        const y = parseFloat(document.getElementById('correction-y').value);
+        if (!isNaN(x) && !isNaN(y)) {
+            yCorrections.push({ x, y });
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${x}</td><td>${y}</td><td><button onclick="removeCorrection(${x})">Remove</button></td>`;
+            document.getElementById('corrections-table').appendChild(row);
+        }
+    }
+
+    function removeCorrection(x) {
+        const index = yCorrections.findIndex(correction => correction.x === x);
+        if (index !== -1) {
+            yCorrections.splice(index, 1);
+            const table = document.getElementById('corrections-table');
+            table.deleteRow(index);
+        }
+    }
+
+    for (let i = 1; i <= 4; i++) {
+        updateGrid(i);
+    }
+
+    socket.on('serial_output', (data) => {
+        const terminal = document.getElementById('terminal');
+        const message = document.createElement('p');
+        message.textContent = data.message;
+        terminal.appendChild(message);
+        terminal.scrollTop = terminal.scrollHeight;
+
+        if (data.message.startsWith('GETPOS')) {
+            const [_, motor, position] = data.message.split(' ');
+            document.getElementById(`pos-${motor}`).textContent = position;
+        } else if (data.message.startsWith('GETSPEED')) {
+            const [_, motor, speed] = data.message.split(' ');
+            document.getElementById(`speed-${motor}`).textContent = speed;
+        }
+    });
+
+    function moveMotor(direction) {
+        const xDistance = parseInt(document.getElementById('x-distance').value) || 0;
+        const yDistance = parseInt(document.getElementById('y-distance').value) || 0;
+
+        let command;
+        switch (direction) {
+            case 'up':
+                command = `move 1 ${yDistance}`;
+                break;
+            case 'down':
+                command = `move 1 ${-yDistance}`;
+                break;
+            case 'left':
+                command = `move 0 ${-xDistance}`;
+                break;
+            case 'right':
+                command = `move 0 ${xDistance}`;
+                break;
+        }
+        if (command) {
+            socket.emit('send_command', { command: command });
+        }
+    }
+
+    function sendCommand() {
+        const commandInput = document.getElementById('command-input');
+        const command = commandInput.value.trim();
+        if (command) {
+            socket.emit('send_command', { command: command });
+            commandInput.value = '';
+        }
+    }
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,56 @@
+# /etc/nginx/sites-available/dose-cam on pi-06-ioc: one site, three pages.
+#   /         DoseCam            (Flask, 127.0.0.1:8000)
+#   /motion/  FLASH positioning  (motor_control, 127.0.0.1:8081)
+#   /run/     FLASH auto position-and-fire
+#   /settings/ FLASH firing route (ssh gateway) and run defaults
+# From the DoseCam Wi-Fi hotspot (192.168.50.0/24) the Run API is read-only
+# except ABORT, and Settings are read-only.
+# FLASH locations pass $http_host (keeps the port) so Socket.IO's same-origin
+# check accepts tunnels such as http://localhost:8080. The app enforces the same rule; this is the second layer.
+
+map "$remote_addr $request_method $uri" $flash_hotspot_block {
+    default 0;
+    "~^192\.168\.50\.\d+ (POST|PUT|DELETE|PATCH) /run/api/(?!abort$)" 1;
+    "~^192\.168\.50\.\d+ (POST|PUT|DELETE|PATCH) /settings/api/" 1;
+}
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    proxy_read_timeout 3600s;
+    proxy_send_timeout 3600s;
+    proxy_buffering off;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location ~ ^/(motion|run|settings)(/|$) {
+        if ($flash_hotspot_block) {
+            return 403 "Not allowed from the DoseCam Wi-Fi: watch and ABORT only\n";
+        }
+        proxy_pass http://127.0.0.1:8081;
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /socket.io/ {
+        proxy_pass http://127.0.0.1:8081;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}

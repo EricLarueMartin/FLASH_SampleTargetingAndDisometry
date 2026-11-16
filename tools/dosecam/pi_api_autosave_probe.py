@@ -1,0 +1,30 @@
+import json
+import urllib.request
+
+
+BASE_URL = "http://127.0.0.1:8000"
+
+
+def post(path, obj, timeout=90):
+    data = json.dumps(obj).encode()
+    req = urllib.request.Request(
+        BASE_URL + path,
+        data=data,
+        headers={"Content-Type": "application/json"},
+    )
+    print(urllib.request.urlopen(req, timeout=timeout).read().decode())
+
+
+def main():
+    post("/api/set_delay", {"delay_us": 5})
+    post("/api/set_width", {"width_us": 100})
+    post("/api/active_level", {"level": 0})
+    post(
+        "/api/autosave",
+        {"enabled": True, "base": "lossless/rawtest", "include_log": True},
+    )
+    post("/api/capture", {"trigger_source": "pi_test_raw", "timeout_s": 20})
+
+
+if __name__ == "__main__":
+    main()

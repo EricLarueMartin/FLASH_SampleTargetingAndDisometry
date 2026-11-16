@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLASH Settings</title>
+<link rel="stylesheet" href="/motion/static/nav.css">
+<style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; font-family: Arial, sans-serif; color: #1f2427; background: #eef1f2; }
+    button, input { font: inherit; }
+    button { border: 1px solid #8c969b; border-radius: 6px; padding: 7px 12px; background: #fff; cursor: pointer; }
+    button:hover:not(:disabled) { background: #e6f2f5; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    button.primary { background: #1f7a8c; border-color: #155e6c; color: #fff; font-weight: 700; }
+    input { border: 1px solid #9ba4a8; border-radius: 4px; padding: 6px 8px; background: #fff; }
+    input:focus-visible, button:focus-visible { outline: 3px solid #3f95a8; outline-offset: 2px; }
+    main { max-width: 980px; margin: 0 auto; padding: 16px; display: grid; gap: 14px; }
+    .card { background: #fbfcfc; border: 1px solid #c8ced1; border-radius: 8px; padding: 14px 16px; }
+    h2 { font-size: 1.1rem; margin: 0 0 4px; }
+    .hint { color: #5d666a; font-size: 0.88rem; line-height: 1.45; margin: 4px 0 10px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px 16px; }
+    label.f { display: grid; gap: 4px; font-size: 0.9rem; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+    pre { margin: 8px 0 0; padding: 10px; background: #12303a; color: #fff; border-radius: 6px; white-space: pre-wrap; word-break: break-all; font-size: 0.85rem; }
+    .chip { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 0.85rem; font-weight: 700; background: #e5e8e9; }
+    .ok { background: #d5f0dd; color: #1c6b37; }
+    .warn { background: #fbe9c7; color: #7a4d06; }
+    .bad { background: #f6d2d2; color: #8c1c1c; }
+    ol.steps { margin: 6px 0 0; padding-left: 20px; line-height: 1.7; }
+    .msg { min-height: 1.2em; font-size: 0.9rem; margin-top: 6px; }
+    .denied { color: #c62828; font-weight: 700; }
+    table { border-collapse: collapse; font-size: 0.85rem; width: 100%; }
+    td { padding: 4px 6px; border-bottom: 1px solid #dde2e4; word-break: break-all; }
+</style>
+</head>
+<body>
+<nav class="site-nav" aria-label="FLASH pages">
+    <span class="site-title">FLASH</span>
+    <a href="/">DoseCam</a>
+    <a href="/motion/">Motion</a>
+    <a href="/run/">Run</a>
+    <a href="/settings/" aria-current="page">Settings</a>
+    <span class="site-nav-status" id="nav-status"></span>
+</nav>
+<main>
+    <p class="denied" id="denied" hidden></p>
+
+    <section class="card">
+        <h2>Live firing route</h2>
+        <p class="hint">
+            In Live mode each pulse is one put of <b>{{ fire_pv }}</b>, sent through an SSH session to a
+            control-room account the IOC already lets write. The session stays open for the whole run, so a
+            pulse costs a few ms. Pulses follow a fixed clock (pulse k at t0 + k&times;delay), so send times
+            never add up into the total. Without a host set here, Live mode is unavailable
+            (this Pi has read-only CA access).
+        </p>
+        <div class="grid">
+            <label class="f">Account <input id="g-user" autocomplete="off"></label>
+            <label class="f">Gateway host <input id="g-host" placeholder="control-room host name or IP" autocomplete="off"></label>
+            <label class="f">SSH port <input id="g-port" type="number" min="1" max="65535"></label>
+            <label class="f">Key on this Pi <input id="g-key"></label>
+            <label class="f">Gateway script path on the host <input id="g-cmd"></label>
+            <label class="f">This Pi's address (for from=) <input id="g-pi"></label>
+        </div>
+        <div class="row">
+            <button type="button" class="primary" id="save-gw">Save</button>
+            <span class="chip" id="route-chip">checking...</span>
+        </div>
+        <div class="msg" id="gw-msg" role="status"></div>
+    </section>
+
+    <section class="card">
+        <h2>1. Key</h2>
+        <p class="hint">A key used only for firing. On the gateway it is pinned to the gateway script, to this Pi's address, and to no shell, pty or forwarding.</p>
+        <div class="row">
+            <span class="chip" id="key-chip">?</span>
+            <button type="button" id="create-key">Create key on this Pi</button>
+        </div>
+        <div id="key-box" hidden>
+            <p class="hint" style="margin-top:12px">Add this line to <code id="ak-path">~ringop/.ssh/authorized_keys</code> on the gateway host, and copy <code>deploy/fire-gateway/flash_fire_gw.py</code> to the script path above (chmod 755):</p>
+            <pre id="ak-line"></pre>
+            <div class="row"><button type="button" id="copy-ak">Copy line</button></div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>2. Gateway host key</h2>
+        <p class="hint">Fetch the host's SSH key, compare the fingerprint with the host (<code>ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub</code> there), then trust it. The connection is refused if the key ever changes.</p>
+        <div class="row">
+            <span class="chip" id="hk-chip">?</span>
+            <button type="button" id="keyscan">Get host key</button>
+        </div>
+        <div id="hk-box" hidden>
+            <table><tbody id="hk-table"></tbody></table>
+            <div class="row"><button type="button" class="primary" id="trust">Trust these keys</button></div>
+        </div>
+        <div class="msg" id="hk-msg" role="status"></div>
+    </section>
+
+    <section class="card">
+        <h2>3. Test (read only)</h2>
+        <p class="hint">Asks the gateway to connect to {{ fire_pv }} and report its access rights. Nothing is written.</p>
+        <div class="row">
+            <button type="button" id="check">Test connection</button>
+        </div>
+        <pre id="check-out" hidden></pre>
+    </section>
+
+    <section class="card">
+        <h2>Firing and run defaults</h2>
+        <div class="grid">
+            <label class="f">PV (fixed) <input value="{{ fire_pv }}" disabled></label>
+            <label class="f">Value written per pulse <input id="s-value" type="number" min="0" max="15" step="1"></label>
+            <label class="f">Settle after arriving (s) <input id="s-settle" type="number" min="0" max="60" step="0.1"></label>
+            <label class="f">Arrival tolerance (steps) <input id="s-tol" type="number" min="0" max="50" step="1"></label>
+            <label class="f">DoseCam gate (&micro;s) <input id="s-gate" type="number" min="1" step="1"></label>
+            <label class="f">DoseCam ESP delay (&micro;s) <input id="s-espdelay" type="number" min="0" step="1"></label>
+        </div>
+        <div class="row">
+            <label><input type="checkbox" id="s-dosecam"> DoseCam capture at each position (one frame per pulse)</label>
+        </div>
+        <p class="hint">The gateway script also has its own list of allowed values (1 by default), so a wrong value here is refused there.</p>
+        <div class="row"><button type="button" class="primary" id="save-run">Save</button></div>
+        <div class="msg" id="run-msg" role="status"></div>
+    </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+let view = null;
+let scanned = [];
+
+async function api(path, opts = {}) {
+    const r = await fetch(path, Object.assign({ cache: 'no-store', headers: { 'Content-Type': 'application/json' } }, opts));
+    let data = {};
+    try { data = await r.json(); } catch (e) { /* empty */ }
+    if (!r.ok || data.ok === false) throw new Error(data.error || `HTTP ${r.status}`);
+    return data;
+}
+
+function chip(el, cls, text) { el.className = `chip ${cls}`; el.textContent = text; }
+
+function render(v) {
+    view = v;
+    const g = v.gateway;
+    $('g-user').value = g.user; $('g-host').value = g.host; $('g-port').value = g.port;
+    $('g-key').value = g.key; $('g-cmd').value = g.command_path; $('g-pi').value = g.pi_address;
+    const pv = v.pv;
+    if (!g.host) chip($('route-chip'), 'warn', 'No gateway host: Live mode unavailable');
+    else if (pv.ssh_ok) chip($('route-chip'), 'ok', `Live ready: ${pv.ssh_target} has ${(pv.ssh_info || {}).access} on the PV`);
+    else chip($('route-chip'), 'bad', `Not ready: ${pv.ssh_error || 'not tested yet'}`);
+    chip($('key-chip'), v.key_exists ? 'ok' : 'warn', v.key_exists ? `key ${g.key} exists` : 'no key yet');
+    $('create-key').disabled = v.key_exists || !v.edit_allowed_here;
+    $('key-box').hidden = !v.authorized_keys_line;
+    $('ak-line').textContent = v.authorized_keys_line || '';
+    $('ak-path').textContent = `~${g.user}/.ssh/authorized_keys`;
+    chip($('hk-chip'), v.host_trusted ? 'ok' : 'warn', v.host_trusted ? 'host key trusted' : (g.host ? 'host key not trusted yet' : 'set a host first'));
+    if (pv.ssh_info || pv.ssh_error) {
+        $('check-out').hidden = false;
+        $('check-out').textContent = pv.ssh_info ? JSON.stringify(pv.ssh_info, null, 2) : pv.ssh_error;
+    }
+    const lo = v.loadout;
+    $('s-value').value = lo.fire.value; $('s-settle').value = lo.run.settle_s; $('s-tol').value = lo.run.tolerance_steps;
+    $('s-gate').value = lo.run.gate_width_us; $('s-espdelay').value = lo.run.esp_delay_us; $('s-dosecam').checked = !!lo.run.dosecam;
+    $('denied').hidden = v.edit_allowed_here;
+    $('denied').textContent = v.edit_allowed_here ? '' : `You are on the DoseCam Wi-Fi (${v.client}): settings are read-only from here.`;
+    document.querySelectorAll('main button').forEach((b) => { if (!v.edit_allowed_here) b.disabled = true; });
+}
+
+async function run(btn, msgEl, fn) {
+    btn.disabled = true;
+    if (msgEl) msgEl.textContent = 'working...';
+    try { const r = await fn(); if (msgEl) msgEl.textContent = ''; return r; }
+    catch (e) { if (msgEl) msgEl.textContent = e.message; else alert(e.message); }
+    finally { btn.disabled = false; if (view) render(view); }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    $('save-gw').addEventListener('click', () => run($('save-gw'), $('gw-msg'), async () => {
+        render(await api('/settings/api/gateway', { method: 'PUT', body: JSON.stringify({
+            user: $('g-user').value, host: $('g-host').value, port: parseInt($('g-port').value, 10),
+            key: $('g-key').value, command_path: $('g-cmd').value, pi_address: $('g-pi').value }) }));
+        $('gw-msg').textContent = 'Saved.';
+    }));
+    $('create-key').addEventListener('click', () => run($('create-key'), null, async () => render(await api('/settings/api/create_key', { method: 'POST', body: '{}' }))));
+    $('copy-ak').addEventListener('click', () => navigator.clipboard && navigator.clipboard.writeText($('ak-line').textContent));
+    $('keyscan').addEventListener('click', () => run($('keyscan'), $('hk-msg'), async () => {
+        const r = await api('/settings/api/keyscan', { method: 'POST', body: '{}' });
+        scanned = r.keys;
+        $('hk-table').replaceChildren(...r.keys.map((k) => {
+            const tr = document.createElement('tr'); const td = document.createElement('td');
+            td.textContent = k.fingerprint || k.line; tr.appendChild(td); return tr;
+        }));
+        $('hk-box').hidden = false;
+    }));
+    $('trust').addEventListener('click', () => run($('trust'), $('hk-msg'), async () => {
+        render(await api('/settings/api/trust', { method: 'POST', body: JSON.stringify({ lines: scanned.map((k) => k.line) }) }));
+        $('hk-box').hidden = true;
+        $('hk-msg').textContent = 'Trusted.';
+    }));
+    $('check').addEventListener('click', () => run($('check'), null, async () => render(await api('/settings/api/check', { method: 'POST', body: '{}' }))));
+    $('save-run').addEventListener('click', () => run($('save-run'), $('run-msg'), async () => {
+        await api('/motion/api/loadout', { method: 'PUT', body: JSON.stringify({
+            fire: { value: parseInt($('s-value').value, 10) },
+            run: { settle_s: +$('s-settle').value, tolerance_steps: parseInt($('s-tol').value, 10),
+                   dosecam: $('s-dosecam').checked, gate_width_us: parseInt($('s-gate').value, 10),
+                   esp_delay_us: parseInt($('s-espdelay').value, 10) } }) });
+        render(await api('/settings/api'));
+        $('run-msg').textContent = 'Saved.';
+    }));
+    try { render(await api('/settings/api')); }
+    catch (e) { $('nav-status').textContent = `Server not responding: ${e.message}`; }
+});
+</script>
+</body>
+</html>

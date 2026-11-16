@@ -1,0 +1,16 @@
+# The unit already running on elm-ioc-00. Unchanged by the combine; kept here for reference
+# and so the combined deployment can be rebuilt from this branch alone.
+[Unit]
+Description=Motor Control with Video Feed
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/test/camera_stream/app.py
+WorkingDirectory=/home/test/camera_stream
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=test
+
+[Install]
+WantedBy=multi-user.target

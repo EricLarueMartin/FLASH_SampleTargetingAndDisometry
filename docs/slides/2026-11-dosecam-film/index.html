@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DoseCam: first comparison with film</title>
+<link rel="stylesheet" href="../vendor/reveal.js-5.1.0/reset.css">
+<link rel="stylesheet" href="../vendor/reveal.js-5.1.0/reveal.css">
+<link rel="stylesheet" href="../vendor/reveal.js-5.1.0/theme/white.css">
+<style>
+  :root { --ink:#0b0b0b; --ink2:#52514e; --blue:#2a78d6; --orange:#eb6834; --rule:#e6e5e1; }
+  .reveal { font-family: "Helvetica Neue", Arial, sans-serif; color: var(--ink); font-size: 30px; }
+  .reveal h1, .reveal h2 { font-family: inherit; text-transform: none; letter-spacing: -0.01em; color: var(--ink); }
+  .reveal h2 { font-size: 1.45em; margin-bottom: 0.45em; text-align: left; }
+  .reveal p, .reveal li { line-height: 1.35; }
+  .reveal ul { display: block; margin-left: 1em; }
+  .reveal li { margin: 0.25em 0; }
+  .reveal .muted { color: var(--ink2); }
+  .reveal .small { font-size: 0.72em; }
+  .reveal .tiny { font-size: 0.58em; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; align-items: start; text-align: left; }
+  .cols.w { grid-template-columns: 1.15fr 1fr; }
+  .reveal img { margin: 0; }
+  .reveal table { font-size: 0.6em; margin: 0; width: 100%; border-collapse: collapse; }
+  .reveal table th, .reveal table td { border-bottom: 1px solid var(--rule); padding: 0.28em 0.5em; text-align: left; vertical-align: top; }
+  .reveal table th { color: var(--ink2); font-weight: 600; }
+  .reveal td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .big { font-size: 2.2em; font-weight: 700; line-height: 1; }
+  .tag { display:inline-block; font-size:0.55em; padding:0.1em 0.5em; border-radius:4px; background:#eef4fc; color:var(--blue); vertical-align: middle; }
+  .left { text-align: left; }
+  .kpi { display:grid; grid-template-columns: repeat(3, 1fr); gap: 0.8em; margin: 0.3em 0 0.6em; text-align:left; }
+  .kpi div { border-top: 3px solid var(--rule); padding-top: 0.3em; }
+  .kpi .v { font-size: 1.5em; font-weight: 700; }
+  .kpi .l { font-size: 0.6em; color: var(--ink2); }
+  .warn { color: #a3401b; }
+</style>
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+<!-- 1 -->
+<section>
+  <h1 style="font-size:2.1em">DoseCam</h1>
+  <p style="font-size:1.1em">Per-pulse beam imaging for the FLASH sample rig — first comparison with film</p>
+  <p class="muted small">Duke FEL Lab · Linac low-energy spectrometer, ~30 MeV electrons · Nov 2026</p>
+  <p class="tiny muted">Data: 13 Oct 2026, run <code>PolyAlDosCal_…_000006</code> (4 pulses) · Film: EBT-XD, read out by J. Sherman</p>
+</section>
+
+<!-- 2 -->
+<section>
+  <h2>What DoseCam is</h2>
+  <div class="cols w">
+    <div>
+      <ul>
+        <li>A <b>global-shutter camera</b> (Sony IMX296, 1456×1088, 10-bit mono) looks at a thin target the beam passes through just upstream of the sample.</li>
+        <li>The beam makes the target glow (mostly Cherenkov light); one frame per pulse gives the <b>beam's position, shape and peak dose</b>.</li>
+        <li>A 2D rotated-Gaussian fit gives amplitude (DN) → dose via a film calibration.</li>
+        <li>Runs on the same Pi 5 as the XY sample positioner: target → fire → image, all in one web app.</li>
+      </ul>
+    </div>
+    <div>
+      <img src="img/targeting_raw.png" alt="Room-light view of the target plate from the DoseCam, beam spot circled" style="width:100%">
+      <p class="tiny muted left">Targeting frame (1 ms gate, room light). Orange: where the beam spot lands on the target plate.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section>
+  <h2>Timing from the laser charging pulse</h2>
+  <svg viewBox="0 0 1000 300" width="100%" role="img" aria-label="Timing diagram: laser charging pulse edge, 200 microsecond delay, 100 microsecond camera gate, beam light arriving 200 to 225 microseconds after the edge">
+    <style>
+      .t{font:22px Helvetica,Arial,sans-serif;fill:#0b0b0b}.m{font:19px Helvetica,Arial,sans-serif;fill:#52514e}
+    </style>
+    <!-- axis: 0..400 us mapped to x 170..950 -->
+    <line x1="170" y1="270" x2="950" y2="270" stroke="#52514e" stroke-width="1.5"/>
+    <g class="m" text-anchor="middle">
+      <text x="170" y="294">0</text><text x="365" y="294">100</text><text x="560" y="294">200</text><text x="755" y="294">300</text><text x="950" y="294">400 µs</text>
+    </g>
+    <!-- laser charging -->
+    <text class="t" x="10" y="58">Laser charging</text>
+    <polyline points="150,70 170,70 170,30 208,30 208,70 950,70" fill="none" stroke="#0b0b0b" stroke-width="3"/>
+    <!-- ESP delay -->
+    <text class="t" x="10" y="128">ESP8266 delay</text>
+    <line x1="170" y1="118" x2="560" y2="118" stroke="#2a78d6" stroke-width="3" marker-end="url(#a)"/>
+    <defs><marker id="a" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2a78d6"/></marker></defs>
+    <text class="m" x="365" y="108" text-anchor="middle">200 µs (programmable)</text>
+    <!-- camera gate -->
+    <text class="t" x="10" y="188">Camera gate</text>
+    <polyline points="150,165 560,165 560,200 755,200 755,165 950,165" fill="none" stroke="#2a78d6" stroke-width="3"/>
+    <text class="m" x="657" y="225" text-anchor="middle">XTR low 100 µs (+14 µs)</text>
+    <!-- beam light -->
+    <text class="t" x="10" y="255">Beam light</text>
+    <rect x="560" y="236" width="49" height="26" fill="#eb6834"/>
+    <text class="m" x="625" y="256">~200–225 µs</text>
+  </svg>
+  <ul class="small">
+    <li>The <b>laser charging pulse</b> arrives a couple hundred µs before RF and beam; it is opto-isolated into an ESP8266 that waits a set delay and drives the camera's external-trigger (XTR) line.</li>
+    <li>Delay/gate scans: no light with the gate at 100–200 µs; light gone if the gate starts after ~225 µs → beam light lands <b>~200–225 µs</b> after the edge, inside a 200–300 µs gate.</li>
+    <li>Short gate = little room light and few stray hits; the 100 µs gate keeps ≥94 % of what a 300 µs gate collects.</li>
+  </ul>
+</section>
+
+<!-- 4 -->
+<section>
+  <h2>Current target: polycarbonate + aluminum tape <span class="tag">proof of concept</span></h2>
+  <img src="img/frames.png" alt="Four background-subtracted DoseCam frames, one per pulse, with fitted ellipses and camera/film dose labels" style="width:100%">
+  <ul class="small">
+    <li>0.5 mm polycarbonate sheet, aluminum tape on the back as a mirror. Light is mostly Cherenkov (n ≈ 1.585), ~1 % of the scintillator block tested on 1 Oct — but still ~42 DN peak at ~40 Gy, fitted to ±0.1–0.4 %.</li>
+    <li>Spot σ ≈ 20 × 35 px, tilted −15°; centroid drifts ~9 px over the 4 pulses. Specks are prompt radiation hits on the sensor (masked in the fit).</li>
+  </ul>
+</section>
+
+<!-- 5 -->
+<section>
+  <h2>Camera vs film, pulse by pulse</h2>
+  <img src="img/compare.png" alt="Left: film and camera peak dose per well. Right: camera minus film in percent: B1 -2.3, A1 +2.6, A2 +1.1, A3 -1.3" style="width:92%">
+  <div class="kpi">
+    <div><div class="v">1.056 DN/Gy</div><div class="l">calibration: mean fit peak 42.25 DN ÷ mean film peak 40.00 Gy</div></div>
+    <div><div class="v">±2.2 %</div><div class="l">per-pulse camera/film scatter (1σ, n = 4)</div></div>
+    <div><div class="v">±3.2 %</div><div class="l">calibration constant: 1.1 % stat ⊕ 3 % film absolute (provisional)</div></div>
+  </div>
+  <p class="tiny muted left">Single dose level, zero intercept assumed; frame→well order (B1, A1, A2, A3) is the recorded order, not yet independently confirmed.</p>
+</section>
+
+<!-- 6 -->
+<section>
+  <h2>Where the 2 % comes from</h2>
+  <table>
+    <tr><th>Source (per pulse, 1σ)</th><th class="n">Size</th><th>Comment</th></tr>
+    <tr><td><b>Film</b> — B row vs A row offset</td><td class="n">+3.4 %</td><td>B1, B2 both high; scanner lateral response or real — explains most of B1's −2.3 %</td></tr>
+    <tr><td><b>Film</b> — window-peak noise</td><td class="n">0.2–0.5 %</td><td>1.9–2.4 % per pixel; A1–A3 agree to <b>0.18 %</b></td></tr>
+    <tr><td><b>Film</b> — absolute (~40 Gy)</td><td class="n">~3 %</td><td>common to all wells → moves the calibration, not the scatter</td></tr>
+    <tr><td><b>Target</b> — Al tape / PC non-uniformity</td><td class="n">0.5–2 %?</td><td>pixel-scale light structure ~10 % rms that does <i>not</i> repeat pulse to pulse</td></tr>
+    <tr><td><b>Analysis</b> — hit masking, fit choice</td><td class="n">~1 %</td><td>mostly common-mode; amplitude shifts 1–2 % between mask thresholds</td></tr>
+    <tr><td><b>Camera</b> — read noise + sensor hits</td><td class="n">0.2–0.4 %</td><td>fit statistical error from residuals</td></tr>
+    <tr><td><b>Camera</b> — photon statistics</td><td class="n">0.1–0.25 %</td><td>next slide</td></tr>
+    <tr><td>Gate timing</td><td class="n">≪ 0.5 %</td><td>light well inside the gate</td></tr>
+  </table>
+  <p class="small left" style="margin-top:0.6em">Film can account for B1 but not the A row (film flat to 0.2 %, camera 1.8 %, falling as the spot drifts). The leftover ~1.8 % is <b>target + analysis</b>, not the camera's noise floor.</p>
+</section>
+
+<!-- 7 -->
+<section>
+  <h2>Photon-count noise</h2>
+  <div class="cols">
+    <div class="left">
+      <table>
+        <tr><th>Measured over</th><th class="n">Photo-e⁻</th><th class="n">Shot noise</th></tr>
+        <tr><td>Peak pixel (42 DN)</td><td class="n">90–420</td><td class="n">5–11 %</td></tr>
+        <tr><td>10 × 10 px window</td><td class="n">0.9–4 × 10⁴</td><td class="n">0.5–1.1 %</td></tr>
+        <tr><td>Whole spot (1.8 × 10⁵ DN)</td><td class="n">0.4–1.8 × 10⁶</td><td class="n">0.07–0.17 %</td></tr>
+        <tr><td><b>Fitted peak (free shape)</b></td><td class="n"></td><td class="n"><b>0.10–0.25 %</b></td></tr>
+      </table>
+      <p class="tiny muted">Range = 2–10 e⁻/DN at gain 1 (10-bit). Not yet measured cleanly; dark noise 0.58 DN suggests ~4–5 e⁻/DN.</p>
+    </div>
+    <div class="left small">
+      <p><b>Fano factor ≈ 1.</b> Each pixel catches ~10⁻⁵ detected photons per beam electron. Thinning makes the count Poisson:</p>
+      <p style="text-align:center">F = 1 + p (Var N / ⟨N⟩ − 1),&nbsp; F − 1 ≲ 10⁻⁴</p>
+      <p>even if light per electron were very non-Poisson. Cherenkov emission per electron is Poisson anyway; photo-electrons from visible photons are Poisson.</p>
+      <p>Photon noise would need <b>F ≈ 50–100</b> to explain the ~1.5–1.8 % camera spread. The real non-Poisson term is prompt sensor hits (2.6 % of pixels in the gated frame vs 0.03 % with the gate early).</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section>
+  <h2>Next</h2>
+  <ul>
+    <li>Confirm the pulse → well order (timestamps or a deliberate skipped pulse).</li>
+    <li>Film: scanner lateral-response correction for row B; a stated dose uncertainty.</li>
+    <li>Target: fix the PC/Al sheet relative to the camera and flat-field it; ≥10 pulses on one patch; flat, non-wrinkled reflector.</li>
+    <li>Camera: dark + flat frames at gain 1 for a clean photon-transfer curve; log analogue gain in each capture.</li>
+    <li>Second dose level to test linearity; Faraday-cup charge per pulse as an independent reference.</li>
+  </ul>
+  <p class="tiny muted left">Analysis and scripts: <code>docs/analysis/20261116_film_comparison/</code> in this repository.</p>
+</section>
+
+</div></div>
+<script src="../vendor/reveal.js-5.1.0/reveal.js"></script>
+<script>Reveal.initialize({ hash: true, width: 1280, height: 760, margin: 0.05, transition: 'none', slideNumber: 'c/t' });</script>
+</body>
+</html>

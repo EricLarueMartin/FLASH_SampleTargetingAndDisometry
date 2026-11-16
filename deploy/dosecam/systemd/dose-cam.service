@@ -1,0 +1,17 @@
+[Unit]
+Description=DoseCam web control service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=codex
+Group=codex
+WorkingDirectory=/home/codex/SynchronizedCameraDosimeter/dose_cam
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /home/codex/SynchronizedCameraDosimeter/dose_cam/dose_cam.py
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1050" viewBox="0 0 1800 1050">
+  <defs><style>
+    text{font-family:Segoe UI,Arial,sans-serif;fill:#172033}.title{font-size:42px;font-weight:700}.sub{font-size:22px;fill:#526078}.box{fill:#fff;stroke:#43536a;stroke-width:4}.head{font-size:28px;font-weight:750}.small{font-size:20px}.wire{fill:none;stroke-linecap:round;stroke-width:18}.stripe{fill:none;stroke:#fff;stroke-linecap:butt;stroke-width:7;stroke-dasharray:18 18}.warn{fill:#fff2cd;stroke:#d18b00;stroke-width:4}.flow{font-size:19px;font-weight:650}
+  </style></defs>
+  <rect width="1800" height="1050" fill="#f7f9fc"/>
+  <text x="900" y="58" class="title" text-anchor="middle">Synchronized Camera Dosimeter — Wiring Overview</text>
+  <text x="900" y="94" class="sub" text-anchor="middle">Wire colors reflect the current reported installation; pin functions come from firmware, Pi pinout, and KiCad</text>
+  <rect x="70" y="180" width="260" height="210" rx="20" class="box"/><text x="200" y="230" class="head" text-anchor="middle">AD2</text><text x="200" y="275" class="small" text-anchor="middle">W2 pulse</text><text x="200" y="312" class="small" text-anchor="middle">5.0 V / 100 µs</text><text x="200" y="352" class="small" text-anchor="middle">→ J1 BNC</text>
+  <rect x="450" y="145" width="340" height="330" rx="20" class="box"/><text x="620" y="198" class="head" text-anchor="middle">OPTOISOLATOR PCB</text><text x="490" y="250" class="small">J2 pin 1: GND2</text><text x="490" y="295" class="small">J2 pin 2: VO signal</text><text x="490" y="340" class="small">J2 pin 3: VCC</text><text x="490" y="395" class="small">Observed order:</text><text x="490" y="430" class="small">black → white → grey</text>
+  <rect x="980" y="130" width="390" height="380" rx="20" class="box"/><text x="1175" y="185" class="head" text-anchor="middle">ESP8266 FEATHER</text><text x="1020" y="238" class="small">GPIO14: laser/opto input</text><text x="1020" y="280" class="small">GPIO12: Pi test input</text><text x="1020" y="322" class="small">GPIO13: camera J3 Trig+</text><text x="1020" y="364" class="small">GPIO15: monitor output</text><text x="1020" y="406" class="small">GND: optoisolator return</text><text x="1020" y="448" class="small">3V3: opto output supply</text>
+  <rect x="1510" y="185" width="240" height="220" rx="20" class="box"/><text x="1630" y="235" class="head" text-anchor="middle">CAMERA J3</text><text x="1630" y="287" class="small" text-anchor="middle">Trig+ / XTR</text><text x="1630" y="330" class="small" text-anchor="middle">Trig− / GND</text><text x="1630" y="370" class="small" text-anchor="middle">J2 strobe unused</text>
+  <rect x="880" y="665" width="490" height="250" rx="20" class="box"/><text x="1125" y="720" class="head" text-anchor="middle">RASPBERRY PI 5</text><text x="925" y="775" class="small">Physical 39 / GND: camera J3 return</text><text x="925" y="817" class="small">Physical 37 / GPIO26: test output</text><text x="925" y="859" class="small">Physical 36 / GPIO16: monitor input</text><text x="925" y="901" class="small">USB: ESP power + serial</text>
+
+  <path d="M330 285 H450" class="wire" stroke="#356db5"/><text x="390" y="265" class="flow" text-anchor="middle">BNC</text>
+  <path d="M790 290 C870 290 900 235 980 235" class="wire" stroke="#eef2f5"/><path d="M790 290 C870 290 900 235 980 235" fill="none" stroke="#67727a" stroke-width="2"/><text x="885" y="206" class="flow" text-anchor="middle">WHITE J2-2 → GPIO14</text>
+  <path d="M790 385 C875 420 900 448 980 448" class="wire" stroke="#8b8f96"/><text x="880" y="470" class="flow" text-anchor="middle">GREY J2-3 → 3V3</text>
+  <path d="M790 245 C870 205 910 380 980 405" class="wire" stroke="#151515"/><text x="885" y="360" class="flow" text-anchor="middle">BLACK J2-1 → ESP GND</text>
+  <path d="M1370 310 H1510" class="wire" stroke="#eef2f5"/><path d="M1370 310 H1510" fill="none" stroke="#67727a" stroke-width="2"/><text x="1440" y="287" class="flow" text-anchor="middle">WHITE Trig+</text>
+  <path d="M1510 355 C1470 520 1460 700 1370 760" class="wire" stroke="#151515"/>
+  <path d="M1020 665 C980 600 1000 510 1080 420" class="wire" stroke="#754421"/><path d="M1020 665 C980 600 1000 510 1080 420" class="stripe"/><text x="920" y="580" class="flow" text-anchor="middle">BROWN/WHITE GPIO26 → GPIO12</text>
+  <path d="M1230 510 C1320 575 1340 620 1260 665" class="wire" stroke="#26833e"/><path d="M1230 510 C1320 575 1340 620 1260 665" class="stripe"/><text x="1405" y="590" class="flow" text-anchor="middle">GREEN/WHITE GPIO15 → GPIO16</text>
+
+  <rect x="70" y="650" width="690" height="285" rx="20" class="warn"/>
+  <text x="105" y="700" class="head">CORRECTED + VERIFIED 2026-09-15</text>
+  <text x="105" y="750" class="small">J2-1 BLACK → ESP GND</text>
+  <text x="105" y="793" class="small">J2-2 WHITE → ESP GPIO14 signal</text>
+  <text x="105" y="835" class="small">J2-3 GREY → ESP 3V3</text>
+  <text x="105" y="878" class="small">One W2 pulse → one frame + one monitor pulse.</text>
+  <text x="105" y="920" class="small">Readback: 898.8 µs for configured 1000 µs gate.</text>
+</svg>

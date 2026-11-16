@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="950" viewBox="0 0 1700 950">
+  <defs><style>
+    text{font-family:Segoe UI,Arial,sans-serif;fill:#172033}.title{font-size:42px;font-weight:700}.sub{font-size:23px;fill:#526078}.board{fill:#286b47;stroke:#16432d;stroke-width:5}.pin{fill:#f2c75c;stroke:#6b5115;stroke-width:3}.used{stroke:#e43d30;stroke-width:7}.num{font-size:16px;font-weight:700;text-anchor:middle}.wire{fill:none;stroke-linecap:round;stroke-width:22}.stripe{fill:none;stroke:#fff;stroke-linecap:butt;stroke-width:8;stroke-dasharray:20 20}.call{font-size:24px;font-weight:700}.small{font-size:20px}.port{fill:#cfd7dc;stroke:#707b82;stroke-width:3}
+  </style></defs>
+  <rect width="1700" height="950" fill="#f7f9fc"/>
+  <text x="850" y="62" class="title" text-anchor="middle">Raspberry Pi 5 — GPIO Header Wiring</text>
+  <text x="850" y="100" class="sub" text-anchor="middle">TOP / COMPONENT VIEW • board below header • USB/Ethernet end at RIGHT</text>
+  <rect x="75" y="390" width="1450" height="385" rx="38" class="board"/>
+  <rect x="1475" y="470" width="190" height="95" rx="12" class="port"/><rect x="1475" y="600" width="190" height="95" rx="12" class="port"/>
+  <text x="1570" y="527" class="call" text-anchor="middle">USB</text><text x="1570" y="657" class="call" text-anchor="middle">Ethernet</text>
+  <text x="85" y="235" class="call">AWAY FROM PCB — EVEN PHYSICAL PINS</text>
+  <text x="85" y="500" class="call" fill="#fff">NEXT TO PCB — ODD PHYSICAL PINS</text>
+  <g>
+    <circle cx="130" cy="315" r="20" class="pin"/><circle cx="200" cy="315" r="20" class="pin"/><circle cx="270" cy="315" r="20" class="pin"/><circle cx="340" cy="315" r="20" class="pin"/><circle cx="410" cy="315" r="20" class="pin"/><circle cx="480" cy="315" r="20" class="pin"/><circle cx="550" cy="315" r="20" class="pin"/><circle cx="620" cy="315" r="20" class="pin"/><circle cx="690" cy="315" r="20" class="pin"/><circle cx="760" cy="315" r="20" class="pin"/><circle cx="830" cy="315" r="20" class="pin"/><circle cx="900" cy="315" r="20" class="pin"/><circle cx="970" cy="315" r="20" class="pin"/><circle cx="1040" cy="315" r="20" class="pin"/><circle cx="1110" cy="315" r="20" class="pin"/><circle cx="1180" cy="315" r="20" class="pin"/><circle cx="1250" cy="315" r="20" class="pin"/><circle cx="1320" cy="315" r="25" class="pin used"/><circle cx="1390" cy="315" r="20" class="pin"/><circle cx="1460" cy="315" r="20" class="pin"/>
+    <text x="130" y="280" class="num">2</text><text x="200" y="280" class="num">4</text><text x="270" y="280" class="num">6</text><text x="340" y="280" class="num">8</text><text x="410" y="280" class="num">10</text><text x="480" y="280" class="num">12</text><text x="550" y="280" class="num">14</text><text x="620" y="280" class="num">16</text><text x="690" y="280" class="num">18</text><text x="760" y="280" class="num">20</text><text x="830" y="280" class="num">22</text><text x="900" y="280" class="num">24</text><text x="970" y="280" class="num">26</text><text x="1040" y="280" class="num">28</text><text x="1110" y="280" class="num">30</text><text x="1180" y="280" class="num">32</text><text x="1250" y="280" class="num">34</text><text x="1320" y="280" class="num">36</text><text x="1390" y="280" class="num">38</text><text x="1460" y="280" class="num">40</text>
+  </g>
+  <g>
+    <circle cx="130" cy="415" r="20" class="pin"/><circle cx="200" cy="415" r="20" class="pin"/><circle cx="270" cy="415" r="20" class="pin"/><circle cx="340" cy="415" r="20" class="pin"/><circle cx="410" cy="415" r="20" class="pin"/><circle cx="480" cy="415" r="20" class="pin"/><circle cx="550" cy="415" r="20" class="pin"/><circle cx="620" cy="415" r="20" class="pin"/><circle cx="690" cy="415" r="20" class="pin"/><circle cx="760" cy="415" r="20" class="pin"/><circle cx="830" cy="415" r="20" class="pin"/><circle cx="900" cy="415" r="20" class="pin"/><circle cx="970" cy="415" r="20" class="pin"/><circle cx="1040" cy="415" r="20" class="pin"/><circle cx="1110" cy="415" r="20" class="pin"/><circle cx="1180" cy="415" r="20" class="pin"/><circle cx="1250" cy="415" r="20" class="pin"/><circle cx="1320" cy="415" r="20" class="pin"/><circle cx="1390" cy="415" r="25" class="pin used"/><circle cx="1460" cy="415" r="25" class="pin used"/>
+    <text x="130" y="462" class="num" fill="#fff">1</text><text x="200" y="462" class="num" fill="#fff">3</text><text x="270" y="462" class="num" fill="#fff">5</text><text x="340" y="462" class="num" fill="#fff">7</text><text x="410" y="462" class="num" fill="#fff">9</text><text x="480" y="462" class="num" fill="#fff">11</text><text x="550" y="462" class="num" fill="#fff">13</text><text x="620" y="462" class="num" fill="#fff">15</text><text x="690" y="462" class="num" fill="#fff">17</text><text x="760" y="462" class="num" fill="#fff">19</text><text x="830" y="462" class="num" fill="#fff">21</text><text x="900" y="462" class="num" fill="#fff">23</text><text x="970" y="462" class="num" fill="#fff">25</text><text x="1040" y="462" class="num" fill="#fff">27</text><text x="1110" y="462" class="num" fill="#fff">29</text><text x="1180" y="462" class="num" fill="#fff">31</text><text x="1250" y="462" class="num" fill="#fff">33</text><text x="1320" y="462" class="num" fill="#fff">35</text><text x="1390" y="462" class="num" fill="#fff">37</text><text x="1460" y="462" class="num" fill="#fff">39</text>
+  </g>
+  <path d="M1320 315 C1280 190 1110 175 980 165" class="wire" stroke="#26833e"/><path d="M1320 315 C1280 190 1110 175 980 165" class="stripe"/>
+  <text x="960" y="157" class="call" text-anchor="end">GREEN/WHITE: pin 36 / GPIO16 ← ESP GPIO15 monitor</text>
+  <path d="M1390 415 C1320 585 1180 585 1050 630" class="wire" stroke="#754421"/><path d="M1390 415 C1320 585 1180 585 1050 630" class="stripe"/>
+  <text x="1030" y="640" class="call" text-anchor="end">BROWN/WHITE: pin 37 / GPIO26 → ESP GPIO12</text>
+  <path d="M1460 415 C1460 620 1510 720 1580 790" class="wire" stroke="#151515"/>
+  <text x="1625" y="835" class="call" text-anchor="end">BLACK: pin 39 / GND</text>
+  <text x="1625" y="872" class="small" text-anchor="end">→ camera J3 Trig−</text>
+  <rect x="100" y="690" width="850" height="145" rx="18" fill="#eef4ff" stroke="#6d91c9" stroke-width="3"/>
+  <text x="140" y="735" class="call">COUNTING INWARD FROM USB END</text>
+  <text x="140" y="780" class="small">PCB-side row: pin 39 black, then pin 37 brown/white.</text>
+  <text x="140" y="815" class="small">Away row: pins 40 and 38 empty, then pin 36 green/white.</text>
+</svg>
