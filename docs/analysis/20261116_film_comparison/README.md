@@ -54,18 +54,33 @@ exposure with 100 µs delay. It is not a 100 µs dosimetry pulse image.
 ## Rig upgrade slides
 
 Slide 6 uses an unchanged embedded PNG from `hardware/cad/FLASH Core XY.f3z`:
-nested model `4227a9f5-7de4-4df8-a545-9d4176d48033.f3d`, member
+nested model `222bcf11-8163-4af9-8acd-932c9e2ee0e9.f3d`, member
 `FusionAssetName[Active]/Previews/big.png`. The archive identifies FLASH Core XY,
-version 15, created 8 November 2026. The 1024×1024 image is copied byte for byte
+version 21, created 17 November 2026 at 17:21 EST. The 1024×1024 image is copied byte for byte
 to the deck's `img/corexy_cad.png`; SHA-256:
-`9c8ab733d8e684cf6ab60e8760685a83b7477595aa912c8efce4fd5c4411a621`.
+`633a7ae2d9a11a2cc87a90516e60dd6b45c730243396ef50fb6d5f49d152c9f0`.
 The slide crops surrounding white space for display. It is a CAD preview of
-the rail/belt assembly, not an installed-stage photograph; the sample holder
-is not shown. Containment inside a frame and reduced susceptibility to bumps
+the rail/belt assembly and central holder, not an installed-stage photograph.
+The updated model includes the user's MakerBeam dummy and linked
+`LM8UUonMakerBeamXL` v3 bracket component. Bracket fit and strength have not
+been assessed for the presentation. The repository CAD matches the updated
+`FLASH/FLASH Core XY.f3z` export byte for byte; archive SHA-256:
+`4d5fa97f0efcc5aef2e06e8aae687f19eb3103e3714cf5ca4348d0f1404b5c5d`.
+Containment inside a frame and reduced susceptibility to bumps
 are the user's design goals, not measured performance claims. CoreXY is the
 belt-kinematics name; physical user coordinates remain X and Z.
 
-Slide 7 describes the planned position-and-dose workflow. The current
+Slide 7 shows the existing Run GUI with an illustrative two-plate plan:
+six selected positions, twelve programmed pulses and 1000 ms spacing.
+`examples/run-plan.html` reuses the actual `motor_control/templates/run.html`
+HTML/CSS, `nav.css`, and the existing geometry/map/table renderers. Its route
+comes from the existing pure movement planner. The mock selections and time
+estimates do not represent a measurement or an executed run. Network/API/socket
+code is removed, controls are disabled, and its content-security policy blocks
+network connections. `img/run_plan_gui.png` is a browser screenshot of this
+offline page; the slide crops it to emphasize the route, controls and table.
+
+The current
 `motor_control/sequencer.py` accepts positions, pulse counts and delays. It
 moves, checks arrival and settles, optionally arms DoseCam, requests the pulse
 sequence, finalizes the capture and continues to the next target, then parks.

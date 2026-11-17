@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<!-- Derived from motor_control/templates/run.html and static/{geometry.js,nav.css}; no application files modified.
+Template SHA256 0acb45b4c37b9b06f7afa37954019163711448d6536bef24bc877ce9819bc1f5
+Geometry SHA256 a8e26a70aae1a986fd8bde29dbc3adddbff75e717aaabf59f5f4c2f60b527922
+Route generated using only the pure planner functions extracted from motor_control/sequencer.py. -->
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLASH Run — offline illustrative plan</title>
+<style>/* Site navigation shared by /motion/ and /run/ (DoseCam carries a copy inline). */
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 44px;
+    padding: 0 12px;
+    background: #12303a;
+    color: #e6f1f3;
+    font-family: Arial, sans-serif;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+.site-nav .site-title {
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    margin-right: 12px;
+}
+.site-nav a {
+    color: #cfe5ea;
+    text-decoration: none;
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+.site-nav a:hover { background: #1d4552; color: #fff; }
+.site-nav a[aria-current="page"] { background: #e6f1f3; color: #0b3a46; }
+.site-nav-status {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: #a9c6cd;
+}
+</style>
+
+<script>// FLASH sample-holder geometry, shared by the Motion and Run pages.
+// Units are motor steps unless a name says mm. Motor 0 = X (right +), motor 1 = Y (up +).
+// Row 0 is the TOP row (A), so it has the largest Y.
+(function (global) {
+    const stepPerInch = 15837.6;
+    const mmPerInch = 25.4;
+    const sectionSpacing = 5.5 * stepPerInch;
+
+    const holderTypes = {
+        '3x2': { name: '3x2 Well Plate', plate: true, cols: 3, rows: 2, xSpacing: 1.5 * stepPerInch, ySpacing: 1.5 * stepPerInch, xOffset: 0, yOffset: 0.25 * stepPerInch },
+        '4x3': { name: '4x3 Well Plate', plate: true, cols: 4, rows: 3, xSpacing: 1.0 * stepPerInch, ySpacing: 1.0 * stepPerInch, xOffset: 0, yOffset: 0 },
+        '6x4': { name: '6x4 Well Plate', plate: true, cols: 6, rows: 4, xSpacing: 19.2 * stepPerInch / mmPerInch, ySpacing: 19.2 * stepPerInch / mmPerInch, xOffset: -9.9 * stepPerInch / mmPerInch, yOffset: -3.4 * stepPerInch / mmPerInch },
+        '12x8': { name: '12x8 Well Plate', plate: true, cols: 12, rows: 8, xSpacing: 9 * stepPerInch / mmPerInch, ySpacing: 9 * stepPerInch / mmPerInch, xOffset: -11.4 * stepPerInch / mmPerInch, yOffset: -6.1 * stepPerInch / mmPerInch },
+        'tubes': { name: 'Test Tube Rack', plate: false, cols: 3, rows: 1, xSpacing: 1.5 * stepPerInch, ySpacing: 1.5 * stepPerInch, xOffset: 0, yOffset: -5 * stepPerInch / mmPerInch },
+        'puptubes': { name: 'Pup Tube Rack', plate: false, cols: 3, rows: 1, xSpacing: 1.5 * stepPerInch, ySpacing: 1.5 * stepPerInch, xOffset: -7 * stepPerInch / mmPerInch, yOffset: 31 * stepPerInch / mmPerInch },
+        'l4l5tubes': { name: 'L4/L5 Tube Rack', plate: false, cols: 3, rows: 1, xSpacing: 1.5 * stepPerInch, ySpacing: 1.5 * stepPerInch, xOffset: 0, yOffset: 30 * stepPerInch / mmPerInch },
+        'microtubes': { name: 'Micro Tube Rack', plate: false, cols: 4, rows: 2, xSpacing: 1.0 * stepPerInch, ySpacing: 1.75 * stepPerInch, xOffset: 0, yOffset: -0.4 * stepPerInch },
+    };
+
+    const originOffsets = { 1: { x: 0, y: 0 }, 2: { x: sectionSpacing, y: 0 } };
+
+    function mmToSteps(mm) { return mm * stepPerInch / mmPerInch; }
+    function stepsToMm(steps) { return steps * mmPerInch / stepPerInch; }
+
+    // Linear interpolation in the Y-trim table (x and y in steps), flat beyond the ends.
+    function yCorrection(corrections, x) {
+        const c = (corrections || []).slice().sort((a, b) => a.x - b.x);
+        if (c.length === 0) return 0;
+        if (x <= c[0].x) return c[0].y;
+        for (let i = 0; i < c.length - 1; i++) {
+            if (x >= c[i].x && x <= c[i + 1].x) {
+                const slope = (c[i + 1].y - c[i].y) / (c[i + 1].x - c[i].x || 1);
+                return c[i].y + slope * (x - c[i].x);
+            }
+        }
+        return c[c.length - 1].y;
+    }
+
+    // Same arithmetic as the original targeting page.
+    function targetPosition(loadout, section, col, row, type) {
+        type = type || loadout.sections[String(section)];
+        const config = holderTypes[type];
+        const off = loadout.targetOffsetMm || { x: 0, y: 0 };
+        const x = originOffsets[section].x + config.xOffset + col * config.xSpacing + mmToSteps(off.x);
+        const baseY = originOffsets[section].y + config.yOffset + (config.rows - 1 - row) * config.ySpacing;
+        const y = baseY + yCorrection(loadout.yCorrections, x) + mmToSteps(off.y);
+        return { x: Math.round(x), y: Math.round(y) };
+    }
+
+    function wellName(row, col) { return `${String.fromCharCode(65 + row)}${col + 1}`; }
+
+    // Every target in the current loadout: {id, label, section, row, col, x, y, plate}
+    function allTargets(loadout) {
+        const out = [];
+        for (const section of [1, 2]) {
+            const type = loadout.sections[String(section)];
+            const cfg = holderTypes[type];
+            if (!cfg) continue;
+            for (let row = 0; row < cfg.rows; row++) {
+                for (let col = 0; col < cfg.cols; col++) {
+                    const p = targetPosition(loadout, section, col, row, type);
+                    const w = wellName(row, col);
+                    out.push({ id: `${section}:${w}`, label: `S${section}-${w}`, well: w, section, row, col, type, plate: cfg.plate, x: p.x, y: p.y });
+                }
+            }
+        }
+        return out;
+    }
+
+    global.FlashGeometry = { stepPerInch, mmPerInch, sectionSpacing, holderTypes, originOffsets, mmToSteps, stepsToMm, yCorrection, targetPosition, wellName, allTargets };
+})(window);
+</script>
+<style>
+    :root {
+        --ink: #1f2427; --muted: #5d666a; --line: #c8ced1; --bg: #eef1f2; --card: #fbfcfc;
+        --sel: #1f7a8c; --sel-fill: #9ed9e4; --path: #b45309; --done: #2e9b54; --bad: #c62828;
+        --warn: #b7791f; --active: #e8a317; --skip: #8c969b;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; font-family: Arial, sans-serif; color: var(--ink); background: var(--bg); }
+    button, input, select { font: inherit; }
+    button {
+        border: 1px solid #8c969b; border-radius: 6px; padding: 8px 12px; background: #fff;
+        color: var(--ink); cursor: pointer;
+    }
+    button:hover:not(:disabled) { background: #e6f2f5; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #3f95a8; outline-offset: 2px; }
+    input, select { border: 1px solid #9ba4a8; border-radius: 4px; padding: 5px 7px; background: #fff; }
+    h2 { font-size: 1.05rem; margin: 0 0 10px; }
+
+    .fire-bar {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+        padding: 10px 16px; background: #fff; border-bottom: 1px solid var(--line);
+    }
+    .pv { font-family: Consolas, "Courier New", monospace; font-size: 1.05rem; }
+    .pv b { font-size: 1.15rem; }
+    .chip { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 0.85rem; font-weight: 700; background: #e5e8e9; }
+    .chip.ok { background: #d5f0dd; color: #1c6b37; }
+    .chip.warn { background: #fbe9c7; color: #7a4d06; }
+    .chip.bad { background: #f6d2d2; color: #8c1c1c; }
+    .modes { display: flex; gap: 4px; align-items: center; }
+    .modes label { display: flex; gap: 5px; align-items: center; padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: #f7f8f8; cursor: pointer; }
+    .modes label.disabled { opacity: 0.5; cursor: not-allowed; }
+    .modes input:checked + span { font-weight: 800; }
+    .mode-live input:checked + span { color: var(--bad); }
+    .stage-readout { margin-left: auto; font-family: Consolas, monospace; font-size: 0.9rem; color: var(--muted); }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.65fr); gap: 14px; padding: 14px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+    .map-card { position: relative; align-self: start; }
+    .map-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .map-toolbar .spacer { flex: 1; }
+    .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.82rem; color: var(--muted); margin-top: 6px; }
+    .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
+    svg#map { width: 100%; height: auto; max-height: calc(100vh - 230px); background: #fff; border: 1px solid var(--line); border-radius: 6px; user-select: none; }
+    .tgt { cursor: pointer; }
+    .tgt circle.well { fill: #fff; stroke: #7c8b90; }
+    .tgt:hover circle.well { fill: #e6f2f5; }
+    .tgt.sel circle.well { fill: var(--sel-fill); stroke: var(--sel); }
+    .tgt.focus circle.well { stroke: #0b3a46; }
+    .tgt.st-moving circle.well, .tgt.st-settling circle.well { fill: #fde9b5; stroke: var(--active); }
+    .tgt.st-firing circle.well { fill: var(--active); stroke: #8a5a00; animation: pulse 0.8s infinite alternate; }
+    .tgt.st-done circle.well { fill: #bfe8cc; stroke: var(--done); }
+    .tgt.st-skipped circle.well { fill: #e1e4e5; stroke: var(--skip); }
+    .tgt.st-failed circle.well, .tgt.st-aborted circle.well { fill: #f6c9c9; stroke: var(--bad); }
+    @keyframes pulse { from { opacity: 1; } to { opacity: 0.55; } }
+    .well-label { fill: #2e3a3e; font-weight: 700; pointer-events: none; }
+    .badge-bg { fill: #12303a; }
+    .badge { fill: #fff; font-weight: 700; pointer-events: none; }
+    .order-bg { fill: var(--path); }
+    .order { fill: #fff; font-weight: 800; pointer-events: none; }
+    .holder { fill: #f3f6f7; stroke: #aab4b8; }
+    .holder-label { fill: #5d666a; font-weight: 700; }
+    .leg { stroke: var(--path); fill: none; }
+    .leg.home { stroke-dasharray: 6 5; }
+    .leg.done { stroke: var(--done); opacity: 0.5; }
+    .access rect { fill: #12303a; }
+    .access text { fill: #fff; font-weight: 800; }
+    .here, .access { pointer-events: none; }
+    .here line { stroke: var(--bad); }
+    .here circle { fill: none; stroke: var(--bad); }
+
+    .side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .row label { display: flex; gap: 6px; align-items: center; }
+    .num { width: 76px; }
+    .hint { color: var(--muted); font-size: 0.86rem; line-height: 1.4; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { border-bottom: 1px solid #dde2e4; padding: 4px 6px; text-align: left; }
+    th { color: var(--muted); font-weight: 600; font-size: 0.8rem; }
+    td input { width: 76px; padding: 3px 5px; }
+    tr.focus td { background: #e4f1f3; }
+    .tbl-wrap { max-height: 260px; overflow-y: auto; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn-plan { background: #fff7ea; border-color: var(--path); font-weight: 700; }
+    .btn-run { background: #1f7a8c; border-color: #155e6c; color: #fff; font-weight: 800; }
+    .btn-run:hover:not(:disabled) { background: #176575; }
+    .btn-abort {
+        grid-column: 1 / -1; padding: 14px; font-size: 1.25rem; font-weight: 900; letter-spacing: 0.06em;
+        background: var(--bad); border-color: #8c1c1c; color: #fff;
+    }
+    .btn-abort:hover:not(:disabled) { background: #a51f1f; }
+    .plan-summary { font-size: 0.92rem; line-height: 1.5; }
+    .run-state { font-weight: 800; }
+    .operator {
+        border: 2px solid var(--active); background: #fff8e6;
+    }
+    .operator[hidden] { display: none; }
+    .operator code { display: block; padding: 10px; margin: 8px 0; background: #12303a; color: #fff; border-radius: 6px; font-size: 1.05rem; word-break: break-all; }
+    .checks { list-style: none; margin: 0; padding: 0; font-size: 0.88rem; }
+    .checks li { padding: 3px 0; }
+    .checks li::before { content: "\25CF"; margin-right: 6px; }
+    .checks li.ok::before { color: var(--done); }
+    .checks li.warn::before { color: var(--warn); }
+    .checks li.error::before { color: var(--bad); }
+    #log { height: 220px; overflow-y: auto; font-family: Consolas, monospace; font-size: 0.8rem; background: #1f2527; color: #e8eeee; border-radius: 6px; padding: 8px; }
+    #log div { margin-bottom: 3px; overflow-wrap: anywhere; }
+    #log .ev-error, #log .ev-aborted, #log .ev-abort { color: #ff9b9b; }
+    #log .ev-warn, #log .ev-operator { color: #ffd479; }
+    #log .ev-done { color: #8fe3a8; }
+    #log .ev-pulse { color: #f6c37a; }
+    dialog { border: 1px solid var(--line); border-radius: 10px; max-width: 520px; }
+    dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
+    .live-warn { color: var(--bad); font-weight: 700; }
+    details summary { cursor: pointer; font-weight: 700; }
+    .denied { color: var(--bad); font-weight: 700; }
+    @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } .side { order: -1; } .site-nav-status { display: none; } }
+</style>
+<style>.offline-example{padding:7px 16px;background:#fff7df;color:#644609;border-bottom:1px solid #dfc681;font:600 13px Arial,sans-serif}.tgt{pointer-events:none;cursor:default}a[aria-disabled]{cursor:default}</style>
+</head>
+<body>
+<nav class="site-nav" aria-label="FLASH pages">
+    <span class="site-title">FLASH</span>
+    <a href="/">DoseCam</a>
+    <a href="/motion/">Motion</a>
+    <a href="/run/" aria-current="page">Run</a>
+    <a href="/settings/">Settings</a>
+    <span class="site-nav-status" id="nav-status"></span>
+</nav>
+
+<div class="offline-example">OFFLINE EXAMPLE · Existing Run interface with illustrative selections and route · All action controls disabled</div>
+<div class="fire-bar">
+    <div class="pv" title="Fired the same way as repeatPut.sh: caput PV VALUE, repeated, with the delay between">
+        Fire PV <b id="pv-name">BST:INJ:START</b> &larr; <b id="pv-value">1</b> <span id="pv-value-label"></span>
+    </div>
+    <span class="chip" id="pv-chip">CA: checking...</span>
+    <div class="modes" role="radiogroup" aria-label="Firing mode">
+        <label title="Moves the stage and logs each pulse; nothing is written to the PV"><input type="radio" name="mode" value="simulate" checked><span>Simulate</span></label>
+        <label title="Moves the stage, then waits at each position while an operator runs repeatPut.sh from a control-room console"><input type="radio" name="mode" value="assisted"><span>Assisted</span></label>
+        <label class="mode-live disabled" id="mode-live-label" title="This server writes the PV itself. Needs WRITE access from this host."><input type="radio" name="mode" value="live" id="mode-live" disabled><span>Live</span></label>
+    </div>
+    <div class="stage-readout" id="stage-readout">stage: --</div>
+</div>
+
+<main class="layout">
+    <section class="card map-card" aria-label="Target map">
+        <div class="map-toolbar">
+            <strong id="loadout-title">Loadout</strong>
+            <span class="spacer"></span>
+            <label>New: <input class="num" id="def-pulses" type="number" min="1" max="10000" step="1" value="1"> pulses</label>
+            <label>&times; <input class="num" id="def-delay" type="number" min="0" max="3600000" step="any" value="1000"> ms apart</label>
+            <button type="button" id="sel-all-1">All S1</button>
+            <button type="button" id="sel-all-2">All S2</button>
+            <button type="button" id="sel-clear">Clear</button>
+        </div>
+        <svg id="map" role="img" aria-label="Sample holder map; click a position to select it"></svg>
+        <div class="legend">
+            <span><i style="background:#fff;border:1px solid #7c8b90"></i>not selected</span>
+            <span><i style="background:var(--sel-fill)"></i>selected (badge = pulses &times; delay)</span>
+            <span><i style="background:var(--active)"></i>moving / firing</span>
+            <span><i style="background:#bfe8cc"></i>done</span>
+            <span><i style="background:#12303a;border-radius:2px"></i>P = access (park)</span>
+            <span><i style="background:none;border:2px solid var(--bad)"></i>stage now</span>
+            <span><i style="background:var(--path)"></i>planned path (numbers = order)</span>
+        </div>
+        <h2 style="margin-top:14px">Run log</h2>
+        <div id="log" aria-live="polite"></div>
+    </section>
+
+    <aside class="side">
+        <section class="card operator" id="operator" hidden aria-live="assertive">
+            <h2>Operator: fire now</h2>
+            <div id="operator-where"></div>
+            <code id="operator-cmd"></code>
+            <div class="row">
+                <button type="button" id="op-copy">Copy command</button>
+                <button type="button" id="op-fired" class="btn-run">Fired - continue</button>
+                <button type="button" id="op-skip">Skip position</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="actions">
+                <button type="button" class="btn-plan" id="btn-plan">Plan path</button>
+                <button type="button" class="btn-run" id="btn-run" disabled>Run</button>
+                <button type="button" class="btn-abort" id="btn-abort">ABORT</button>
+            </div>
+            <p class="plan-summary" id="plan-summary">Select positions on the map, then press <b>Plan path</b>.</p>
+            <div>Run: <span class="run-state" id="run-state">idle</span> <span id="run-msg" class="hint"></span></div>
+            <p class="denied" id="denied" hidden></p>
+        </section>
+
+        <section class="card">
+            <h2>Selected positions <span class="hint" id="sel-count"></span></h2>
+            <div class="tbl-wrap">
+                <table>
+                    <thead><tr><th>#</th><th>Position</th><th>Pulses</th><th>Delay (ms)</th><th></th></tr></thead>
+                    <tbody id="sel-table"></tbody>
+                </table>
+            </div>
+            <div class="row" style="margin-top:8px">
+                <button type="button" id="apply-all">Set all to New values</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Access (park) position</h2>
+            <div class="row">
+                <span id="access-readout">not set</span>
+            </div>
+            <div class="row" style="margin-top:8px">
+                <button type="button" id="set-access">Set access = current position</button>
+                <button type="button" id="goto-access">Move to access</button>
+            </div>
+            <p class="hint">Access is the sample holder all the way left and up. Jog there on the Motion page, then set it here. Every run ends there.</p>
+        </section>
+
+        <section class="card">
+            <details>
+                <summary>Pre-flight checks</summary>
+                <ul class="checks" id="checks"><li>not run yet</li></ul>
+                <div class="row" style="margin-top:6px">
+                    <button type="button" id="btn-checks">Re-check</button>
+                    <button type="button" id="btn-esp-low" hidden>Set ESP8266 input to LOW</button>
+                </div>
+            </details>
+        </section>
+
+        <section class="card">
+            <p class="hint" style="margin:0">Settle time, arrival tolerance, PV value, DoseCam capture and the live firing route (account, host, key) are on the <a href="/settings/">Settings</a> page.</p>
+        </section>
+
+    </aside>
+</main>
+
+<dialog id="confirm">
+    <form method="dialog">
+        <h2 id="confirm-title">Start run?</h2>
+        <div id="confirm-body" class="plan-summary"></div>
+        <div id="confirm-live" hidden>
+            <p class="live-warn">LIVE: this server will fire BST:INJ:START (<span id="confirm-route"></span>). Confirm the area is cleared and the beam permit is in place.</p>
+            <label>Type <b>BST:INJ:START</b> to confirm: <input id="confirm-pv" autocomplete="off"></label>
+        </div>
+        <div class="row" style="margin-top:14px; justify-content:flex-end">
+            <button value="cancel">Cancel</button>
+            <button value="go" id="confirm-go" class="btn-run">Start</button>
+        </div>
+    </form>
+</dialog>
+
+<script>// Offline presentation fixture: original Run GUI rendering, no backend code.
+// Template and geometry source SHA256 recorded below; fixture values are illustrative.
+const G = window.FlashGeometry;
+const svgNS = 'http://www.w3.org/2000/svg';
+const $ = (id) => document.getElementById(id);
+const active = () => false;
+const fmtS = (s) => s >= 90 ? `${Math.floor(s / 60)} min ${Math.round(s % 60)} s` : `${Math.round(s * 10) / 10} s`;
+const fmtMs = (d) => Number((Number(d) * 1000).toPrecision(6)).toString();
+const badgeText = (s, compact) => `${s.pulses}×${fmtMs(s.delay)}${compact ? '' : 'ms'}`;
+let runStatus = {state:'idle',run:null};
+let planStale=false, focusId=null, hideFinishedRun=false, mapBounds=null, runAllowedHere=false;
+function targets(){ return G.allTargets(loadout); }
+function targetById(id){ return targets().find(t => t.id === id); }
+function toggle(){} function changed(){}
+const loadout={"sections": {"1": "3x2", "2": "3x2"}, "targetOffsetMm": {"x": 0, "y": 0}, "yCorrections": [], "access": {"x": -12670, "y": 42762}, "fire": {"value": 1}, "run": {"settle_s": 1.0, "tolerance_steps": 2, "default_pulses": 1, "default_delay": 1.0, "dosecam": true, "gate_width_us": 100, "esp_delay_us": 200}, "targets": {"1:A1": {"pulses": 1, "delay": 1.0}, "1:A2": {"pulses": 2, "delay": 1.0}, "1:B2": {"pulses": 3, "delay": 1.0}, "2:A1": {"pulses": 2, "delay": 1.0}, "2:A2": {"pulses": 1, "delay": 1.0}, "2:B1": {"pulses": 3, "delay": 1.0}}, "version": 0};
+const selection={"1:A1": {"pulses": 1, "delay": 1.0}, "1:A2": {"pulses": 2, "delay": 1.0}, "1:B2": {"pulses": 3, "delay": 1.0}, "2:A1": {"pulses": 2, "delay": 1.0}, "2:A2": {"pulses": 1, "delay": 1.0}, "2:B1": {"pulses": 3, "delay": 1.0}};
+const stepper={"pos": {"0": -12670, "1": 42762}};
+const plan={"plan_id": "offline-example", "created": 0, "start": [-12670, 42762], "access": [-12670, 42762], "stops": [{"id": "1:A1", "label": "S1-A1", "x": 0, "y": 27716, "pulses": 1, "delay": 1.0}, {"id": "1:B2", "label": "S1-B2", "x": 23756, "y": 3959, "pulses": 3, "delay": 1.0}, {"id": "2:B1", "label": "S2-B1", "x": 87107, "y": 3959, "pulses": 3, "delay": 1.0}, {"id": "2:A2", "label": "S2-A2", "x": 110863, "y": 27716, "pulses": 1, "delay": 1.0}, {"id": "2:A1", "label": "S2-A1", "x": 87107, "y": 27716, "pulses": 2, "delay": 1.0}, {"id": "1:A2", "label": "S1-A2", "x": 23756, "y": 27716, "pulses": 2, "delay": 1.0}], "legs": [{"to": "1:A1", "from": [-12670, 42762], "dest": [0, 27716], "time_s": 6.7}, {"to": "1:B2", "from": [0, 27716], "dest": [23756, 3959], "time_s": 9.42}, {"to": "2:B1", "from": [23756, 3959], "dest": [87107, 3959], "time_s": 21.8}, {"to": "2:A2", "from": [87107, 3959], "dest": [110863, 27716], "time_s": 9.42}, {"to": "2:A1", "from": [110863, 27716], "dest": [87107, 27716], "time_s": 9.42}, {"to": "1:A2", "from": [87107, 27716], "dest": [23756, 27716], "time_s": 21.8}, {"to": "__access__", "from": [23756, 27716], "dest": [-12670, 42762], "time_s": 13.38}], "vmax": 3200.0, "accel": 1600.0, "settle_s": 1.0, "total_pulses": 12, "est_move_s": 91.9, "est_total_s": 115.6};
+function el(tag, attrs, parent) {
+    const e = document.createElementNS(svgNS, tag);
+    for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
+    if (parent) parent.appendChild(e);
+    return e;
+}
+
+function render() {
+    renderMap();
+    renderTable();
+    renderButtons();
+}
+
+function renderMap() {
+    const svg = $('map');
+    svg.replaceChildren();
+    if (!loadout) return;
+    const ts = targets();
+    const pts = ts.map((t) => [t.x, t.y]);
+    if (loadout.access) pts.push([loadout.access.x, loadout.access.y]);
+    if (stepper && stepper.pos['0'] != null) pts.push([stepper.pos['0'], stepper.pos['1']]);
+    const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+    const pad = 0.6 * G.stepPerInch;
+    const minX = Math.min(...xs) - pad, maxX = Math.max(...xs) + pad;
+    const minY = Math.min(...ys) - pad, maxY = Math.max(...ys) + pad;
+    const W = maxX - minX, H = maxY - minY;
+    svg.setAttribute('viewBox', `${minX} ${-maxY} ${W} ${H}`);
+    const u = W / 900;                       // ~1 screen pixel at 900 px wide
+    const runState = (runStatus.run && runStatus.run.stop_state) || {};
+    const showRun = runStatus.run && (active() || (!hideFinishedRun && ['done', 'aborted', 'failed'].includes(runStatus.state)));
+
+    // holders
+    for (const section of [1, 2]) {
+        const st = ts.filter((t) => t.section === section);
+        if (!st.length) continue;
+        const cfg = G.holderTypes[loadout.sections[String(section)]];
+        const m = Math.min(cfg.xSpacing, cfg.ySpacing) * 0.55;
+        const sx = st.map((t) => t.x), sy = st.map((t) => t.y);
+        const x0 = Math.min(...sx) - m, x1 = Math.max(...sx) + m, y0 = Math.min(...sy) - m, y1 = Math.max(...sy) + m;
+        el('rect', { class: 'holder', x: x0, y: -y1, width: x1 - x0, height: y1 - y0, rx: 8 * u, 'stroke-width': 1.5 * u }, svg);
+        const lbl = el('text', { class: 'holder-label', x: x0, y: -y1 - 8 * u, 'font-size': 14 * u }, svg);
+        lbl.textContent = `Section ${section} · ${cfg.name}`;
+    }
+
+    // path
+    const order = {};
+    const drawPlan = plan && !planStale ? plan : (showRun && runStatus.plan ? runStatus.plan : null);
+    if (drawPlan) {
+        const defs = el('defs', {}, svg);
+        const mk = el('marker', { id: 'arrow', viewBox: '0 0 10 10', refX: 9, refY: 5, markerUnits: 'userSpaceOnUse',
+            markerWidth: 14 * u, markerHeight: 14 * u, orient: 'auto-start-reverse' }, defs);
+        el('path', { d: 'M0,0 L10,5 L0,10 z', fill: getComputedStyle(document.documentElement).getPropertyValue('--path') }, mk);
+        drawPlan.stops.forEach((s, i) => { order[s.id] = i + 1; });
+        const rOf = (id) => {
+            const t = targetById(id);
+            if (!t) return 9 * u;
+            const cfg = G.holderTypes[t.type];
+            return Math.min(cfg.xSpacing, cfg.ySpacing) * 0.32;
+        };
+        const g = el('g', {}, svg);
+        drawPlan.legs.forEach((leg) => {
+            const [x0, y0] = leg.from, [x1, y1] = leg.dest;
+            const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy);
+            if (len < 1) return;
+            const r1 = leg.to === '__access__' ? 14 * u : rOf(leg.to) + 3 * u;
+            const shrink0 = Math.min(len * 0.3, 10 * u);
+            const ex = x1 - dx / len * r1, ey = y1 - dy / len * r1;
+            const fromStop = drawPlan.stops.find((s) => s.x === x0 && s.y === y0);
+            const doneLeg = showRun && runState[leg.to] && ['done', 'skipped'].includes(runState[leg.to]);
+            el('line', { class: `leg${leg.to === '__access__' ? ' home' : ''}${doneLeg ? ' done' : ''}`,
+                x1: x0 + dx / len * (fromStop ? rOf(fromStop.id) : shrink0), y1: -(y0 + dy / len * (fromStop ? rOf(fromStop.id) : shrink0)),
+                x2: ex, y2: -ey, 'stroke-width': 2.5 * u, 'marker-end': 'url(#arrow)' }, g);
+        });
+    }
+
+    // targets
+    for (const t of ts) {
+        const cfg = G.holderTypes[t.type];
+        const r = Math.min(cfg.xSpacing, cfg.ySpacing) * 0.32;
+        const s = selection[t.id];
+        const st = showRun ? runState[t.id] : null;
+        const g = el('g', { class: `tgt${s ? ' sel' : ''}${focusId === t.id ? ' focus' : ''}${st ? ' st-' + st : ''}`,
+            tabindex: 0, role: 'button', 'aria-pressed': s ? 'true' : 'false',
+            'aria-label': `${t.label}${s ? `, ${s.pulses} pulses, ${s.delay} s apart` : ''}` }, svg);
+        el('circle', { class: 'well', cx: t.x, cy: -t.y, r, 'stroke-width': (focusId === t.id ? 3 : 1.5) * u }, g);
+        const fs = Math.min(r * 0.75, 13 * u);
+        const lt = el('text', { class: 'well-label', x: t.x, y: -t.y + fs * 0.35, 'text-anchor': 'middle', 'font-size': fs }, g);
+        lt.textContent = t.well;
+        const title = el('title', {}, g);
+        title.textContent = `${t.label}  X ${t.x}  Y ${t.y}`;
+        if (s) {
+            const txt = badgeText(s, r < 20 * u);
+            const bfs = Math.max(9 * u, Math.min(r * 0.62, 12 * u));
+            const bw = txt.length * bfs * 0.62 + 6 * u, bh = bfs * 1.35;
+            const by = -t.y + r * 0.62;
+            el('rect', { class: 'badge-bg', x: t.x - bw / 2, y: by, width: bw, height: bh, rx: bh / 2 }, g);
+            const bt = el('text', { class: 'badge', x: t.x, y: by + bh * 0.74, 'text-anchor': 'middle', 'font-size': bfs }, g);
+            bt.textContent = txt;
+        }
+        if (order[t.id]) {
+            const ofs = Math.max(9 * u, Math.min(r * 0.6, 12 * u));
+            const cx = t.x - r * 0.85, cy = -t.y - r * 0.85;
+            el('circle', { class: 'order-bg', cx, cy, r: ofs * 0.85 }, g);
+            const ot = el('text', { class: 'order', x: cx, y: cy + ofs * 0.36, 'text-anchor': 'middle', 'font-size': ofs }, g);
+            ot.textContent = order[t.id];
+        }
+        g.addEventListener('click', () => toggle(t.id));
+        g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(t.id); } });
+    }
+
+    // access marker
+    if (loadout.access) {
+        const a = loadout.access, s = 12 * u;
+        const g = el('g', { class: 'access' }, svg);
+        el('rect', { x: a.x - s, y: -a.y - s, width: 2 * s, height: 2 * s, rx: 3 * u }, g);
+        const t = el('text', { x: a.x, y: -a.y + s * 0.45, 'text-anchor': 'middle', 'font-size': 14 * u }, g);
+        t.textContent = 'P';
+        el('title', {}, g).textContent = `Access (park) X ${a.x} Y ${a.y}`;
+    }
+
+    // current stage position
+    if (stepper && stepper.pos['0'] != null) {
+        const x = stepper.pos['0'], y = stepper.pos['1'], s = 16 * u;
+        const g = el('g', { class: 'here', id: 'here', transform: `translate(${x} ${-y})` }, svg);
+        el('line', { x1: -s, y1: 0, x2: s, y2: 0, 'stroke-width': 2 * u }, g);
+        el('line', { x1: 0, y1: -s, x2: 0, y2: s, 'stroke-width': 2 * u }, g);
+        el('circle', { cx: 0, cy: 0, r: s * 0.6, 'stroke-width': 2 * u }, g);
+        mapBounds = { minX, maxX, minY, maxY };
+    }
+}
+
+function renderTable() {
+    const tb = $('sel-table');
+    tb.replaceChildren();
+    const ids = Object.keys(selection);
+    const ord = {};
+    if (plan && !planStale) plan.stops.forEach((s, i) => { ord[s.id] = i + 1; });
+    const all = targets();
+    const sorted = all.filter((t) => selection[t.id]).sort((a, b) => (ord[a.id] || 1e9) - (ord[b.id] || 1e9));
+    let pulses = 0;
+    for (const t of sorted) {
+        const s = selection[t.id];
+        pulses += s.pulses;
+        const tr = document.createElement('tr');
+        if (t.id === focusId) tr.className = 'focus';
+        const cells = [ord[t.id] || '', t.label];
+        cells.forEach((c) => { const td = document.createElement('td'); td.textContent = c; tr.appendChild(td); });
+        const mkInput = (key, min, max, step) => {
+            const td = document.createElement('td');
+            const inp = document.createElement('input');
+            Object.assign(inp, { type: 'number', min, max, step,
+                value: key === 'delay' ? fmtMs(s.delay) : s[key] });
+            inp.disabled = active();
+            inp.setAttribute('aria-label', `${t.label} ${key}`);
+            inp.addEventListener('focus', () => { focusId = t.id; renderMap(); });
+            inp.addEventListener('change', () => {
+                let v = key === 'pulses' ? parseInt(inp.value, 10) : parseFloat(inp.value);
+                if (key === 'delay') {                     // entered in ms, stored in s
+                    if (!Number.isFinite(v)) v = 0;
+                    s.delay = Math.min(max, Math.max(min, v)) / 1000;
+                    inp.value = fmtMs(s.delay);
+                    changed();
+                    return;
+                }
+                if (!Number.isFinite(v)) v = key === 'pulses' ? 1 : 0;
+                v = Math.min(max, Math.max(min, v));
+                s[key] = v;
+                inp.value = v;
+                changed();
+            });
+            td.appendChild(inp);
+            tr.appendChild(td);
+        };
+        mkInput('pulses', 1, 10000, 1);
+        mkInput('delay', 0, 3600000, 'any');
+        const td = document.createElement('td');
+        const rm = document.createElement('button');
+        rm.type = 'button'; rm.textContent = '×'; rm.title = `Remove ${t.label}`; rm.disabled = active();
+        rm.style.padding = '2px 8px';
+        rm.addEventListener('click', () => { delete selection[t.id]; changed(); });
+        td.appendChild(rm); tr.appendChild(td);
+        tb.appendChild(tr);
+    }
+    $('sel-count').textContent = ids.length ? `${ids.length} positions · ${pulses} pulses` : '';
+}
+
+function renderButtons() {
+    const n = Object.keys(selection).length;
+    const busy = active();
+    $('btn-plan').disabled = busy || n === 0 || !runAllowedHere;
+    $('btn-run').disabled = busy || !plan || planStale || !runAllowedHere;
+    $('btn-abort').disabled = false;
+    ['sel-all-1', 'sel-all-2', 'sel-clear', 'apply-all', 'set-access', 'goto-access', 'btn-esp-low']
+        .forEach((id) => { $(id).disabled = busy || (!runAllowedHere && id !== 'sel-clear'); });
+    const st = runStatus.state;
+    $('run-state').textContent = st;
+    $('run-state').style.color = st === 'done' ? 'var(--done)' : (['failed', 'aborted', 'aborting'].includes(st) ? 'var(--bad)' : (busy ? 'var(--path)' : ''));
+    $('run-msg').textContent = runStatus.run && st !== 'idle' ? (runStatus.run.message || '') : '';
+    if (plan && !planStale) {
+        const mode = currentMode();
+        $('plan-summary').innerHTML = '';
+        $('plan-summary').append(
+            `Path: ${plan.stops.length} positions, ${plan.total_pulses} pulses, then back to access. `,
+            `Moving ≈ ${fmtS(plan.est_move_s)}, total ≈ ${fmtS(plan.est_total_s)}`
+            + (mode === 'assisted' ? ' plus operator time.' : '.'));
+    } else if (n) {
+        $('plan-summary').textContent = 'Press Plan path to order the positions and draw the route.';
+    } else {
+        $('plan-summary').textContent = 'Select positions on the map, then press Plan path.';
+    }
+    const op = runStatus.run && runStatus.run.operator_command && st === 'waiting_operator';
+    $('operator').hidden = !op;
+    if (op) {
+        $('operator-cmd').textContent = runStatus.run.operator_command;
+        const idx = runStatus.run.index;
+        const stop = runStatus.plan && runStatus.plan.stops[idx];
+        $('operator-where').textContent = stop ? `Stage is at ${stop.label} (${idx + 1} of ${runStatus.plan.stops.length}). Run this from a control-room console:` : '';
+    }
+}
+
+// ---------------------------------------------------------------- PV / mode
+function currentMode() { return document.querySelector('input[name="mode"]:checked').value; }
+
+
+render();
+$('loadout-title').textContent = `S1: ${G.holderTypes[loadout.sections['1']].name} · S2: ${G.holderTypes[loadout.sections['2']].name}`;
+$('access-readout').textContent = `X ${loadout.access.x}, Y ${loadout.access.y} steps`;
+$('pv-chip').textContent='Offline example · no connection'; $('pv-chip').className='chip warn';
+$('nav-status').textContent='Illustrative plan · controls disabled';
+$('stage-readout').textContent='illustrative stage position';
+$('run-msg').textContent='offline preview; no run executed';
+$('checks').innerHTML='<li>Offline preview; no device checks performed</li>';
+$('log').innerHTML='<div>ILLUSTRATIVE PLAN — not an acquisition record</div><div>6 selected positions · 12 programmed pulses · 1000 ms spacing</div><div>Route calculated using the existing sequencer planner</div><div>No stage movement, firing or device connection</div>';
+document.querySelectorAll('button,input,select').forEach(e => {e.disabled=true;});
+document.querySelectorAll('.tgt').forEach(e => {e.setAttribute('tabindex','-1');e.setAttribute('aria-disabled','true');});
+document.querySelectorAll('a').forEach(e=>{e.removeAttribute('href');e.setAttribute('aria-disabled','true');});
+</script>
+</body>
+</html>

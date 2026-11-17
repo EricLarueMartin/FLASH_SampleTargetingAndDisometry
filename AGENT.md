@@ -8,6 +8,32 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-17 — refreshed CoreXY v21 and existing GUI example
+
+- Status: local slides visually verified in day/night mode, ready for the
+  existing GitHub Pages publication workflow. No device operations.
+- Replaced hardware/cad/FLASH Core XY.f3z with Eric's newer export from the
+  parent FLASH folder; hashes match. Main design v21 includes the MakerBeam
+  dummy, central holder and LM8UUonMakerBeamXL v3 component. Copied its embedded
+  preview unchanged and updated slide 6/provenance. No bracket fit/strength
+  validation is implied.
+- Per Eric, slide 7 now shows the existing Run GUI and movement planning,
+  replacing the generic sequence diagram. The example uses six illustrative
+  selected targets, twelve pulses and 1000 ms spacing, with a route generated
+  by the existing pure planner.
+- Preserved the actual template/styles/map/table renderers in a self-contained
+  offline example. Removed API/socket code, disabled action controls and blocked
+  network connections with CSP. Captured its screenshot for the slide; no
+  acquisition, motion, firing or live web-service changes occurred.
+- Files: hardware/cad/FLASH Core XY.f3z; slide index.html/style.css,
+  img/{corexy_cad.png,run_plan_gui.png}, examples/run-plan.html;
+  docs/analysis/20261116_film_comparison/README.md; this log.
+- Validation: CAD/preview checksums, source/provenance review, offline example
+  connection checks, seven-slide/local-link checks, Git whitespace checks and
+  browser layout review. Slide 7 remains open for Eric's review.
+- Rollback: revert this commit to restore the prior archive, preview and slides;
+  no physical hardware or application rollback is needed.
+
 ## 2026-11-17 — restore automatic Pages publication
 
 - Status: static deployment workflow prepared for the existing public site.

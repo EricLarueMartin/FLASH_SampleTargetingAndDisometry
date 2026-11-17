@@ -5,7 +5,7 @@
 <title>DoseCam — dosimetry, positioning and automated runs</title>
 <link rel="stylesheet" href="../vendor/reveal.js-5.1.0/reset.css">
 <link rel="stylesheet" href="../vendor/reveal.js-5.1.0/reveal.css">
-<link rel="stylesheet" href="style.css?v=20261117-rig1">
+<link rel="stylesheet" href="style.css?v=20261117-gui1">
 </head>
 <body>
 <aside class="outline" aria-label="Presentation outline">
@@ -163,45 +163,32 @@
   <h1>Keep the motion inside a frame</h1>
   <div class="columns corexy-layout">
     <figure class="corexy-figure">
-      <svg viewBox="20 185 985 660" role="img" aria-label="Actual FLASH Core XY CAD preview showing the rectangular rail and belt assembly, end pulleys and a corner-mounted motor. This is a design preview, not a photograph of an installed stage.">
-        <image href="img/corexy_cad.png" width="1024" height="1024"/>
+      <svg viewBox="20 175 985 670" role="img" aria-label="Updated FLASH Core XY v21 CAD preview showing the rail and frame assembly, two motors, central holder, MakerBeam dummy and proposed LM8UU mounting brackets.">
+        <image href="img/corexy_cad.png?v=21" width="1024" height="1024"/>
       </svg>
-      <figcaption>FLASH Core XY CAD design, v15 · 8 Nov 2026. Rail / belt assembly; sample holder not shown.</figcaption>
+      <figcaption>FLASH Core XY CAD design, v21 · 17 Nov 2026. Includes MakerBeam dummy and proposed LM8UU brackets.</figcaption>
     </figure>
     <div class="upgrade-copy">
       <p>Replace the existing actuator with a <b>CoreXY system whose carriage travels within a fixed frame</b>.</p>
       <p><b>Less susceptible to bumps:</b> The surrounding frame reduces exposure to accidental contact that could disturb the target position.</p>
-      <p>Integrate the new stage, then verify its travel, repeatability and position calibration.</p>
+      <p>The updated assembly includes a <b>MakerBeam dummy and LM8UU mounting brackets</b>. Check travel and clearances during integration.</p>
     </div>
   </div>
   <p class="sources">Actual embedded preview from <a href="https://github.com/EricLarueMartin/FLASH_SampleTargetingAndDisometry/blob/main/hardware/cad/FLASH%20Core%20XY.f3z" target="_blank" rel="noopener">FLASH Core XY.f3z</a> · <a href="../../ROADMAP_INTEGRATED_RIG.md" target="_blank">project kinematics roadmap</a> · <a href="../../analysis/20261116_film_comparison/README.md#rig-upgrade-slides" target="_blank">asset provenance and design status</a>.<br>Frame containment and bump resistance: design goals, E. Martin, 17 Nov 2026. CoreXY describes the belt kinematics; physical user coordinates remain X and Z.</p>
 </section>
 
 <section id="automation">
-  <p class="eyebrow">Control-system changes · planned position-and-dose workflow</p>
-  <h1>Specify the positions and dose plan, then run the sequence</h1>
-  <svg class="run-flow" viewBox="0 0 1240 155" role="img" aria-label="Workflow: define the position and dose plan, move to the target, confirm arrival and settle, fire while DoseCam records, then repeat at the next position.">
-    <defs><marker id="runArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--blue)"/></marker></defs>
-    <path d="M80 47H1155" stroke="var(--rule)" stroke-width="3" fill="none"/>
-    <g fill="var(--bg)" stroke="var(--blue)" stroke-width="3"><circle cx="105" cy="47" r="23"/><circle cx="355" cy="47" r="23"/><circle cx="605" cy="47" r="23"/><circle cx="855" cy="47" r="23"/><circle cx="1105" cy="47" r="23"/></g>
-    <g text-anchor="middle" class="svg-label"><text x="105" y="54">1</text><text x="355" y="54">2</text><text x="605" y="54">3</text><text x="855" y="54">4</text><text x="1105" y="54">5</text></g>
-    <g text-anchor="middle" class="svg-label"><text x="105" y="105">Define plan</text><text x="355" y="105">Move</text><text x="605" y="105">Confirm + settle</text><text x="855" y="105">Fire + record</text><text x="1105" y="105">Next position</text></g>
-    <g fill="none" stroke="var(--blue)" stroke-width="2" marker-end="url(#runArrow)"><path d="M155 47H295"/><path d="M405 47H545"/><path d="M655 47H795"/><path d="M905 47H1045"/></g>
-  </svg>
-  <div class="columns automation-layout">
-    <div>
-      <h2>Define the experiment once</h2>
-      <p>Select the sample positions and the <b>prescribed dose at each position</b>. Set the pulse count and spacing used to deliver that plan.</p>
-      <p>Preview the route, then start the run. The sequencer visits each target and returns to the access position when finished.</p>
-    </div>
-    <div>
-      <h2>Measure each delivered pulse</h2>
-      <p>Arm DoseCam before firing. Capture one synchronized image per pulse to check beam position, shape and dose.</p>
-      <p>Associate captures with each target in the run. Planned fiducial tracking checks position calibration and drift.</p>
-    </div>
-  </div>
-  <p class="takeaway"><b>Current software:</b> position, pulse-count and timing sequences. <b>Planned:</b> dose-based feedback and fiducial checks.</p>
-  <p class="sources"><a href="../../history/COMBINE_SINGLE_PI.md" target="_blank">Run-page implementation and commissioning log</a> · <a href="https://github.com/EricLarueMartin/FLASH_SampleTargetingAndDisometry/blob/main/motor_control/sequencer.py" target="_blank" rel="noopener">sequencer source</a> · <a href="../../ROADMAP_INTEGRATED_RIG.md" target="_blank">dose-plan roadmap</a>.<br>The current engine accepts positions, pulse counts and delays, without prescribed-Gy stopping. Recorded validation used an emulator; live firing commissioning is not documented.</p>
+  <p class="eyebrow">Existing Motion / Run interface · illustrative movement and pulse plan</p>
+  <h1>Use the web GUI to plan motion and pulse delivery</h1>
+  <figure class="run-gui-figure">
+    <a href="examples/run-plan.html" target="_blank" rel="noopener" aria-label="Open the full offline example of the existing Run GUI">
+      <svg viewBox="14 140 1223 560" role="img" aria-label="Existing Run GUI with an illustrative two-plate plan. Six selected target positions are connected by numbered orange route arrows; the table specifies pulses and delays. Plan path, Run and ABORT controls are visible but disabled in this offline example.">
+        <image href="img/run_plan_gui.png" width="1264" height="1135"/>
+      </svg>
+    </a>
+    <figcaption><b>Example:</b> 6 positions, 12 pulses, 1000 ms spacing. Orange arrows show the visit order and return to access. Click for the full GUI example.</figcaption>
+  </figure>
+  <p class="sources">Existing <a href="https://github.com/EricLarueMartin/FLASH_SampleTargetingAndDisometry/blob/main/motor_control/templates/run.html" target="_blank" rel="noopener">Run interface</a> and <a href="https://github.com/EricLarueMartin/FLASH_SampleTargetingAndDisometry/blob/main/motor_control/sequencer.py" target="_blank" rel="noopener">movement planner / sequencer</a> · <a href="examples/run-plan.html" target="_blank" rel="noopener">offline example</a> · <a href="../../analysis/20261116_film_comparison/README.md#rig-upgrade-slides" target="_blank">provenance</a>.<br>Authentic GUI rendering with illustrative selections and route estimates; controls disabled, no run performed. Current plans specify positions, pulse counts and spacing. Measured-Gy feedback and fiducial checks remain planned.</p>
 </section>
 
 </div></main>
