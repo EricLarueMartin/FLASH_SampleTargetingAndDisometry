@@ -1,183 +1,178 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="day">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DoseCam: first comparison with film</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DoseCam — film comparison and light mechanism</title>
 <link rel="stylesheet" href="../vendor/reveal.js-5.1.0/reset.css">
 <link rel="stylesheet" href="../vendor/reveal.js-5.1.0/reveal.css">
-<link rel="stylesheet" href="../vendor/reveal.js-5.1.0/theme/white.css">
-<style>
-  :root { --ink:#0b0b0b; --ink2:#52514e; --blue:#2a78d6; --orange:#eb6834; --rule:#e6e5e1; }
-  .reveal { font-family: "Helvetica Neue", Arial, sans-serif; color: var(--ink); font-size: 30px; }
-  .reveal h1, .reveal h2 { font-family: inherit; text-transform: none; letter-spacing: -0.01em; color: var(--ink); }
-  .reveal h2 { font-size: 1.45em; margin-bottom: 0.45em; text-align: left; }
-  .reveal p, .reveal li { line-height: 1.35; }
-  .reveal ul { display: block; margin-left: 1em; }
-  .reveal li { margin: 0.25em 0; }
-  .reveal .muted { color: var(--ink2); }
-  .reveal .small { font-size: 0.72em; }
-  .reveal .tiny { font-size: 0.58em; }
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; align-items: start; text-align: left; }
-  .cols.w { grid-template-columns: 1.15fr 1fr; }
-  .reveal img { margin: 0; }
-  .reveal table { font-size: 0.6em; margin: 0; width: 100%; border-collapse: collapse; }
-  .reveal table th, .reveal table td { border-bottom: 1px solid var(--rule); padding: 0.28em 0.5em; text-align: left; vertical-align: top; }
-  .reveal table th { color: var(--ink2); font-weight: 600; }
-  .reveal td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .big { font-size: 2.2em; font-weight: 700; line-height: 1; }
-  .tag { display:inline-block; font-size:0.55em; padding:0.1em 0.5em; border-radius:4px; background:#eef4fc; color:var(--blue); vertical-align: middle; }
-  .left { text-align: left; }
-  .kpi { display:grid; grid-template-columns: repeat(3, 1fr); gap: 0.8em; margin: 0.3em 0 0.6em; text-align:left; }
-  .kpi div { border-top: 3px solid var(--rule); padding-top: 0.3em; }
-  .kpi .v { font-size: 1.5em; font-weight: 700; }
-  .kpi .l { font-size: 0.6em; color: var(--ink2); }
-  .warn { color: #a3401b; }
-</style>
+<link rel="stylesheet" href="style.css?v=20261116-alignment2">
 </head>
 <body>
-<div class="reveal"><div class="slides">
+<aside class="outline" aria-label="Presentation outline">
+  <a class="brand" href="#/system">DoseCam</a>
+  <p class="deck-meta">Film comparison &amp;<br>light mechanism<br><span>16 November 2026</span></p>
+  <nav aria-label="Slides">
+    <a href="#/system" data-slide="0"><span>01</span> System &amp; timing</a>
+    <a href="#/comparison" data-slide="1"><span>02</span> Four pulses &amp; film doses</a>
+    <a href="#/scatter" data-slide="2"><span>03</span> Error sources</a>
+    <a href="#/geometry" data-slide="3"><span>04</span> Cherenkov light</a>
+    <a href="#/alignment" data-slide="4"><span>05</span> Alignment use</a>
+  </nav>
+  <div class="outline-bottom">
+    <a href="research.html" target="_blank" rel="noopener">Research notes &amp; full references ↗</a>
+    <button id="theme-toggle" type="button" aria-label="Switch to night mode">☾ Night mode</button>
+    <p>← → navigate · F full screen<br>Sources are linked on each slide</p>
+  </div>
+</aside>
+<main class="reveal" aria-label="DoseCam presentation"><div class="slides">
 
-<!-- 1 -->
-<section>
-  <h1 style="font-size:2.1em">DoseCam</h1>
-  <p style="font-size:1.1em">Per-pulse beam imaging for the FLASH sample rig — first comparison with film</p>
-  <p class="muted small">Duke FEL Lab · Linac low-energy spectrometer, ~30 MeV electrons · Nov 2026</p>
-  <p class="tiny muted">Data: 13 Oct 2026, run <code>PolyAlDosCal_…_000006</code> (4 pulses) · Film: EBT-XD, read out by J. Sherman</p>
-</section>
-
-<!-- 2 -->
-<section>
-  <h2>What DoseCam is</h2>
-  <div class="cols w">
+<section id="system">
+  <p class="eyebrow">DoseCam · FLASH sample rig · ~30 MeV electron beam</p>
+  <h1>Per-pulse beam imaging, synchronized to the gun cycle</h1>
+  <div class="columns system-layout">
     <div>
-      <ul>
-        <li>A <b>global-shutter camera</b> (Sony IMX296, 1456×1088, 10-bit mono) looks at a thin target the beam passes through just upstream of the sample.</li>
-        <li>The beam makes the target glow (mostly Cherenkov light); one frame per pulse gives the <b>beam's position, shape and peak dose</b>.</li>
-        <li>A 2D rotated-Gaussian fit gives amplitude (DN) → dose via a film calibration.</li>
-        <li>Runs on the same Pi 5 as the XY sample positioner: target → fire → image, all in one web app.</li>
-      </ul>
+      <p>A <b>monochrome IMX296 global-shutter camera</b> on a Pi 5 views a <b>0.5 mm polycarbonate sheet backed with Al tape</b>, just upstream of the sample.</p>
+      <p>One frame per beam pulse gives <b>position, widths, tilt and fitted peak</b>. A film calibration converts fitted DN to peak dose.</p>
+      <figure class="target-photo"><img src="img/targeting_raw.png" alt="Room-light camera view of the target plate, with an orange ellipse marking the beam position"><figcaption>Room-light targeting view; orange ellipse marks the beam location.</figcaption></figure>
     </div>
     <div>
-      <img src="img/targeting_raw.png" alt="Room-light view of the target plate from the DoseCam, beam spot circled" style="width:100%">
-      <p class="tiny muted left">Targeting frame (1 ms gate, room light). Orange: where the beam spot lands on the target plate.</p>
+      <p><b>Arm first.</b> The laser charging/timing reference precedes RF and the electron beam. An optoisolated input starts the ESP8266 delay; it then drives the camera’s active-low XTR gate.</p>
+      <svg viewBox="0 0 850 345" role="img" aria-label="Timing relative to laser charging: reference at zero, programmable delay of 200 microseconds, camera XTR low from 200 to 300 microseconds, and the beam-light pulse schematically inside the gate with margins on both sides. Delay and duration scans established a full-signal plateau; the selected margins exceed the expected jitter. Pulse shape and position are schematic.">
+        <defs><marker id="delayArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--blue)"/></marker></defs>
+        <g class="svg-small"><text x="5" y="48">Charging ref.</text><text x="5" y="112">ESP delay</text><text x="5" y="179">Camera XTR</text><text x="5" y="250">Beam / light</text></g>
+        <path d="M160 57H180V30H211V57H820" fill="none" stroke="var(--ink2)" stroke-width="2.5"/>
+        <path d="M180 113H500" stroke="var(--blue)" stroke-width="3" marker-end="url(#delayArrow)"/>
+        <text x="340" y="100" text-anchor="middle" class="svg-small">200 µs programmable delay</text>
+        <path d="M160 157H500V194H660V157H820" stroke="var(--blue)" stroke-width="3" fill="none"/>
+        <text x="580" y="218" text-anchor="middle" class="svg-small">100 µs low gate</text>
+        <rect x="540" y="234" width="48" height="28" fill="var(--orange)"/>
+        <text x="600" y="255" class="svg-small">Full light pulse*</text>
+        <path d="M500 264V275M660 264V275" stroke="var(--ink2)" stroke-width="1" stroke-dasharray="3 3"/>
+        <path d="M180 285H820" fill="none" stroke="var(--ink2)"/>
+        <g class="svg-small" text-anchor="middle"><text x="180" y="310">0</text><text x="340" y="310">100</text><text x="500" y="310">200</text><text x="660" y="310">300</text><text x="810" y="310">400 µs</text></g>
+      </svg>
+      <p class="timing-note"><b>Full-pulse capture checked experimentally.</b> Delay and duration scans reached full-signal plateaus. The selected gate has margins well beyond the expected jitter on both sides.</p>
+      <p class="timing-note">A short synchronized gate limits room light and stray sensor hits. XTR low is 200–300 µs; exposure duration is about the low width +14 µs. *Light-pulse placement and width are schematic.</p>
     </div>
   </div>
+  <p class="sources">Setup and timing: <a href="../../history/DOSECAM_AGENT_LOG.md" target="_blank">project timing log</a> · <a href="../../analysis/20261116_film_comparison/README.md" target="_blank">run settings / timing scans</a> · <a href="https://www.raspberrypi.com/documentation/accessories/global-shutter-camera.html" target="_blank" rel="noopener">Raspberry Pi external-trigger documentation</a>.<br>1456 × 1088 native 10-bit mono; 200 µs delay, 100 µs gate. Plateau and margin checks: E. Martin, 16 Nov 2026.</p>
 </section>
 
-<!-- 3 -->
-<section>
-  <h2>Timing from the laser charging pulse</h2>
-  <svg viewBox="0 0 1000 300" width="100%" role="img" aria-label="Timing diagram: laser charging pulse edge, 200 microsecond delay, 100 microsecond camera gate, beam light arriving 200 to 225 microseconds after the edge">
-    <style>
-      .t{font:22px Helvetica,Arial,sans-serif;fill:#0b0b0b}.m{font:19px Helvetica,Arial,sans-serif;fill:#52514e}
-    </style>
-    <!-- axis: 0..400 us mapped to x 170..950 -->
-    <line x1="170" y1="270" x2="950" y2="270" stroke="#52514e" stroke-width="1.5"/>
-    <g class="m" text-anchor="middle">
-      <text x="170" y="294">0</text><text x="365" y="294">100</text><text x="560" y="294">200</text><text x="755" y="294">300</text><text x="950" y="294">400 µs</text>
-    </g>
-    <!-- laser charging -->
-    <text class="t" x="10" y="58">Laser charging</text>
-    <polyline points="150,70 170,70 170,30 208,30 208,70 950,70" fill="none" stroke="#0b0b0b" stroke-width="3"/>
-    <!-- ESP delay -->
-    <text class="t" x="10" y="128">ESP8266 delay</text>
-    <line x1="170" y1="118" x2="560" y2="118" stroke="#2a78d6" stroke-width="3" marker-end="url(#a)"/>
-    <defs><marker id="a" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2a78d6"/></marker></defs>
-    <text class="m" x="365" y="108" text-anchor="middle">200 µs (programmable)</text>
-    <!-- camera gate -->
-    <text class="t" x="10" y="188">Camera gate</text>
-    <polyline points="150,165 560,165 560,200 755,200 755,165 950,165" fill="none" stroke="#2a78d6" stroke-width="3"/>
-    <text class="m" x="657" y="225" text-anchor="middle">XTR low 100 µs (+14 µs)</text>
-    <!-- beam light -->
-    <text class="t" x="10" y="255">Beam light</text>
-    <rect x="560" y="236" width="49" height="26" fill="#eb6834"/>
-    <text class="m" x="625" y="256">~200–225 µs</text>
-  </svg>
-  <ul class="small">
-    <li>The <b>laser charging pulse</b> arrives a couple hundred µs before RF and beam; it is opto-isolated into an ESP8266 that waits a set delay and drives the camera's external-trigger (XTR) line.</li>
-    <li>Delay/gate scans: no light with the gate at 100–200 µs; light gone if the gate starts after ~225 µs → beam light lands <b>~200–225 µs</b> after the edge, inside a 200–300 µs gate.</li>
-    <li>Short gate = little room light and few stray hits; the 100 µs gate keeps ≥94 % of what a 300 µs gate collects.</li>
-  </ul>
-</section>
-
-<!-- 4 -->
-<section>
-  <h2>Current target: polycarbonate + aluminum tape <span class="tag">proof of concept</span></h2>
-  <img src="img/frames.png" alt="Four background-subtracted DoseCam frames, one per pulse, with fitted ellipses and camera/film dose labels" style="width:100%">
-  <ul class="small">
-    <li>0.5 mm polycarbonate sheet, aluminum tape on the back as a mirror. Light is mostly Cherenkov (n ≈ 1.585), ~1 % of the scintillator block tested on 1 Oct — but still ~42 DN peak at ~40 Gy, fitted to ±0.1–0.4 %.</li>
-    <li>Spot σ ≈ 20 × 35 px, tilted −15°; centroid drifts ~9 px over the 4 pulses. Specks are prompt radiation hits on the sensor (masked in the fit).</li>
-  </ul>
-</section>
-
-<!-- 5 -->
-<section>
-  <h2>Camera vs film, pulse by pulse</h2>
-  <img src="img/compare.png" alt="Left: film and camera peak dose per well. Right: camera minus film in percent: B1 -2.3, A1 +2.6, A2 +1.1, A3 -1.3" style="width:92%">
-  <div class="kpi">
-    <div><div class="v">1.056 DN/Gy</div><div class="l">calibration: mean fit peak 42.25 DN ÷ mean film peak 40.00 Gy</div></div>
-    <div><div class="v">±2.2 %</div><div class="l">per-pulse camera/film scatter (1σ, n = 4)</div></div>
-    <div><div class="v">±3.2 %</div><div class="l">calibration constant: 1.1 % stat ⊕ 3 % film absolute (provisional)</div></div>
-  </div>
-  <p class="tiny muted left">Single dose level, zero intercept assumed; frame→well order (B1, A1, A2, A3) is the recorded order, not yet independently confirmed.</p>
-</section>
-
-<!-- 6 -->
-<section>
-  <h2>Where the 2 % comes from</h2>
-  <table>
-    <tr><th>Source (per pulse, 1σ)</th><th class="n">Size</th><th>Comment</th></tr>
-    <tr><td><b>Film</b> — B row vs A row offset</td><td class="n">+3.4 %</td><td>B1, B2 both high; scanner lateral response or real — explains most of B1's −2.3 %</td></tr>
-    <tr><td><b>Film</b> — window-peak noise</td><td class="n">0.2–0.5 %</td><td>1.9–2.4 % per pixel; A1–A3 agree to <b>0.18 %</b></td></tr>
-    <tr><td><b>Film</b> — absolute (~40 Gy)</td><td class="n">~3 %</td><td>common to all wells → moves the calibration, not the scatter</td></tr>
-    <tr><td><b>Target</b> — Al tape / PC non-uniformity</td><td class="n">0.5–2 %?</td><td>pixel-scale light structure ~10 % rms that does <i>not</i> repeat pulse to pulse</td></tr>
-    <tr><td><b>Analysis</b> — hit masking, fit choice</td><td class="n">~1 %</td><td>mostly common-mode; amplitude shifts 1–2 % between mask thresholds</td></tr>
-    <tr><td><b>Camera</b> — read noise + sensor hits</td><td class="n">0.2–0.4 %</td><td>fit statistical error from residuals</td></tr>
-    <tr><td><b>Camera</b> — photon statistics</td><td class="n">0.1–0.25 %</td><td>next slide</td></tr>
-    <tr><td>Gate timing</td><td class="n">≪ 0.5 %</td><td>light well inside the gate</td></tr>
+<section id="comparison">
+  <p class="eyebrow">13 October 2026 · PolyAlDosCal … 000006 · EBT-XD lot 06092501</p>
+  <h1>Four beam pulses: camera fits and film dosimetry</h1>
+  <figure class="frame-figure"><img src="img/frames.png" alt="Four background-subtracted beam images on a common color scale, with 1-sigma solid and 2-sigma dashed Gaussian fit ellipses. Pulse 1 B1: film 40.94 Gy; pulse 2 A1: 39.61 Gy; pulse 3 A2: 39.75 Gy; pulse 4 A3: 39.70 Gy."><figcaption>Same net-DN scale; 3 × 3 median for display. Cyan ellipses: fitted 1σ (solid) and 2σ (dashed). Prompt sensor hits are masked in the fit.</figcaption></figure>
+  <table class="comparison-table">
+    <thead><tr><th>Pulse → film well</th><th>Fit peak (DN)</th><th>Camera peak (Gy)</th><th>EBT-XD peak (Gy)</th><th>Camera − film</th></tr></thead>
+    <tbody>
+    <tr><td>1 → B1</td><td>42.24</td><td>39.99</td><td><b>40.94</b></td><td>−2.3%</td></tr>
+    <tr><td>2 → A1</td><td>42.92</td><td>40.63</td><td><b>39.61</b></td><td>+2.6%</td></tr>
+    <tr><td>3 → A2</td><td>42.45</td><td>40.19</td><td><b>39.75</b></td><td>+1.1%</td></tr>
+    <tr><td>4 → A3</td><td>41.40</td><td>39.19</td><td><b>39.70</b></td><td>−1.3%</td></tr>
+    </tbody>
   </table>
-  <p class="small left" style="margin-top:0.6em">Film can account for B1 but not the A row (film flat to 0.2 %, camera 1.8 %, falling as the spot drifts). The leftover ~1.8 % is <b>target + analysis</b>, not the camera's noise floor.</p>
+  <p class="comparison-summary"><b>Calibration: 1.0563 DN/Gy</b> = mean fit peak / mean film dose. Camera/film ratio sample SD: <b>2.2%</b> (n = 4). Spot σ ≈ 20 × 35 px; centroid moves ~9 px.</p>
+  <p class="sources">Measured data and methods: <a href="../../analysis/20261116_film_comparison/README.md" target="_blank">comparison analysis</a> · <a href="../../analysis/20261116_film_comparison/scripts/crosscal.csv" target="_blank">fit parameters</a> · <a href="../../analysis/20261116_film_comparison/scripts/figs.py" target="_blank">figure source</a>.<br>Film read by J. Sherman using a 24 h curve; peak = maximum over a 10 px window. Frame → well order: B1, A1, A2, A3. Single dose level; zero intercept assumed.</p>
 </section>
 
-<!-- 7 -->
-<section>
-  <h2>Photon-count noise</h2>
-  <div class="cols">
-    <div class="left">
-      <table>
-        <tr><th>Measured over</th><th class="n">Photo-e⁻</th><th class="n">Shot noise</th></tr>
-        <tr><td>Peak pixel (42 DN)</td><td class="n">90–420</td><td class="n">5–11 %</td></tr>
-        <tr><td>10 × 10 px window</td><td class="n">0.9–4 × 10⁴</td><td class="n">0.5–1.1 %</td></tr>
-        <tr><td>Whole spot (1.8 × 10⁵ DN)</td><td class="n">0.4–1.8 × 10⁶</td><td class="n">0.07–0.17 %</td></tr>
-        <tr><td><b>Fitted peak (free shape)</b></td><td class="n"></td><td class="n"><b>0.10–0.25 %</b></td></tr>
-      </table>
-      <p class="tiny muted">Range = 2–10 e⁻/DN at gain 1 (10-bit). Not yet measured cleanly; dark noise 0.58 DN suggests ~4–5 e⁻/DN.</p>
+<section id="scatter">
+  <p class="eyebrow">Observed camera / film ratio scatter: 2.2% sample SD · four paired pulses</p>
+  <h1>Error sources and what the data constrain</h1>
+  <table class="error-table">
+    <thead><tr><th>Source</th><th>Size / status</th><th>Evidence and limitation</th></tr></thead>
+    <tbody>
+    <tr><td><b>Camera photon statistics</b></td><td><b>~0.10%</b> fitted peak</td><td>Ideal Poisson Gaussian floor; N ≈ 1.93 million e⁻ at a 10.7 e⁻/DN gain proxy. 8–12 e⁻/DN gives 0.097–0.118%. <a href="https://softwareservices.flir.com/FFY-U3-16S2-DL/latest/EMVA/EMVA.html" target="_blank" rel="noopener">[1]</a></td></tr>
+    <tr><td><b>Read noise / residual hits</b></td><td>~0.2–0.4%</td><td>Fit residual estimate, dependent on correlations; measured dark noise is 0.58 DN rms per pixel.</td></tr>
+    <tr><td><b>Masking / fit choices</b></td><td>~1% sensitivity</td><td>Amplitude shifts 1–2% between mask thresholds; much may be common across pulses.</td></tr>
+    <tr><td><b>PC / Al-tape target</b></td><td>Likely nonuniform</td><td>Tape surface, contact and local reflectivity can vary across the target. The ~9 px spot drift can therefore change collected light at the same dose; the size of this effect is unmeasured.</td></tr>
+    <tr><td><b>Gate timing</b></td><td>Not expected to contribute appreciably</td><td>Delay and duration scans reached full-signal plateaus; operating margins are well beyond expected jitter (operator check).</td></tr>
+    <tr><td><b>Film pixel / peak noise</b></td><td>1.9–2.4% per pixel</td><td>Window-maximum error depends on smoothing and correlations; pixel noise cannot be divided by √N for a selected maximum.</td></tr>
+    <tr><td><b>Film calibration / rate response</b></td><td>Mixed evidence</td><td>Some EBT-XD studies report UHDR overresponse <a href="https://doi.org/10.3389/fphy.2025.1474416" target="_blank" rel="noopener">[2a]</a><a href="https://doi.org/10.3390/app15148101" target="_blank" rel="noopener">[2b]</a>, others no significant dependence within tested ranges <a href="https://doi.org/10.1002/acm2.13270" target="_blank" rel="noopener">[2c]</a><a href="https://doi.org/10.1016/j.ejmp.2026.105723" target="_blank" rel="noopener">[2d]</a>. No rate-related bias is established for this run.</td></tr>
+    </tbody>
+  </table>
+  <p class="takeaway">The <b>Al-tape target is likely nonuniform</b>: spot motion can change the optical response. The observed <b>2.2%</b> camera/film scatter is much larger than the ideal photon-statistics floor; these data do not isolate each contribution.</p>
+  <p class="sources">Local estimates: <a href="../../analysis/20261116_film_comparison/README.md" target="_blank">comparison analysis</a>. [1] <a href="https://softwareservices.flir.com/FFY-U3-16S2-DL/latest/EMVA/EMVA.html" target="_blank" rel="noopener">Teledyne FLIR IMX296 mono EMVA</a> (gain proxy, not this module’s calibration).<br>EBT-XD overresponse: [2a] <a href="https://doi.org/10.3389/fphy.2025.1474416" target="_blank" rel="noopener">Del Sarto et al. (2025)</a>, [2b] <a href="https://doi.org/10.3390/app15148101" target="_blank" rel="noopener">Cayley et al. (2025)</a>. No significant dependence: [2c] <a href="https://doi.org/10.1002/acm2.13270" target="_blank" rel="noopener">Szpala et al. (2021)</a>, [2d] <a href="https://doi.org/10.1016/j.ejmp.2026.105723" target="_blank" rel="noopener">Schott et al. (2026)</a>.<br>Studies use different beam conditions and methods. Schott tests 1.06–3.27 Gy/pulse. All film wells are treated on the same basis.</p>
+</section>
+
+<section id="geometry">
+  <p class="eyebrow">30 MeV electrons · n ≈ 1.585 · angles measured from the sheet normal</p>
+  <h1>Primary Cherenkov light should be internally reflected</h1>
+  <div class="columns geometry">
+    <div>
+      <svg viewBox="0 0 690 500" role="img" aria-label="Cross-section: a near-normal electron beam creates a Cherenkov cone with a 51-degree half-angle. A flat aluminum backing reflects the rays to the polycarbonate-air face. Their incidence exceeds the 39-degree critical angle, so they are totally internally reflected.">
+        <defs><marker id="beamArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--blue)"/></marker></defs>
+        <rect x="410" y="50" width="86" height="390" fill="var(--pc)" stroke="var(--rule)" stroke-width="2"/>
+        <rect x="496" y="50" width="12" height="390" fill="var(--ink2)"/>
+        <text x="408" y="30" class="svg-label">PC</text><text x="516" y="70" class="svg-label">Flat Al</text>
+        <text x="288" y="430" class="svg-small">Air</text><text x="416" y="465" class="svg-small">Thickness exaggerated</text>
+        <path d="M90 290H650" stroke="var(--blue)" stroke-width="3" fill="none" marker-end="url(#beamArrow)"/>
+        <text x="75" y="321" class="svg-label">30 MeV electron →</text>
+        <circle cx="453" cy="290" r="5" fill="var(--ink)"/>
+        <path d="M453 290L496 237L410 131L473 53" fill="none" stroke="var(--orange)" stroke-width="4"/>
+        <path d="M453 290L496 343L420 437" fill="none" stroke="var(--orange)" stroke-width="3" opacity=".55"/>
+        <path d="M410 131H365" stroke="var(--ink2)" stroke-dasharray="5 5" fill="none"/>
+        <text x="520" y="221" class="svg-label" fill="var(--orange)">51° cone ray</text>
+        <text x="178" y="104" class="svg-label" fill="var(--orange)">51° &gt; 39°</text>
+        <text x="178" y="130" class="svg-small">Total internal reflection</text>
+        <path d="M375 121L410 131" stroke="var(--ink2)" fill="none"/>
+        <text x="69" y="377" class="svg-small" fill="var(--orange)">Orange: ideal primary Cherenkov path</text>
+        <text x="69" y="402" class="svg-small">The primary cone is outside the escape cone.</text>
+      </svg>
     </div>
-    <div class="left small">
-      <p><b>Fano factor ≈ 1.</b> Each pixel catches ~10⁻⁵ detected photons per beam electron. Thinning makes the count Poisson:</p>
-      <p style="text-align:center">F = 1 + p (Var N / ⟨N⟩ − 1),&nbsp; F − 1 ≲ 10⁻⁴</p>
-      <p>even if light per electron were very non-Poisson. Cherenkov emission per electron is Poisson anyway; photo-electrons from visible photons are Poisson.</p>
-      <p>Photon noise would need <b>F ≈ 50–100</b> to explain the ~1.5–1.8 % camera spread. The real non-Poisson term is prompt sensor hits (2.6 % of pixels in the gated frame vs 0.03 % with the gate early).</p>
+    <div>
+      <p><b>Cone half-angle:</b> cos θ<sub>C</sub> = 1/(βn) → <b>50.9°</b> for β = 0.99986, n = 1.585. <a href="https://pdg.lbl.gov/2024/reviews/rpp2024-rev-particle-detectors-accel.pdf#page=17" target="_blank" rel="noopener">[3]</a></p>
+      <p><b>Escape limit:</b> θ<sub>crit</sub> = sin⁻¹(1/n) = <b>39.1°</b>. A 51° ray would require sin θ<sub>air</sub> = <b>1.23</b>; it cannot refract into air. <a href="https://openstax.org/books/college-physics/pages/25-4-total-internal-reflection" target="_blank" rel="noopener">[4]</a></p>
+      <p>A parallel, specular Al backing preserves incidence angle. Up to ~12° sheet tilt leaves the primary cone above the escape limit.</p>
     </div>
   </div>
+  <p class="takeaway">For this geometry, primary Cherenkov light should remain inside the sheet after a flat Al reflection. Undoped PC can also produce scintillation light. <a href="https://www.jstage.jst.go.jp/article/jhps/49/2/49_98/_pdf" target="_blank" rel="noopener">[5]</a></p>
+  <p class="sources">[3] PDG (2024), §35.5, Eq. 35.5. [4] OpenStax, §25.4, Snell’s law and total internal reflection. Tilt boundary θ<sub>C</sub> − θ<sub>crit</sub> ≈ 11.8° at n = 1.585.<br>[5] Nakamura et al. (2014), <a href="https://doi.org/10.5453/jhps.49.98" target="_blank" rel="noopener">doi:10.5453/jhps.49.98</a>: intrinsic PC emission. Reflection diagram assumes smooth, parallel faces and near-normal primary tracks.</p>
 </section>
 
-<!-- 8 -->
-<section>
-  <h2>Next</h2>
-  <ul>
-    <li>Confirm the pulse → well order (timestamps or a deliberate skipped pulse).</li>
-    <li>Film: scanner lateral-response correction for row B; a stated dose uncertainty.</li>
-    <li>Target: fix the PC/Al sheet relative to the camera and flat-field it; ≥10 pulses on one patch; flat, non-wrinkled reflector.</li>
-    <li>Camera: dark + flat frames at gain 1 for a clean photon-transfer curve; log analogue gain in each capture.</li>
-    <li>Second dose level to test linearity; Faraday-cup charge per pulse as an independent reference.</li>
-  </ul>
-  <p class="tiny muted left">Analysis and scripts: <code>docs/analysis/20261116_film_comparison/</code> in this repository.</p>
+<section id="alignment">
+  <p class="eyebrow">13 October 2026 · PC / Al-tape target · individual 100 µs beam exposures</p>
+  <h1>Visible target features can support beam alignment</h1>
+  <div class="columns alignment-examples">
+    <figure>
+      <h2>Pulse 2 · A1</h2>
+      <svg viewBox="40 381 383 313" role="img" aria-label="Contrast-enhanced pulse 2 image showing dark parallel target features below the masked beam region. Cyan ellipses mark the fitted beam location.">
+        <image href="../../analysis/20261014/positions_suppressed.png" width="1302" height="714"/>
+      </svg>
+      <figcaption>Dark parallel features are visible just below the beam.</figcaption>
+    </figure>
+    <figure>
+      <h2>Pulse 4 · A3</h2>
+      <svg viewBox="902 381 383 313" role="img" aria-label="Contrast-enhanced pulse 4 image showing a bright L-shaped target or holder feature below and left of the masked beam region. Cyan ellipses mark the fitted beam location.">
+        <image href="../../analysis/20261014/positions_suppressed.png" width="1302" height="714"/>
+      </svg>
+      <figcaption>A bright L-shaped target / holder feature is also visible.</figcaption>
+    </figure>
+  </div>
+  <p class="alignment-plan"><b>Planned use:</b> Detect a mark or edge and compare its position with the fitted beam centroid in the same camera coordinates. Track their relative displacement for alignment.</p>
+  <p class="small">These images demonstrate feature contrast. Automated tracking and alignment precision have not yet been validated.</p>
+  <p class="sources">Image source: <a href="../../analysis/20261014/positions_suppressed.png" target="_blank">full six-panel analysis</a> · <a href="../../analysis/20261014/analysis_scripts.tgz" target="_blank">archived processing scripts (shift.py)</a> · <a href="../../analysis/20261116_film_comparison/README.md#alignment-image-provenance" target="_blank">capture provenance</a>.<br>Same pixel crop, separate contrast stretches. Gaussian smoothing σ = 6 px; central beam region masked to 3.5σ (white), cyan = fitted beam location. Visible marks are not identified as Sharpie in the archive.</p>
 </section>
 
-</div></div>
+</div></main>
 <script src="../vendor/reveal.js-5.1.0/reveal.js"></script>
-<script>Reveal.initialize({ hash: true, width: 1280, height: 760, margin: 0.05, transition: 'none', slideNumber: 'c/t' });</script>
-</body>
-</html>
+<script>
+const themeButton = document.getElementById('theme-toggle');
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  themeButton.textContent = theme === 'night' ? '☀ Day mode' : '☾ Night mode';
+  themeButton.setAttribute('aria-label', 'Switch to ' + (theme === 'night' ? 'day' : 'night') + ' mode');
+  try { localStorage.setItem('dosecam-deck-theme', theme); } catch (_) {}
+}
+let savedTheme; try { savedTheme = localStorage.getItem('dosecam-deck-theme'); } catch (_) {}
+setTheme(savedTheme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'));
+themeButton.addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'night' ? 'day' : 'night'));
+Reveal.initialize({hash:true, width:1280, height:790, margin:0.045, transition:'none', slideNumber:'c/t', center:true, controls:true, progress:true});
+function updateOutline() {
+  const index = Reveal.getIndices().h;
+  document.querySelectorAll('nav [data-slide]').forEach(a => {
+    if (Number(a.dataset.slide) === index) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+  });
+}
+Reveal.on('ready', updateOutline); Reveal.on('slidechanged', updateOutline);
+</script>
+</body></html>

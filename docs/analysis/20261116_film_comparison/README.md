@@ -4,11 +4,77 @@ Data: `PolyAlDosCal_20261013_161112_732305_000006.raw` (4 frames, delay 200 µs,
 gain 1, 10-bit), 0.5 mm polycarbonate sheet backed with aluminum tape. Background reference:
 median of the 34 frames of `Alanine_20261013_145026_730724_000002.raw` (same gate, 100 µs delay,
 beam outside the gate). Film: EBT-XD lot 06092501, well_041, 24 h curve, peak = max over a
-10 px window (Julia Sherman, 2026-10-18/21). Frame → well order B1, A1, A2, A3 is the recorded
-order and has **not** been independently confirmed.
+10 px window (Julia Sherman, 2026-10-18/21). Frame → well order **B1, A1, A2, A3** is taken as correct for this comparison
+(per E. Martin, 2026-11-16).
 
 Figures: `frames.png` (the four pulses, same colour scale, fitted 1σ/2σ ellipses),
 `compare.png` (camera vs film per well). Scripts in `scripts/` (set `DOSECAM_CAPTURES`).
+
+## Research update — 2026-11-16
+
+[Full sourced research](RESEARCH.md) and [five-slide presentation](../../slides/2026-11-dosecam-film/index.html).
+The current deck has five slides, in the requested order: system and
+timing; all four fitted beam images with camera / film doses; error sources;
+Cherenkov internal reflection; planned alignment use with visible target features.
+A left outline, linked references and
+persistent day/night mode are included. Detailed light-yield and uncertainty
+calculations remain in the research notes.
+
+## Alignment image provenance
+
+Slide 5 enlarges the A1 and A3 panels of the existing
+[positions_suppressed.png](../20261014/positions_suppressed.png), without
+resynthesizing their image content. These are zero-based frames 1 and 3 of
+`PolyAlDosCal_20261013_161112_732305_000006.raw`, the same four-pulse run
+used for the film comparison: 200 µs delay, 100 µs gate. Original raw files and
+JSON metadata remain in `FLASH/SynchronizedCameraDosimeter/captures_backup_20261013/`.
+
+Archived `shift.py` in [analysis_scripts.tgz](../20261014/analysis_scripts.tgz)
+replaces positive outliers exceeding a 3×3 median by more than 40 DN,
+masks the central beam inside 3.5 fitted sigma, subtracts a frame median and
+applies Gaussian smoothing (sigma 6 px), with a separate percentile contrast
+stretch for each panel. The white masked area and cyan beam-location ellipses
+are processing overlays. Both displayed panels use the same pixel-coordinate
+crop. Their brightness is not a quantitative light-yield comparison.
+
+The dark parallel features in A1 and bright L-shaped structure in A3 are
+visible target/holder features. No archived note identifies them as Sharpie;
+the operator's recalled Sharpie observation is not attributed to these images.
+The proposed use is to track a target mark/edge relative to the fitted beam
+centroid. Feature tracking and alignment precision are not yet validated.
+
+The separate room-light targeting photograph on slide 1 comes from
+`PolyAlDosCal_20261013_160908_654522_000004.raw`, one 1000 µs targeting
+exposure with 100 µs delay. It is not a 100 µs dosimetry pulse image.
+
+## Light-mechanism conclusions
+
+- Replace the unsupported “mostly Cherenkov” claim with an unresolved mixture.
+  PC scintillation is demonstrated in the literature. In the user's near-normal
+  beam geometry, the ideal 51-degree primary cone is trapped at the 39-degree
+  PC-air limit even after flat Al reflection. Secondary light and roughness remain.
+- A QE-weighted, equal-throughput calculation gives approximately 70/30
+  scintillation/Cherenkov. This is a conditional benchmark, not a measured split.
+  Lens UV transmission and foil redistribution are unmeasured. A worked rough-Al
+  scenario gives 73/27; alternate assumptions reverse the split. These exploratory
+  estimates remain in the notes; no component-separation measurements are planned.
+  The presentation simply notes expected primary-cone internal reflection.
+- Gain proxy: 10.7 e-/DN; sensitivity interval 8–12, not a confidence interval.
+- No apparatus-specific 1-sigma film absolute uncertainty was established.
+  A 2025 study reports possible FLASH bias; the existing code's provisional 3.0%
+  film / 3.19% total numbers remain unchanged and must not be advertised as validated.
+- No deployment, Pi access, PV changes or GitHub push.
+
+## Gate containment — operator confirmation, 2026-11-16
+
+Eric scanned both gate delay and gate duration until the captured signal stopped
+changing, then placed the operating settings well inside the full-capture limits.
+He reports margins much larger than the expected jitter. This supports full-pulse
+light capture and makes gate clipping an unlikely contributor to the observed
+scatter. The approximately 200–225 us arrival interval from earlier coarse scans
+is not a precision boundary or a measured gun pulse width. No numerical jitter,
+scintillation decay constant or percentage clipping bound is inferred here; the
+observed plateau is the direct evidence for adequate integration.
 
 ## Comparison
 
@@ -26,8 +92,8 @@ film peak 40.00 Gy. Camera amplitudes are the deployed-code fits in
 - Scatter of camera/film: **2.2 % (1σ, n = 4, 3 dof)**; rms residual 1.9 %. Camera and film are
   uncorrelated (r = −0.06): the ratio scatter equals the quadrature sum of the two separate
   spreads (1.50 % ⊕ 1.57 % = 2.17 %).
-- Film A row (A1–A3) agrees to **0.18 %**; film B row (B1, B2) sits **+3.4 %** above it.
-  Removing that row offset leaves 1.6 % scatter. A-row only: 1.9 % — essentially all camera-side.
+- All film wells are treated on the same basis, without a row-dependent offset
+  or correction (per E. Martin, 2026-11-16).
 - Camera A1→A3 falls monotonically (42.92 → 42.45 → 41.40 DN) while the spot centroid drifts
   ~9 px right/up.
 
@@ -35,46 +101,51 @@ film peak 40.00 Gy. Camera amplitudes are the deployed-code fits in
 
 | Source | Estimate | Basis |
 |---|---|---|
-| Photon (photo-electron) statistics, fitted peak | 0.10–0.25 % | 0.36–1.8 M photo-electrons in the spot (2–10 e⁻/DN); Fisher-matrix error of a free-shape 2D Gaussian |
+| Photon statistics, fitted peak | ~0.102%; 0.097–0.118% over gain sensitivity interval | 1.93 M photoelectrons at 10.7 e-/DN; ideal Poisson Gaussian floor, not total fit uncertainty; [vendor proxy](https://softwareservices.flir.com/FFY-U3-16S2-DL/latest/EMVA/EMVA.html) |
 | Read noise + prompt sensor hits, fitted peak | ≈0.2–0.4 % | Fit statistical error from residuals (0.05 DN ≈ 0.12 % white-noise; ~0.36 % with correlated-noise estimate) |
 | Hit-masking / fit-method choice | ~1 % (mostly common-mode) | Amplitude moves 1–2 % between masking thresholds (`scripts/robust.py`) |
-| Target non-uniformity (Al tape, PC, viewing angle) | ~0.5–2 % (untested) | Pixel-scale light structure ~10 % rms that does not repeat pulse to pulse (frame-to-frame correlation 0.0–0.36) |
-| Gate timing | ≪ 0.5 % | Light arrives ~200–225 µs after the trigger edge, inside the 200–300 µs gate |
-| Film: per-pixel noise | 1.9–2.4 % per pixel; ~0.2–0.5 % for the 10 px window peak (biased slightly high by the max) | Julia's numbers |
-| Film: B-row vs A-row offset | 3.4 % (row-systematic) | Scanner lateral response or real dose difference — open question |
-| Film: absolute accuracy at ~40 Gy | ~3 % (provisional) | Common-mode: moves the calibration constant, not the scatter |
-| Frame ↔ well assignment | unknown | Recorded order only |
+| PC / Al-tape target | Likely nonuniform; contribution unmeasured | Tape surface, contact and local reflectivity can vary. The ~9 px spot drift can sample a different optical response; no quantitative target uncertainty has been established |
+| Gate timing | Not expected to contribute appreciably | Operator scanned delay and duration to full-signal plateaus, then selected operating margins much larger than expected jitter; no numerical percent bound assigned |
+| Film: per-pixel noise | 1.9–2.4%; window-maximum uncertainty unresolved | Window definition, smoothing and correlations are required; cannot infer the maximum error by averaging |
+| Film: absolute accuracy at ~40 Gy/pulse | Not validated | Common calibration uncertainty plus possible rate bias; see [research](RESEARCH.md#5-ebt-xd-at-40-gy). Existing 3% code allowance remains provisional |
 
-Reading: photon statistics are ~10× too small to explain anything. Film can explain the B1
-outlier (row offset) but not the A-row spread, because the film A row is flat to 0.2 %. The
-remaining ~1.8 % is on the camera/target side, and the evidence points to the target (moving
-textured tape / PC patch) and analysis choices rather than the camera's own noise.
+Reading: the ideal photon shot-noise floor is far below the observed scatter.
+The aluminum-tape target is likely nonuniform, so spot motion can change the
+collected light even at the same dose. Variation can also include analysis and
+real beam changes; four frames do not establish their individual contributions.
+No film-row effect is assigned or subtracted.
 
-## Photon statistics and Fano factor
+## Photon-count noise
 
-- Integrated spot signal ≈ 2π·A·σx·σy ≈ 1.8 × 10⁵ DN. IMX296 at analogue gain 1 in 10-bit mode:
-  conversion gain not yet measured cleanly. Dark-frame temporal noise 0.58 DN (→ ~4–5 e⁻/DN if
-  read noise ~2 e⁻); a sensor-class ~10 ke⁻ full well over 963 DN gives ≤ 10 e⁻/DN. A photon-transfer
-  attempt on these four frames is dominated by prompt sensor hits and target texture and only
-  brackets the gain loosely (≈1.5–6 e⁻/DN). All conclusions hold anywhere in 2–10 e⁻/DN.
-- Per pixel at the peak (42 DN ≈ 90–420 e⁻) shot noise is 5–11 %; a 10×10 px window 0.5–1.1 %;
-  the whole-spot Gaussian fit 0.1–0.25 %.
-- Fano factor: the light is mostly Cherenkov in PC (n ≈ 1.585; ~15 visible photons per electron
-  in 0.5 mm, Poisson per electron). Each pixel collects ~10⁻⁵ detected photons per beam electron
-  (~10⁷ electrons cross the area one pixel sees at 40 Gy). Binomial thinning gives
-  F = 1 + p·(Var N/⟨N⟩ − 1), so F − 1 ≲ 10⁻⁴ even if the per-electron yield were strongly
-  super-Poisson (Landau-like scintillation). Photo-electron generation by visible photons is
-  Poisson. **F = 1 to well below the percent level**; to explain the observed 1.5–1.8 % camera
-  spread with photon noise would need F ≈ 50–100.
-- The non-Poisson term that does matter is prompt radiation hits on the sensor: 2.6 % of pixels
-  in beam-gated frames sit > 20 DN above their 5×5 median, vs 0.03 % with the gate 100 µs early.
-  They are masked in the fit; the mask choice is the ~1 % method systematic above.
+Use **10.7 e-/DN** as a proxy from the Teledyne FLIR monochrome IMX296 EMVA data,
+with **8–12 e-/DN** as an engineering sensitivity interval. The manufacturer
+reports a 10-bit ADC, 10,276-electron saturation and 4.69-electron read noise.
+Our gain is not measured. With quantization added separately, the proxy predicts
+0.525 DN dark noise, compared with measured 0.58 DN; some EMVA definitions already
+include quantization. A photon-transfer curve is still required.
+
+For the measured 180,000 DN integrated spot, N = 1.926 million electrons. Shot
+noise is 4.72% on a 42 DN peak pixel, 0.472% for an ideal constant-peak 10 x 10
+camera window, and 0.072% for the whole spot. The ideal free-shape Gaussian peak
+error is 1.42/sqrt(N) = **0.102%**; over g = 8–12 it is **0.097–0.118%**.
+These are model floors and do not include sensor hits or a fitted background.
+
+The light-mechanism and Fano-factor assertions in the earlier version were
+removed. The user requested dropping the Fano-factor discussion. Neither that
+discussion nor a Cherenkov-dominance assumption is needed for the shot-noise estimate.
+
+## Sources
+
+- [Full references, optical geometry verification and film limitations](RESEARCH.md).
+- [Nakamura et al. (2014): undoped PC scintillation](https://www.jstage.jst.go.jp/article/jhps/49/2/49_98/_pdf).
+- [Teledyne FLIR mono IMX296 EMVA and QE curve](https://softwareservices.flir.com/FFY-U3-16S2-DL/latest/EMVA/EMVA.html).
+- [PDG detector review, Cherenkov Eq. 35.5](https://pdg.lbl.gov/2024/reviews/rpp2024-rev-particle-detectors-accel.pdf).
+- [Del Sarto et al. (2025): EBT-XD rate-dependence study](https://www.frontiersin.org/journals/physics/articles/10.3389/fphy.2025.1474416/full).
 
 ## Next checks
 
-1. Confirm the frame ↔ well order (time stamps or a deliberate skip pulse).
-2. Ask Julia about scanner lateral-response correction for the B row and a film dose uncertainty.
-3. Fix the PC/Al target relative to the camera (or flat-field it): image an LED-lit or
+1. Obtain the film absolute dose uncertainty and rate-validation information.
+2. Fix the PC/Al target relative to the camera (or flat-field it): image an LED-lit or
    beam-integrated flat to measure the light-yield map, and repeat with ≥10 pulses on one patch.
-4. Dark/flat frames at gain 1 for a clean photon-transfer curve (gain in e⁻/DN).
-5. Second dose level for linearity; record analogue gain in the capture JSON.
+3. Dark/flat frames at gain 1 for a clean photon-transfer curve (gain in e⁻/DN).
+4. Second dose level for linearity; record analogue gain in the capture JSON.

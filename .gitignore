@@ -16,6 +16,9 @@ captures_backup_*/
 # Copies of files Claude delivered into the chat
 Claude outputs/
 
+# Local literature reading copies; publisher citations are in RESEARCH.md
+/docs/analysis/20261116_film_comparison/sources/
+
 # KiCad per-user state, caches and automatic backups
 *-backups/
 *.kicad_prl
