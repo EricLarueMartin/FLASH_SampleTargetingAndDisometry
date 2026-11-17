@@ -8,6 +8,24 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-17 — restore automatic Pages publication
+
+- Status: static deployment workflow prepared for the existing public site.
+- After aa28e63 was pushed, the public deck still had five slides. Read-only
+  GitHub Pages settings showed Source = GitHub Actions, while the repository
+  had no workflow; the last successful deployment was 680ba77.
+- Added .github/workflows/pages.yml based on GitHub's official static Pages
+  starter workflow. Publishes only docs/ on matching main pushes or manual
+  dispatch; permissions are contents:read, pages:write and id-token:write.
+- Kept the existing github-pages environment and Actions source setting.
+  Updated the root README to describe this publishing configuration.
+- Files: .github/workflows/pages.yml, README.md and this log.
+- Validation: official starter comparison, workflow structure and Git whitespace
+  checks. Deployment completion and the public seven-slide HTML are checked
+  after pushing. No hardware or live application changes.
+- Rollback: revert this workflow commit to stop automatic publication; no
+  repository visibility, credential or hardware changes were made.
+
 ## 2026-11-17 — CoreXY, automated runs and DoseCam fiducials
 
 - Status: seven-slide presentation visually verified in day/night mode;
