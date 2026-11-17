@@ -8,6 +8,32 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-17 — CoreXY, automated runs and DoseCam fiducials
+
+- Status: seven-slide presentation visually verified in day/night mode;
+  documentation update only, prepared for the authorized GitHub push.
+- Added slide 6: replace the actuator with CoreXY-style motion contained
+  inside a frame, reducing exposure to accidental bumps. Uses the unchanged
+  embedded preview from FLASH Core XY.f3z v15 (8 November), with provenance
+  and source links. Physical coordinates remain X and Z.
+- Added slide 7: define positions and prescribed dose, plan pulse count/spacing,
+  then move, settle, capture and fire in sequence. Distinguishes existing
+  position/pulse/timing code from planned dose feedback and fiducial checks;
+  live firing commissioning is not established by the recorded emulator tests.
+- Updated slide 5 with planned fiducial features at known target positions
+  for image calibration, reference-pose monitoring and drift/rotation detection.
+  Corrected the roadmap's superseded claim that DoseCam cannot show features.
+- Updated seven-link outline, slide metadata, root README, docs index and
+  analysis/provenance notes; existing dose measurements/calibration unchanged.
+- Files: README.md, docs/index.html, docs/ROADMAP_INTEGRATED_RIG.md,
+  docs/analysis/20261116_film_comparison/README.md,
+  docs/slides/2026-11-dosecam-film/{index.html,style.css,img/corexy_cad.png},
+  and this log.
+- Validation: source/code review, seven-slide outline and local-link checks,
+  preview PNG checksum, Git whitespace check and browser visual review.
+- Rollback: revert this documentation commit; no hardware, live controls,
+  application behavior or beam operations were changed.
+
 ## 2026-11-17 — direct slide link before approved initial push
 
 - Status: README link verified against the docs layout; Eric explicitly

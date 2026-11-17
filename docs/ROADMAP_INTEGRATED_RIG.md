@@ -745,15 +745,19 @@ even when counting pulses.
 
 ### Fiducial monitoring
 
-The important realisation: **the DoseCam cannot do this.** The IMX296 only opens for
-a 100 us gate synchronised to the beam; it sees scintillation, not the holder. Use
-the **OV5647 positioner camera**, which free-runs and already watches the holder.
-Having both cameras on one Pi is what makes this possible at all.
+**Plan update, 2026-11-17:** Eric plans dedicated fiducial features in the
+**DoseCam view** for position calibration and monitoring. The 13 October
+100 us beam exposures show target/holder feature contrast; the earlier blanket
+claim that this camera cannot see such features is superseded. Calibrate image
+coordinates from features at known target positions, then monitor their pose
+relative to the fitted beam centroid and a reference image. Visibility and
+tracking precision still need validation. The free-running OV5647 remains
+available for a continuous view of the positioner.
 
-- Put **ArUco markers** on the carriage or spreader plate - `cv2.aruco`, and `cv2` is
-  already a dependency of `app.py`. Three non-collinear tags give translation *and*
-  rotation, with sub-pixel corners and unique IDs, which beats template matching on a
-  repetitive machined surface.
+- Add recognizable fiducial features at known physical positions in the target
+  plane. Their geometry should support scale, orientation and perspective
+  calibration. Select the mark design after checking contrast in the DoseCam
+  exposure; no particular tag family or sub-pixel precision is established yet.
 - Capture a reference pose at session start, right after the daily re-targeting.
   Check before and after each target; log the residual every time.
 - **Threshold in sample-plane mm, not pixels**, tied to the beam size. The 2026-10-13
@@ -765,9 +769,10 @@ Having both cameras on one Pi is what makes this possible at all.
   apply it only on confirmation, and log it loudly.
 - Cherenkov caveat from the redesign note: PETG glows beam-on at 30 MeV, so anything
   in the DoseCam field of view is a *beam-correlated* background that a no-beam
-  background frame will not subtract. Keep fiducials on the OV5647 and out of the dose
-  ROI, and check whether the holder currently visible in the DoseCam background has a
-  beam-on component being attributed to scintillator signal.
+  background frame will not subtract. Keep fiducial features outside the fitted
+  dose ROI, and check whether the holder currently visible in the DoseCam background
+  has a beam-on component being attributed to target signal. Fiducial monitoring
+  uses that feature contrast separately from the dose fit.
 
 ### Run record
 

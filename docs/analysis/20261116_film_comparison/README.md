@@ -12,10 +12,11 @@ Figures: `frames.png` (the four pulses, same colour scale, fitted 1σ/2σ ellips
 
 ## Research update — 2026-11-16
 
-[Full sourced research](RESEARCH.md) and [five-slide presentation](../../slides/2026-11-dosecam-film/index.html).
-The current deck has five slides, in the requested order: system and
+[Full sourced research](RESEARCH.md) and [seven-slide presentation](../../slides/2026-11-dosecam-film/index.html).
+The current deck has seven slides: system and
 timing; all four fitted beam images with camera / film doses; error sources;
-Cherenkov internal reflection; planned alignment use with visible target features.
+Cherenkov internal reflection; fiducial positioning; the CoreXY frame replacement;
+and automated position-and-dose plans.
 A left outline, linked references and
 persistent day/night mode are included. Detailed light-yield and uncertainty
 calculations remain in the research notes.
@@ -40,12 +41,41 @@ crop. Their brightness is not a quantitative light-yield comparison.
 The dark parallel features in A1 and bright L-shaped structure in A3 are
 visible target/holder features. No archived note identifies them as Sharpie;
 the operator's recalled Sharpie observation is not attributed to these images.
-The proposed use is to track a target mark/edge relative to the fitted beam
-centroid. Feature tracking and alignment precision are not yet validated.
+Per E. Martin's update on 17 November, the plan is to add dedicated fiducial
+features at known target positions. These will calibrate image scale,
+orientation and perspective, and monitor the target relative to the fitted
+beam centroid and a reference pose. Existing contrast images are not images
+of installed fiducials. Tracking and alignment precision are not yet validated.
 
 The separate room-light targeting photograph on slide 1 comes from
 `PolyAlDosCal_20261013_160908_654522_000004.raw`, one 1000 µs targeting
 exposure with 100 µs delay. It is not a 100 µs dosimetry pulse image.
+
+## Rig upgrade slides
+
+Slide 6 uses an unchanged embedded PNG from `hardware/cad/FLASH Core XY.f3z`:
+nested model `4227a9f5-7de4-4df8-a545-9d4176d48033.f3d`, member
+`FusionAssetName[Active]/Previews/big.png`. The archive identifies FLASH Core XY,
+version 15, created 8 November 2026. The 1024×1024 image is copied byte for byte
+to the deck's `img/corexy_cad.png`; SHA-256:
+`9c8ab733d8e684cf6ab60e8760685a83b7477595aa912c8efce4fd5c4411a621`.
+The slide crops surrounding white space for display. It is a CAD preview of
+the rail/belt assembly, not an installed-stage photograph; the sample holder
+is not shown. Containment inside a frame and reduced susceptibility to bumps
+are the user's design goals, not measured performance claims. CoreXY is the
+belt-kinematics name; physical user coordinates remain X and Z.
+
+Slide 7 describes the planned position-and-dose workflow. The current
+`motor_control/sequencer.py` accepts positions, pulse counts and delays. It
+moves, checks arrival and settles, optionally arms DoseCam, requests the pulse
+sequence, finalizes the capture and continues to the next target, then parks.
+It records run events and firing requests; it does not stop on a measured-Gy
+threshold or perform fiducial checks. Those are planned extensions.
+The 26 October commissioning log documents simulator tests and deployment
+without real motor moves or PV writes; its live firing route was marked
+as not configured at that time. The slides do not imply that end-to-end automatic beam
+delivery or Gy feedback has been commissioned. No live controls were used
+or changed to prepare these slides.
 
 ## Light-mechanism conclusions
 

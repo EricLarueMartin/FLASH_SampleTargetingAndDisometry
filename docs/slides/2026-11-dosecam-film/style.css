@@ -19,3 +19,7 @@
 #scatter .error-table td:nth-child(2){white-space:normal}
 
 .alignment-examples{gap:1.4em;margin-top:.7em}.alignment-examples h2{font-size:.83em;margin-bottom:.35em}.alignment-examples svg{display:block;width:440.51px;max-width:100%;height:360px;margin:0 auto;overflow:hidden;background:#fff}.alignment-examples figcaption{font-size:.65em;margin:.45em 0}.reveal .alignment-plan{font-size:.86em;margin:.8em 0 .5em}#alignment .sources{margin-top:.8em}
+
+#alignment .alignment-examples svg{width:367.09px;height:300px}.fiducial-plan{gap:1.4em;margin-top:.6em}.fiducial-plan p{font-size:.78em}.reveal #alignment .small{font-size:.62em;margin-top:.45em}
+.corexy-layout{grid-template-columns:1.25fr 1fr;align-items:center;gap:1.4em}.corexy-figure svg{display:block;width:100%;height:auto;overflow:hidden;background:white}.corexy-figure figcaption{font-size:.6em}.upgrade-copy p{font-size:.85em;margin:0 0 .85em}.reveal .run-flow{display:block;width:100%;height:auto;margin:1em 0 .6em}.automation-layout{gap:1.5em}.automation-layout h2{font-size:1em}.automation-layout p{font-size:.87em}.reveal #automation .takeaway{margin-top:1.1em;font-size:.8em}
+@media(max-width:620px){.outline nav{overflow-x:auto;max-width:100%;padding-bottom:4px}.outline nav a{flex:0 0 auto;max-width:none}}

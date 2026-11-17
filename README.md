@@ -11,7 +11,7 @@ This repository replaces the separate `SynchronizedCameraDosimeter` repository a
 
 **Slides and documentation** (GitHub Pages, source `main` → `/docs`):
 
-- [DoseCam slides: film comparison, Cherenkov light and alignment](https://ericlaruemartin.github.io/FLASH_SampleTargetingAndDisometry/slides/2026-11-dosecam-film/)
+- [DoseCam slides: dosimetry, fiducial positioning, CoreXY and automated runs](https://ericlaruemartin.github.io/FLASH_SampleTargetingAndDisometry/slides/2026-11-dosecam-film/)
 - [All project slides and documentation](https://ericlaruemartin.github.io/FLASH_SampleTargetingAndDisometry/)
 
 ## Layout

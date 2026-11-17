@@ -2,21 +2,23 @@
 <html lang="en" data-theme="day">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DoseCam — film comparison and light mechanism</title>
+<title>DoseCam — dosimetry, positioning and automated runs</title>
 <link rel="stylesheet" href="../vendor/reveal.js-5.1.0/reset.css">
 <link rel="stylesheet" href="../vendor/reveal.js-5.1.0/reveal.css">
-<link rel="stylesheet" href="style.css?v=20261116-alignment2">
+<link rel="stylesheet" href="style.css?v=20261117-rig1">
 </head>
 <body>
 <aside class="outline" aria-label="Presentation outline">
   <a class="brand" href="#/system">DoseCam</a>
-  <p class="deck-meta">Film comparison &amp;<br>light mechanism<br><span>16 November 2026</span></p>
+  <p class="deck-meta">Dosimetry &amp; positioning<br><span>17 November 2026</span></p>
   <nav aria-label="Slides">
     <a href="#/system" data-slide="0"><span>01</span> System &amp; timing</a>
     <a href="#/comparison" data-slide="1"><span>02</span> Four pulses &amp; film doses</a>
     <a href="#/scatter" data-slide="2"><span>03</span> Error sources</a>
     <a href="#/geometry" data-slide="3"><span>04</span> Cherenkov light</a>
-    <a href="#/alignment" data-slide="4"><span>05</span> Alignment use</a>
+    <a href="#/alignment" data-slide="4"><span>05</span> Fiducial positioning</a>
+    <a href="#/corexy" data-slide="5"><span>06</span> CoreXY frame</a>
+    <a href="#/automation" data-slide="6"><span>07</span> Automated runs</a>
   </nav>
   <div class="outline-bottom">
     <a href="research.html" target="_blank" rel="noopener">Research notes &amp; full references ↗</a>
@@ -130,8 +132,8 @@
 </section>
 
 <section id="alignment">
-  <p class="eyebrow">13 October 2026 · PC / Al-tape target · individual 100 µs beam exposures</p>
-  <h1>Visible target features can support beam alignment</h1>
+  <p class="eyebrow">Feature contrast observed · fiducial calibration and monitoring planned</p>
+  <h1>Add fiducials to calibrate and monitor target position</h1>
   <div class="columns alignment-examples">
     <figure>
       <h2>Pulse 2 · A1</h2>
@@ -148,9 +150,58 @@
       <figcaption>A bright L-shaped target / holder feature is also visible.</figcaption>
     </figure>
   </div>
-  <p class="alignment-plan"><b>Planned use:</b> Detect a mark or edge and compare its position with the fitted beam centroid in the same camera coordinates. Track their relative displacement for alignment.</p>
-  <p class="small">These images demonstrate feature contrast. Automated tracking and alignment precision have not yet been validated.</p>
-  <p class="sources">Image source: <a href="../../analysis/20261014/positions_suppressed.png" target="_blank">full six-panel analysis</a> · <a href="../../analysis/20261014/analysis_scripts.tgz" target="_blank">archived processing scripts (shift.py)</a> · <a href="../../analysis/20261116_film_comparison/README.md#alignment-image-provenance" target="_blank">capture provenance</a>.<br>Same pixel crop, separate contrast stretches. Gaussian smoothing σ = 6 px; central beam region masked to 3.5σ (white), cyan = fitted beam location. Visible marks are not identified as Sharpie in the archive.</p>
+  <div class="columns fiducial-plan">
+    <p><b>Calibrate:</b> Add fiducial features at known target positions. Use them to calibrate image scale, orientation and perspective in the DoseCam view.</p>
+    <p><b>Monitor:</b> Track the fiducials relative to the beam centroid and a reference pose. Flag target shifts or rotation during operation.</p>
+  </div>
+  <p class="small">The images show existing feature contrast, not installed fiducials. Fiducial tracking and alignment precision are planned work.</p>
+  <p class="sources">13 Oct 2026, individual 100 µs exposures. <a href="../../analysis/20261014/positions_suppressed.png" target="_blank">Original analysis</a> · <a href="../../analysis/20261014/analysis_scripts.tgz" target="_blank">processing scripts (shift.py)</a> · <a href="../../analysis/20261116_film_comparison/README.md#alignment-image-provenance" target="_blank">provenance and fiducial plan</a>.<br>Same pixel crop, separate contrast stretches. Gaussian smoothing σ = 6 px; beam region masked to 3.5σ (white), cyan = beam location. Sharpie attribution unconfirmed. Fiducial plan: E. Martin, 17 Nov 2026.</p>
+</section>
+
+<section id="corexy">
+  <p class="eyebrow">Mechanical replacement · CoreXY-style belt drive · design in progress</p>
+  <h1>Keep the motion inside a frame</h1>
+  <div class="columns corexy-layout">
+    <figure class="corexy-figure">
+      <svg viewBox="20 185 985 660" role="img" aria-label="Actual FLASH Core XY CAD preview showing the rectangular rail and belt assembly, end pulleys and a corner-mounted motor. This is a design preview, not a photograph of an installed stage.">
+        <image href="img/corexy_cad.png" width="1024" height="1024"/>
+      </svg>
+      <figcaption>FLASH Core XY CAD design, v15 · 8 Nov 2026. Rail / belt assembly; sample holder not shown.</figcaption>
+    </figure>
+    <div class="upgrade-copy">
+      <p>Replace the existing actuator with a <b>CoreXY system whose carriage travels within a fixed frame</b>.</p>
+      <p><b>Less susceptible to bumps:</b> The surrounding frame reduces exposure to accidental contact that could disturb the target position.</p>
+      <p>Integrate the new stage, then verify its travel, repeatability and position calibration.</p>
+    </div>
+  </div>
+  <p class="sources">Actual embedded preview from <a href="https://github.com/EricLarueMartin/FLASH_SampleTargetingAndDisometry/blob/main/hardware/cad/FLASH%20Core%20XY.f3z" target="_blank" rel="noopener">FLASH Core XY.f3z</a> · <a href="../../ROADMAP_INTEGRATED_RIG.md" target="_blank">project kinematics roadmap</a> · <a href="../../analysis/20261116_film_comparison/README.md#rig-upgrade-slides" target="_blank">asset provenance and design status</a>.<br>Frame containment and bump resistance: design goals, E. Martin, 17 Nov 2026. CoreXY describes the belt kinematics; physical user coordinates remain X and Z.</p>
+</section>
+
+<section id="automation">
+  <p class="eyebrow">Control-system changes · planned position-and-dose workflow</p>
+  <h1>Specify the positions and dose plan, then run the sequence</h1>
+  <svg class="run-flow" viewBox="0 0 1240 155" role="img" aria-label="Workflow: define the position and dose plan, move to the target, confirm arrival and settle, fire while DoseCam records, then repeat at the next position.">
+    <defs><marker id="runArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--blue)"/></marker></defs>
+    <path d="M80 47H1155" stroke="var(--rule)" stroke-width="3" fill="none"/>
+    <g fill="var(--bg)" stroke="var(--blue)" stroke-width="3"><circle cx="105" cy="47" r="23"/><circle cx="355" cy="47" r="23"/><circle cx="605" cy="47" r="23"/><circle cx="855" cy="47" r="23"/><circle cx="1105" cy="47" r="23"/></g>
+    <g text-anchor="middle" class="svg-label"><text x="105" y="54">1</text><text x="355" y="54">2</text><text x="605" y="54">3</text><text x="855" y="54">4</text><text x="1105" y="54">5</text></g>
+    <g text-anchor="middle" class="svg-label"><text x="105" y="105">Define plan</text><text x="355" y="105">Move</text><text x="605" y="105">Confirm + settle</text><text x="855" y="105">Fire + record</text><text x="1105" y="105">Next position</text></g>
+    <g fill="none" stroke="var(--blue)" stroke-width="2" marker-end="url(#runArrow)"><path d="M155 47H295"/><path d="M405 47H545"/><path d="M655 47H795"/><path d="M905 47H1045"/></g>
+  </svg>
+  <div class="columns automation-layout">
+    <div>
+      <h2>Define the experiment once</h2>
+      <p>Select the sample positions and the <b>prescribed dose at each position</b>. Set the pulse count and spacing used to deliver that plan.</p>
+      <p>Preview the route, then start the run. The sequencer visits each target and returns to the access position when finished.</p>
+    </div>
+    <div>
+      <h2>Measure each delivered pulse</h2>
+      <p>Arm DoseCam before firing. Capture one synchronized image per pulse to check beam position, shape and dose.</p>
+      <p>Associate captures with each target in the run. Planned fiducial tracking checks position calibration and drift.</p>
+    </div>
+  </div>
+  <p class="takeaway"><b>Current software:</b> position, pulse-count and timing sequences. <b>Planned:</b> dose-based feedback and fiducial checks.</p>
+  <p class="sources"><a href="../../history/COMBINE_SINGLE_PI.md" target="_blank">Run-page implementation and commissioning log</a> · <a href="https://github.com/EricLarueMartin/FLASH_SampleTargetingAndDisometry/blob/main/motor_control/sequencer.py" target="_blank" rel="noopener">sequencer source</a> · <a href="../../ROADMAP_INTEGRATED_RIG.md" target="_blank">dose-plan roadmap</a>.<br>The current engine accepts positions, pulse counts and delays, without prescribed-Gy stopping. Recorded validation used an emulator; live firing commissioning is not documented.</p>
 </section>
 
 </div></main>
