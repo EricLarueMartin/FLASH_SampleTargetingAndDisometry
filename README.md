@@ -9,8 +9,10 @@ position-and-fire, `/settings/` firing route.
 This repository replaces the separate `SynchronizedCameraDosimeter` repository and the
 `FLASH` working repository (motion code, stepper firmware, deploy files).
 
-**Slides / docs site (GitHub Pages, source `main` → `/docs`):**
-<https://ericlaruemartin.github.io/FLASH_SampleTargetingAndDisometry/>
+**Slides and documentation** (GitHub Pages, source `main` → `/docs`):
+
+- [DoseCam slides: film comparison, Cherenkov light and alignment](https://ericlaruemartin.github.io/FLASH_SampleTargetingAndDisometry/slides/2026-11-dosecam-film/)
+- [All project slides and documentation](https://ericlaruemartin.github.io/FLASH_SampleTargetingAndDisometry/)
 
 ## Layout
 

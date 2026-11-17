@@ -8,6 +8,15 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-17 — direct slide link before approved initial push
+
+- Status: README link verified against the docs layout; Eric explicitly
+  approved the full initial public push, including existing project history.
+- Added a direct GitHub Pages link to the five-slide DoseCam presentation in
+  the root README, retaining the documentation-site link and main/docs source.
+- Files: README.md and this log. No hardware or application changes.
+- Rollback: revert this README-link commit without rewriting published history.
+
 ## 2026-11-17 — publish reviewed DoseCam slides and research
 
 - Status: local checks verified; commit and push to the specified GitHub
