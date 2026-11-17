@@ -8,6 +8,30 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-17 — sourced torque estimate and three-holder CoreXY v23
+
+- Status: documentation and CAD preview verified locally in day/night mode;
+  prepared for the existing authorized GitHub Pages publication workflow.
+- Slide 6 assumes 3 kg total moving mass, equal two-motor load sharing,
+  a 6.38 mm belt-path radius and 80% efficiency. The gravity estimate is
+  0.117 N·m per motor, or approximately 0.24 N·m with a 2× margin.
+- Cited manufacturer specifications for Twotrees 17HS4401 (at least
+  0.42 N·m) and STEPPERONLINE 17HS15-1504S-X1 (0.45 N·m), both explicitly
+  holding ratings at 1.5 A/phase. Installed motor identity and running-torque
+  performance remain unverified; no hardware sufficiency claim is made.
+- Replaced the CAD archive and unchanged embedded preview with Eric's v23
+  export showing three holders. Uses Eric's revised estimate of about 75 g
+  each (225 g total), included in the assumed 3 kg. Documented the rough
+  uniform-shell/infill calculation from the supplied geometry and its limits.
+- Files: hardware/cad/FLASH Core XY.f3z;
+  docs/slides/2026-11-dosecam-film/{index.html,style.css,img/corexy_cad.png};
+  docs/analysis/20261116_film_comparison/README.md; this log.
+- Validation: independent arithmetic/source review, CAD and preview hashes,
+  seven-slide/local-link checks, Git whitespace checks and browser layout QA.
+  No device operations or application changes.
+- Rollback: revert this commit to restore the previous archive and slides;
+  no physical hardware or application rollback is needed.
+
 ## 2026-11-17 — refreshed CoreXY v21 and existing GUI example
 
 - Status: local slides visually verified in day/night mode, ready for the

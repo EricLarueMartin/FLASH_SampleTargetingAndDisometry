@@ -5,7 +5,7 @@
 <title>DoseCam — dosimetry, positioning and automated runs</title>
 <link rel="stylesheet" href="../vendor/reveal.js-5.1.0/reset.css">
 <link rel="stylesheet" href="../vendor/reveal.js-5.1.0/reveal.css">
-<link rel="stylesheet" href="style.css?v=20261117-gui1">
+<link rel="stylesheet" href="style.css?v=20261117-torque1">
 </head>
 <body>
 <aside class="outline" aria-label="Presentation outline">
@@ -163,18 +163,23 @@
   <h1>Keep the motion inside a frame</h1>
   <div class="columns corexy-layout">
     <figure class="corexy-figure">
-      <svg viewBox="20 175 985 670" role="img" aria-label="Updated FLASH Core XY v21 CAD preview showing the rail and frame assembly, two motors, central holder, MakerBeam dummy and proposed LM8UU mounting brackets.">
-        <image href="img/corexy_cad.png?v=21" width="1024" height="1024"/>
+      <svg viewBox="20 175 985 670" role="img" aria-label="Updated FLASH Core XY v23 CAD preview showing three holders on the central rail, the frame assembly, two motors, MakerBeam dummy and proposed LM8UU mounting brackets.">
+        <image href="img/corexy_cad.png?v=23" width="1024" height="1024"/>
       </svg>
-      <figcaption>FLASH Core XY CAD design, v21 · 17 Nov 2026. Includes MakerBeam dummy and proposed LM8UU brackets.</figcaption>
+      <figcaption>FLASH Core XY v23 · 17 Nov 2026. Three holders at ~75 g each (~225 g total), included in the 3 kg assumed moving load.</figcaption>
     </figure>
     <div class="upgrade-copy">
-      <p>Replace the existing actuator with a <b>CoreXY system whose carriage travels within a fixed frame</b>.</p>
-      <p><b>Less susceptible to bumps:</b> The surrounding frame reduces exposure to accidental contact that could disturb the target position.</p>
-      <p>The updated assembly includes a <b>MakerBeam dummy and LM8UU mounting brackets</b>. Check travel and clearances during integration.</p>
+      <p>Replace the actuator with <b>CoreXY motion inside a fixed frame</b>, reducing exposure to bumps that could shift the target.</p>
+      <div class="torque-estimate">
+        <h2>3 kg moving load · 2× margin</h2>
+        <p class="torque-result"><b>~0.24 N·m per motor</b></p>
+        <p class="torque-assumptions">2 × m g r / (2η); two-motor load sharing, r ≈ 6.38 mm and assumed η = 0.80. Gravity estimate before the 2× margin: 0.117 N·m per motor.</p>
+        <p class="torque-specs"><b>Reference holding torque</b> at 1.5 A/phase:<br>Twotrees 17HS4401: <b>≥0.42 N·m</b> <a href="https://twotrees3d.com/products/nema-17-stepper-motor-5pcs-17hs4401-nema17-42-motor-4-lead-42bygh-1-5a-with-dupont-line-for-3d-printer-and-cnc" target="_blank" rel="noopener">[6]</a><br>STEPPERONLINE: <b>0.45 N·m</b> <a href="https://omc-stepperonline.com/download/17HS15-1504S-X1.pdf" target="_blank" rel="noopener">[7]</a></p>
+        <p class="torque-caveat">Holding ratings are stationary values. Available running torque, acceleration and bearing drag still need checking.</p>
+      </div>
     </div>
   </div>
-  <p class="sources">Actual embedded preview from <a href="https://github.com/EricLarueMartin/FLASH_SampleTargetingAndDisometry/blob/main/hardware/cad/FLASH%20Core%20XY.f3z" target="_blank" rel="noopener">FLASH Core XY.f3z</a> · <a href="../../ROADMAP_INTEGRATED_RIG.md" target="_blank">project kinematics roadmap</a> · <a href="../../analysis/20261116_film_comparison/README.md#rig-upgrade-slides" target="_blank">asset provenance and design status</a>.<br>Frame containment and bump resistance: design goals, E. Martin, 17 Nov 2026. CoreXY describes the belt kinematics; physical user coordinates remain X and Z.</p>
+  <p class="sources"><a href="https://github.com/EricLarueMartin/FLASH_SampleTargetingAndDisometry/blob/main/hardware/cad/FLASH%20Core%20XY.f3z" target="_blank" rel="noopener">CAD source</a> · <a href="../../analysis/20261116_film_comparison/README.md#corexy-torque-estimate" target="_blank">calculation, holder estimate and provenance</a> · holding specifications: [6] <a href="https://twotrees3d.com/products/nema-17-stepper-motor-5pcs-17hs4401-nema17-42-motor-4-lead-42bygh-1-5a-with-dupont-line-for-3d-printer-and-cnc" target="_blank" rel="noopener">Twotrees 17HS4401</a>, [7] <a href="https://www.omc-stepperonline.com/3pcs-nema-17-bipolar-45ncm-63-74oz-in-1-5a-42x42x39mm-4-wires-w-1m-pin-connector-3-17hs15-1504s-x1" target="_blank" rel="noopener">STEPPERONLINE 17HS15-1504S-X1</a>.<br>Reference motor families match the purchased specifications; the installed pair is not positively identified. The 3 kg load and 80% efficiency are assumptions, not measurements. CoreXY physical user coordinates remain X and Z.</p>
 </section>
 
 <section id="automation">

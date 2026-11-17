@@ -54,21 +54,59 @@ exposure with 100 µs delay. It is not a 100 µs dosimetry pulse image.
 ## Rig upgrade slides
 
 Slide 6 uses an unchanged embedded PNG from `hardware/cad/FLASH Core XY.f3z`:
-nested model `222bcf11-8163-4af9-8acd-932c9e2ee0e9.f3d`, member
+nested model `be8cead4-aaac-45fb-b7e0-ac6393ba87d1.f3d`, member
 `FusionAssetName[Active]/Previews/big.png`. The archive identifies FLASH Core XY,
-version 21, created 17 November 2026 at 17:21 EST. The 1024×1024 image is copied byte for byte
+version 23, created 17 November 2026 at 18:15 EST. The 1024×1024 image is copied byte for byte
 to the deck's `img/corexy_cad.png`; SHA-256:
-`633a7ae2d9a11a2cc87a90516e60dd6b45c730243396ef50fb6d5f49d152c9f0`.
+`61e1e402747028d2de66927c96650e4e73b30828b68a814704044025d1e1c63e`.
 The slide crops surrounding white space for display. It is a CAD preview of
-the rail/belt assembly and central holder, not an installed-stage photograph.
+the rail/belt assembly and three holders, not an installed-stage photograph.
 The updated model includes the user's MakerBeam dummy and linked
 `LM8UUonMakerBeamXL` v3 bracket component. Bracket fit and strength have not
 been assessed for the presentation. The repository CAD matches the updated
 `FLASH/FLASH Core XY.f3z` export byte for byte; archive SHA-256:
-`4d5fa97f0efcc5aef2e06e8aae687f19eb3103e3714cf5ca4348d0f1404b5c5d`.
+`34c3a2f023a999bdfcf550c61bba87ddbf163a7a9297ad3eabb01be80cceda88`.
 Containment inside a frame and reduced susceptibility to bumps
 are the user's design goals, not measured performance claims. CoreXY is the
 belt-kinematics name; physical user coordinates remain X and Z.
+
+### CoreXY torque estimate
+
+Slide 6 assumes a **3 kg total moving load**, including three printed holders
+at approximately **75 g each (225 g combined)**, per E. Martin's revised estimate
+on 17 November. This replaces the earlier 125 g-per-holder estimate; the total
+design load remains 3 kg and the holders are not added to it a second time.
+
+For standard symmetric direct-drive CoreXY with equal load sharing in a pure
+vertical move, each motor's near-static gravity torque is `m*g*r/(2*eta)`.
+With `m=3 kg`, `g=9.80665 m/s²`, CAD belt-path radius `r≈0.00638 m` and assumed
+drive efficiency `eta=0.80`, this is **0.117312 N·m per motor**. Applying the
+user-requested **2× design margin** gives **0.234624 N·m**, rounded to
+**0.24 N·m per motor** on the slide. Acceleration, additional drag, belt preload
+and actual motor/driver speed-torque performance remain to be checked.
+
+Reference manufacturer ratings, both explicitly **holding torque** at
+**1.5 A/phase**:
+
+- [Twotrees 17HS4401](https://twotrees3d.com/products/nema-17-stepper-motor-5pcs-17hs4401-nema17-42-motor-4-lead-42bygh-1-5a-with-dupont-line-for-3d-printer-and-cnc): specification table gives at least 420 mN·m = **0.42 N·m**.
+- [STEPPERONLINE 17HS15-1504S-X1](https://www.omc-stepperonline.com/3pcs-nema-17-bipolar-45ncm-63-74oz-in-1-5a-42x42x39mm-4-wires-w-1m-pin-connector-3-17hs15-1504s-x1), [datasheet](https://omc-stepperonline.com/download/17HS15-1504S-X1.pdf): **45 N·cm = 0.45 N·m**.
+
+These match the purchased specification families; the installed pair has not
+been positively identified. Holding torque is a stationary rated-current value,
+not an available-running-torque guarantee; see [Oriental Motor's distinction](https://www.orientalmotor.co.in/in/tech/reference/stepping-motor03).
+No private purchase receipts or account details are published here.
+
+Holder mass cross-check: the user supplied surface area `A=55,227 mm²`, solid
+CAD volume `V=98,627 mm³`, two walls of `0.45+0.42=0.87 mm`, and 15% infill.
+A first-order equivalent uniform shell gives `V_shell≈A*t=48,047 mm³` and
+`V_plastic≈V_shell+0.15*(V-V_shell)=55,634 mm³` (55.6 cm³). At an **assumed**
+plastic density of 1.2–1.3 g/cm³ this is roughly **67–72 g per holder**. This
+is only a rough consistency check: real top/bottom skins, overlapping shells,
+geometry, supports and slicing rules can change the result. The slide retains
+the user's approximately 75 g planning estimate, rather than claiming a
+measured or slicer-calculated mass.
+
+### Existing Run GUI example
 
 Slide 7 shows the existing Run GUI with an illustrative two-plate plan:
 six selected positions, twelve programmed pulses and 1000 ms spacing.
