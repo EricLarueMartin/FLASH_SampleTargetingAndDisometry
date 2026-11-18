@@ -261,11 +261,15 @@ film peak 40.00 Gy. Camera amplitudes are the deployed-code fits in
 | Source | Estimate | Basis |
 |---|---|---|
 | Camera peak fit, combined statistics | **0.35–0.39% nominal 1σ** | Residual-scaled covariance of the archived fits; photon, read/background and other residual noise are already included. No separate photon/read term is added; see the [audit](scripts/fit_noise_audit.json) |
-| Hit-masking / fit-method choice | ~1 % (mostly common-mode) | Amplitude moves 1–2 % between masking thresholds (`scripts/robust.py`) |
+| Hit-masking / fit-method choice* | ~1 % sensitivity | Amplitude moves 1–2 % between masking thresholds (`scripts/robust.py`); a common scale shift is absorbed by calibration against film |
 | PC / Al-tape target | Likely nonuniform; contribution unmeasured | Tape surface, contact and local reflectivity can vary. The ~9 px spot drift can sample a different optical response; no quantitative target uncertainty has been established |
 | Gate timing | Not expected to contribute appreciably | Operator scanned delay and duration to full-signal plateaus, then selected operating margins much larger than expected jitter; no numerical percent bound assigned |
 | Film dose reference | **~3% (k = 1) literature benchmark** | The workbook supplies intensity SD, not the complete dose uncertainty. A published EBT-XD budget gives ~2.8% excluding delivery stability; protocol dependent, not verified at our 40 Gy. See [audit and sources](RESEARCH.md#workbook-audit-and-absolute-dose-uncertainty-2026-11-18) |
 | Film rate response | Mixed evidence; minor caveat | Studies disagree within different tested conditions; no rate-related bias is established for this run. See [research](RESEARCH.md#5-ebt-xd-at-40-gy) |
+
+*Variation from choosing different masking/fit procedures can be eliminated by
+using one standard procedure for camera calibration against film and all
+subsequent measurements.
 
 The camera fit term is one combined contribution, not the quadrature sum of
 the empirical covariance and the component model checks below. Masking-method

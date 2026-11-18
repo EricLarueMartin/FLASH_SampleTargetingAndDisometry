@@ -8,6 +8,19 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-18 — standard masking procedure footnote
+
+- Status: presentation wording verified locally and prepared for the authorized
+  Pages publication workflow. No fits, calibration values or device changes.
+- Added the requested asterisk to masking/fit choices: variation from selecting
+  different procedures can be eliminated by using one standard procedure for
+  camera calibration against film and later measurements. A common amplitude
+  scale shift is absorbed by that calibration.
+- Files: docs/slides/2026-11-dosecam-film/index.html;
+  docs/analysis/20261116_film_comparison/README.md; this log.
+- Validation: wording review, Git whitespace and browser layout checks.
+- Rollback: revert this documentation commit; no device rollback.
+
 ## 2026-11-18 — film workbook SD and absolute-dose uncertainty
 
 - Status: read-only workbook/source audit and presentation correction prepared
