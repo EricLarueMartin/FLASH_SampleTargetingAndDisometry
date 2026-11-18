@@ -8,6 +8,27 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-18 — proposed DoseCam slides after uncertainty review
+
+- Local preview verified in the browser with the outline and both color modes.
+- Slides 2 and 3 show the four calibration pairs, measured masking sensitivity,
+  nominal fit precision, and the HIGS film–alanine comparison. Slides 4 and 6
+  clarify the first-escape tilt and the assumed motor load split.
+- Files are `docs/slides/2026-11-dosecam-film/index.html` and its `style.css`.
+  Rollback by reverting these slide edits and this entry.
+
+## 2026-11-18 — independent review of DoseCam and film error sources
+
+- Verified locally against the four archived raw frames, production fitter and
+  reported film readings. The review distinguishes in-sample dispersion,
+  nominal peak precision, procedure sensitivity and absolute dose uncertainty.
+- Added a primary literature review including HIGS alanine and OSLD comparisons,
+  and a read-only script reproducing the threshold and spatial covariance checks.
+- Files are `docs/analysis/20261116_film_comparison/REVIEW_uncertainties.md`,
+  `scripts/production_fit_sensitivity_audit.py` in that analysis directory,
+  the analysis README link and this entry. Local review only.
+- Rollback by removing the two new analysis files, README link and this entry.
+
 ## 2026-11-18 — standard masking procedure footnote
 
 - Status: presentation wording verified locally and prepared for the authorized

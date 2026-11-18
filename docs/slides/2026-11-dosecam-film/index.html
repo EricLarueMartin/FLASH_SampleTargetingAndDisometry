@@ -5,7 +5,7 @@
 <title>DoseCam — dosimetry, positioning and automated runs</title>
 <link rel="stylesheet" href="../vendor/reveal.js-5.1.0/reset.css">
 <link rel="stylesheet" href="../vendor/reveal.js-5.1.0/reveal.css">
-<link rel="stylesheet" href="style.css?v=20261117-torque1">
+<link rel="stylesheet" href="style.css?v=20261118-review">
 </head>
 <body>
 <aside class="outline" aria-label="Presentation outline">
@@ -61,38 +61,38 @@
 </section>
 
 <section id="comparison">
-  <p class="eyebrow">13 October 2026 · PolyAlDosCal … 000006 · EBT-XD lot 06092501</p>
-  <h1>Four beam pulses: camera fits and film dosimetry</h1>
-  <figure class="frame-figure"><img src="img/frames.png" alt="Four background-subtracted beam images on a common color scale, with 1-sigma solid and 2-sigma dashed Gaussian fit ellipses. Pulse 1 B1: film 40.94 Gy; pulse 2 A1: 39.61 Gy; pulse 3 A2: 39.75 Gy; pulse 4 A3: 39.70 Gy."><figcaption>Same net-DN scale; 3 × 3 median for display. Cyan ellipses: fitted 1σ (solid) and 2σ (dashed). Prompt sensor hits are masked in the fit.</figcaption></figure>
+  <p class="eyebrow">13 October 2026 · EBT-XD lot 06092501 · 24-hour film readout</p>
+  <h1>Four pulses near 40 Gy set the camera dose scale</h1>
+  <figure class="frame-figure"><img src="img/frames.png" alt="Four beam images on a common color scale. Cyan ellipses show the Gaussian fits for wells B1, A1, A2 and A3 in pulse order."><figcaption>All four images use the same intensity scale. Solid and dashed cyan ellipses mark one and two fitted standard deviations. A 3 × 3 median filter is used for display.</figcaption></figure>
   <table class="comparison-table">
-    <thead><tr><th>Pulse → film well</th><th>Fit peak ± 1σ (DN)</th><th>Camera peak (Gy)</th><th>EBT-XD peak (Gy)</th><th>Camera − film</th></tr></thead>
+    <thead><tr><th scope="col">Pulse / well</th><th scope="col">Fit peak ± nominal 1σ (DN)</th><th scope="col">Camera peak (Gy)</th><th scope="col">Film peak (Gy)</th><th scope="col">Difference from film</th></tr></thead>
     <tbody>
-    <tr><td>1 → B1</td><td>42.24 ± 0.16</td><td>39.99</td><td><b>40.94</b></td><td>−2.3%</td></tr>
-    <tr><td>2 → A1</td><td>42.92 ± 0.17</td><td>40.63</td><td><b>39.61</b></td><td>+2.6%</td></tr>
-    <tr><td>3 → A2</td><td>42.45 ± 0.15</td><td>40.19</td><td><b>39.75</b></td><td>+1.1%</td></tr>
-    <tr><td>4 → A3</td><td>41.40 ± 0.15</td><td>39.19</td><td><b>39.70</b></td><td>−1.3%</td></tr>
+    <tr><td>1 / B1</td><td>42.24 ± 0.16</td><td>39.99</td><td><b>40.94</b></td><td>−2.33%</td></tr>
+    <tr><td>2 / A1</td><td>42.92 ± 0.17</td><td>40.63</td><td><b>39.61</b></td><td>+2.57%</td></tr>
+    <tr><td>3 / A2</td><td>42.45 ± 0.15</td><td>40.19</td><td><b>39.75</b></td><td>+1.11%</td></tr>
+    <tr><td>4 / A3</td><td>41.40 ± 0.15</td><td>39.19</td><td><b>39.70</b></td><td>−1.28%</td></tr>
     </tbody>
   </table>
-  <p class="comparison-summary"><b>Calibration: 1.0563 DN/Gy</b> = mean fit peak / mean film dose. Camera/film ratio sample SD: <b>2.2%</b> (n = 4). Spot σ ≈ 20 × 35 px; centroid moves ~9 px.</p>
-  <p class="sources">Measured data and methods: <a href="../../analysis/20261116_film_comparison/README.md" target="_blank">comparison analysis</a> · <a href="../../analysis/20261116_film_comparison/scripts/peak_fit_uncertainty.csv" target="_blank">nominal camera fit errors</a> · <a href="../../analysis/20261116_film_comparison/scripts/figs.py" target="_blank">figure source</a>.<br>Camera errors: residual-scaled covariance, reconstructed from archived fit parameters; nominal 1σ with independent-pixel approximation. Film read by J. Sherman; workbook reports intensity SD, with no complete dose-uncertainty budget. Frame → well order: B1, A1, A2, A3. Calibration unchanged.</p>
+  <p class="takeaway comparison-summary">The mean camera peak divided by the mean film dose gives <b>1.0563 DN/Gy</b>. The camera/film ratios have a <b>2.23% sample SD relative to their mean</b> across these same four calibration shots.</p>
+  <p class="sources">Film dosimetry by J. Sherman. <a href="../../analysis/20261014/crosscal_fits_PolyAlDosCal_000006.csv" target="_blank" rel="noopener">Archived fits</a> · <a href="../../analysis/20261116_film_comparison/scripts/peak_fit_uncertainty.csv" target="_blank" rel="noopener">Peak standard errors</a> · <a href="../../analysis/20261116_film_comparison/REVIEW_uncertainties.md" target="_blank" rel="noopener">Calibration and film readings</a></p>
 </section>
 
 <section id="scatter">
-  <p class="eyebrow">Observed camera / film ratio scatter: 2.2% sample SD · four paired pulses</p>
-  <h1>Error sources and what the data constrain</h1>
+  <p class="eyebrow">Four-pulse calibration near 40 Gy</p>
+  <h1>What limits the peak dose measurement?</h1>
   <table class="error-table">
-    <thead><tr><th>Source</th><th>Size / status</th><th>Evidence and limitation</th></tr></thead>
+    <thead><tr><th scope="col">Source</th><th scope="col">Size or status</th><th scope="col">Evidence from the run or the literature</th></tr></thead>
     <tbody>
-    <tr><td><b>Camera peak fit — combined statistics</b></td><td><b>0.35–0.39%</b> nominal 1σ</td><td>Residual-scaled parameter covariance already includes photon, read/background and other residual noise. No separate photon or read term is added. <a href="../../analysis/20261116_film_comparison/scripts/peak_fit_uncertainty.csv" target="_blank">[1]</a></td></tr>
-    <tr><td><b>Masking / fit choices*</b></td><td>~1% sensitivity</td><td>Amplitude shifts 1–2% between mask thresholds; a common scale shift is absorbed by calibration against film.</td></tr>
-    <tr><td><b>PC / Al-tape target</b></td><td>Likely nonuniform</td><td>Tape surface, contact and local reflectivity can vary across the target. The ~9 px spot drift can therefore change collected light at the same dose; the size of this effect is unmeasured.</td></tr>
-    <tr><td><b>Gate timing</b></td><td>Not expected to contribute appreciably</td><td>Delay and duration scans reached full-signal plateaus; operating margins are well beyond expected jitter (operator check).</td></tr>
-    <tr><td><b>Film dose reference</b></td><td><b>~3% (k = 1)</b> literature benchmark</td><td>Workbook intensity SD is not a full dose uncertainty. One EBT-XD budget gives ≈2.8% excluding delivery variation <a href="https://doi.org/10.1002/mp.70022" target="_blank" rel="noopener">[3]</a>. Protocol dependent; not verified for our 40 Gy readings.</td></tr>
-    <tr><td><b>Film rate response</b></td><td>Mixed evidence; minor caveat</td><td>Some EBT-XD studies report UHDR overresponse <a href="https://doi.org/10.3389/fphy.2025.1474416" target="_blank" rel="noopener">[2a]</a><a href="https://doi.org/10.3390/app15148101" target="_blank" rel="noopener">[2b]</a>, others no significant dependence within tested ranges <a href="https://doi.org/10.1002/acm2.13270" target="_blank" rel="noopener">[2c]</a><a href="https://doi.org/10.1016/j.ejmp.2026.105723" target="_blank" rel="noopener">[2d]</a>. No rate-related bias is established for this run.</td></tr>
+    <tr><td><b>Camera peak fit</b></td><td><b>0.35–0.39%</b> nominal 1σ</td><td>The fit includes photon and background noise together. Its reported error assumes independent pixels. Neighboring residuals show spatial structure. <a href="../../analysis/20261116_film_comparison/scripts/peak_fit_uncertainty.csv" target="_blank" rel="noopener">Fit results</a></td></tr>
+    <tr><td><b>Masking threshold*</b></td><td><b>≤0.08 percentage points</b></td><td>Largest change in one shot’s camera–film difference from the 40 DN default, after recalibrating at each threshold tested from 20 to 60 DN. <a href="../../analysis/20261116_film_comparison/scripts/production_fit_sensitivity_audit.py" target="_blank" rel="noopener">Fit audit</a></td></tr>
+    <tr><td><b>Aluminum-tape target</b></td><td>Unquantified</td><td>The centroid moved up to <b>10.7 pixels</b>. Tape contact and reflectivity likely vary across the sheet. Their effect on collected light is unmeasured.</td></tr>
+    <tr><td><b>Gate timing</b></td><td>Full pulse expected</td><td>Delay and duration scans both reached full-signal plateaus. The operating margins exceeded the expected timing jitter.</td></tr>
+    <tr><td><b>Film dose calibration</b></td><td><b>~3%</b> published benchmark (k = 1)</td><td>The workbook reports intensity SD. Absolute uncertainty for these wells is unreported. Published budgets depend on the film and scanner protocol. <a href="https://doi.org/10.1002/mp.70022" target="_blank" rel="noopener">Jung, Table 4</a> · <a href="https://doi.org/10.1002/pro6.1236" target="_blank" rel="noopener">Raj, Table 1</a></td></tr>
+    <tr><td><b>Film dose-rate response</b></td><td>Minor caveat</td><td>At HIGS, EBT-XD and alanine agreed within <b>~2.5% on average</b> for 11 single pulses near 30 Gy. Other electron studies found <a href="https://doi.org/10.3389/fphy.2025.1474416" target="_blank" rel="noopener">overresponse</a> or <a href="https://doi.org/10.1016/j.ejmp.2026.105723" target="_blank" rel="noopener">no clear trend</a> under different pulse conditions. <a href="https://eprbiodose2026.org/doc/EPRBioDose2026_Abstract_Book_Final_Website_Version.pdf#page=95" target="_blank" rel="noopener">Sherman et al., P51</a></td></tr>
     </tbody>
   </table>
-  <p class="takeaway"><b>Camera noise is counted once.</b> Film calibration has a shared scale uncertainty. The literature total is not added to the workbook SD; these rows are not summed as independent uncertainties.</p>
-  <p class="sources">*Variation from choosing different masking/fit procedures can be eliminated by using one standard procedure for camera calibration against film and all subsequent measurements.<br>[1] <a href="../../analysis/20261116_film_comparison/scripts/fit_noise_audit.json" target="_blank">noise-accounting audit</a> · <a href="../../analysis/20261116_film_comparison/README.md#camera-peak-fit-error-and-noise-accounting" target="_blank">method and assumptions</a>. Nominal covariance assumes independent pixels; background is correlated.<br>Rate evidence: [2a] <a href="https://doi.org/10.3389/fphy.2025.1474416" target="_blank" rel="noopener">Del Sarto (2025)</a>, [2b] <a href="https://doi.org/10.3390/app15148101" target="_blank" rel="noopener">Cayley (2025)</a>; no significant dependence: [2c] <a href="https://doi.org/10.1002/acm2.13270" target="_blank" rel="noopener">Szpala (2021)</a>, [2d] <a href="https://doi.org/10.1016/j.ejmp.2026.105723" target="_blank" rel="noopener">Schott (2026)</a>. Different conditions; no rate correction assigned.<br>Absolute-dose budgets: [3] <a href="https://doi.org/10.1002/mp.70022" target="_blank" rel="noopener">Jung (2025), Table 4</a>: 3.5% k = 1 at ~22 Gy, including 2% beam stability; ≈2.8% without that term (our calculation). <a href="https://doi.org/10.1002/pro6.1236" target="_blank" rel="noopener">Raj (2024), Table 1</a>: 1.52% k = 1 at 0.5–30 Gy. <a href="https://doi.org/10.1002/mp.14497" target="_blank" rel="noopener">AAPM TG-235 §6.H</a>: evaluate each protocol.</p>
+  <p class="takeaway">A shared film calibration error would shift all four camera doses together. The <b>2.23% shot-to-shot ratio scatter</b> cannot reveal that shift.</p>
+  <p class="sources">*Using one fixed masking rule during calibration and later measurements eliminates operator choice. A common change in fitted amplitude cancels in calibration.<br><a href="../../analysis/20261116_film_comparison/REVIEW_uncertainties.md" target="_blank" rel="noopener">Full uncertainty review and methods</a> · <a href="https://doi.org/10.3390/app15148101" target="_blank" rel="noopener">Cayley et al.</a> · <a href="https://doi.org/10.1002/acm2.13270" target="_blank" rel="noopener">Szpala et al.</a> · <a href="https://doi.org/10.1002/mp.14497" target="_blank" rel="noopener">AAPM TG-235</a></p>
 </section>
 
 <section id="geometry">
@@ -123,7 +123,7 @@
     <div>
       <p><b>Cone half-angle:</b> cos θ<sub>C</sub> = 1/(βn) → <b>50.9°</b> for β = 0.99986, n = 1.585. <a href="https://pdg.lbl.gov/2024/reviews/rpp2024-rev-particle-detectors-accel.pdf#page=17" target="_blank" rel="noopener">[3]</a></p>
       <p><b>Escape limit:</b> θ<sub>crit</sub> = sin⁻¹(1/n) = <b>39.1°</b>. A 51° ray would require sin θ<sub>air</sub> = <b>1.23</b>; it cannot refract into air. <a href="https://openstax.org/books/college-physics/pages/25-4-total-internal-reflection" target="_blank" rel="noopener">[4]</a></p>
-      <p>A parallel, specular Al backing preserves incidence angle. Up to ~12° sheet tilt leaves the primary cone above the escape limit.</p>
+      <p>A flat, parallel Al backing preserves the ray angle. At this refractive index the first rays can escape above <b>11.8° of sheet tilt</b>. With the sheet within a few degrees of normal, the entire ideal primary cone remains above the escape limit.</p>
     </div>
   </div>
   <p class="takeaway">For this geometry, primary Cherenkov light should remain inside the sheet after a flat Al reflection. Undoped PC can also produce scintillation light. <a href="https://www.jstage.jst.go.jp/article/jhps/49/2/49_98/_pdf" target="_blank" rel="noopener">[5]</a></p>
@@ -171,11 +171,11 @@
       <p>Replace the actuator with <b>CoreXY motion inside a fixed frame</b>, reducing exposure to bumps that could shift the target.</p>
       <div class="torque-estimate">
         <h2>Estimated moving mass ~2.43 kg · 2× margin</h2>
-        <p class="torque-result"><b>~0.22 N·m on the heavier motor</b></p>
+        <p class="torque-result"><b>~0.22 N·m if one motor carries the heavier side</b></p>
         <p class="torque-assumptions"><b>Shifted group ~0.814 kg:</b> 3 × 75 g holders, 9 × 30 g mice <a href="https://www.jax.org/jax-mice-and-services/strain-data-sheet-pages/body-weight-chart-000664" target="_blank" rel="noopener">[10]</a>, 9 × 15 g capped tubes <a href="https://sustainability.sarstedt.com/en/US/c/life-science/sample-handling/reagent-and-centrifuge-tubes/p/screw-cap-tubes-with-conical-base/62.548.101" target="_blank" rel="noopener">[11]</a> and 2 × 92 g MGN15H carriages <a href="https://hiwin.com/wp-content/uploads/2026/08/HIWIN-Linear-Guideway-Catalog-1.pdf#page=91" target="_blank" rel="noopener">[12]</a>, shared 70/30.</p>
         <p class="torque-assumptions"><b>Balanced hardware ~1.615 kg:</b> 1 m rail (1.060 kg) <a href="https://hiwin.com/wp-content/uploads/2026/08/HIWIN-Linear-Guideway-Catalog-1.pdf#page=91" target="_blank" rel="noopener">[12]</a>, 1.2 m MakerBeamXL (0.356 kg) <a href="https://www.makerbeam.com/blogs/makerbeam/specifications-makerbeam-and-openbeam/" target="_blank" rel="noopener">[13]</a>, 4 pulleys, 3.2 m belt, 4 LM8UU, 24 g printed bearing brackets, 4 L brackets and fasteners (~0.199 kg combined) <a href="../../analysis/20261116_film_comparison/README.md#balanced-moving-hardware" target="_blank">[9]</a>, shared 50/50.</p>
         <p class="torque-specs"><b>STEPPERONLINE 17HS15-1504S-X1:</b> <b>0.45 N·m rated holding torque</b> at 1.5 A/phase <a href="https://omc-stepperonline.com/download/17HS15-1504S-X1.pdf" target="_blank" rel="noopener">[6]</a>. EASON TB6600 driver, 12 V / 5 A supply <a href="https://www.amazon.com/dp/B08SG7L54W" target="_blank" rel="noopener">[8]</a>.</p>
-        <p class="torque-caveat">The opposite motor requires <b>~0.16 N·m with the same 2× margin</b>. Uses 2gmr/η, r ≈ 6.38 mm and η = 0.80. Published running-torque data use a different driver and 24 V <a href="https://files.omc-stepperonline.com/17HS15-1504S-X1_Torque_Curve.pdf" target="_blank" rel="noopener">[7]</a>.</p>
+        <p class="torque-caveat">Assigning each side’s support load to one motor gives <b>0.22 and 0.16 N·m</b> at 2× margin (6.38 mm radius, 80% efficiency). The belt path and guide reactions determine the actual shaft loads. The published <a href="https://files.omc-stepperonline.com/17HS15-1504S-X1_Torque_Curve.pdf" target="_blank" rel="noopener">running-torque curve</a> uses 24 V and a different driver. <a href="https://www.klipper3d.org/Kinematics.html#corexy-robots" target="_blank" rel="noopener">CoreXY kinematics</a></p>
       </div>
     </div>
   </div>

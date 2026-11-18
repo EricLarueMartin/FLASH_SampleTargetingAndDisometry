@@ -18,6 +18,10 @@ Figures: `frames.png` (the four pulses, same colour scale, fitted 1σ/2σ ellips
 
 ## Research update — 2026-11-16
 
+[Review of the error sources, production re-fits and primary literature](REVIEW_uncertainties.md).
+The review of revision `2323b09` gives the threshold sensitivity for the production
+fitter, the scope of the four-shot comparison, and the HIGS alanine and OSLD results.
+
 [Full sourced research](RESEARCH.md) and [seven-slide presentation](../../slides/2026-11-dosecam-film/index.html).
 The current deck has seven slides: system and
 timing; all four fitted beam images with camera / film doses; error sources;
