@@ -81,20 +81,122 @@ For standard symmetric direct-drive CoreXY with equal load sharing in a pure
 vertical move, each motor's near-static gravity torque is `m*g*r/(2*eta)`.
 With `m=3 kg`, `g=9.80665 m/s²`, CAD belt-path radius `r≈0.00638 m` and assumed
 drive efficiency `eta=0.80`, this is **0.117312 N·m per motor**. Applying the
-user-requested **2× design margin** gives **0.234624 N·m**, rounded to
-**0.24 N·m per motor** on the slide. Acceleration, additional drag, belt preload
+user-requested **2× design margin** gives the balanced-load reference
+**0.234624 N·m per motor**. The endpoint allowance below adds the shifted
+group's unequal contribution. Acceleration, additional drag, belt preload
 and actual motor/driver speed-torque performance remain to be checked.
 
-Reference manufacturer ratings, both explicitly **holding torque** at
-**1.5 A/phase**:
+Per E. Martin, assume the **STEPPERONLINE 17HS15-1504S-X1** motor. Its
+[manufacturer specifications](https://www.omc-stepperonline.com/3pcs-nema-17-bipolar-45ncm-63-74oz-in-1-5a-42x42x39mm-4-wires-w-1m-pin-connector-3-17hs15-1504s-x1)
+and [datasheet](https://omc-stepperonline.com/download/17HS15-1504S-X1.pdf) give
+**45 N·cm = 0.45 N·m holding torque at 1.5 A/phase**. This replaces the
+two-family motor comparison. Holding torque is a stationary value; see
+[Oriental Motor's distinction](https://www.orientalmotor.co.in/in/tech/reference/stepping-motor03).
 
-- [Twotrees 17HS4401](https://twotrees3d.com/products/nema-17-stepper-motor-5pcs-17hs4401-nema17-42-motor-4-lead-42bygh-1-5a-with-dupont-line-for-3d-printer-and-cnc): specification table gives at least 420 mN·m = **0.42 N·m**.
-- [STEPPERONLINE 17HS15-1504S-X1](https://www.omc-stepperonline.com/3pcs-nema-17-bipolar-45ncm-63-74oz-in-1-5a-42x42x39mm-4-wires-w-1m-pin-connector-3-17hs15-1504s-x1), [datasheet](https://omc-stepperonline.com/download/17HS15-1504S-X1.pdf): **45 N·cm = 0.45 N·m**.
+#### Driver current and the published motor curve
 
-These match the purchased specification families; the installed pair has not
-been positively identified. Holding torque is a stationary rated-current value,
-not an available-running-torque guarantee; see [Oriental Motor's distinction](https://www.orientalmotor.co.in/in/tech/reference/stepping-motor03).
-No private purchase receipts or account details are published here.
+The saved purchase record identifies three **EASON TB6600, 4 A, 9–42 V,
+up to 1/32 microstepping** drivers. E. Martin specifies a **12 V, 5 A supply**;
+its 5 A rating is supply capacity, not motor phase current. The public
+[EASON seller listing](https://www.amazon.com/dp/B08SG7L54W) provides a
+[photograph of the printed current table](https://m.media-amazon.com/images/I/61eN8srpbKL._SL1000_.jpg)
+and a [separate DIP table](https://m.media-amazon.com/images/S/aplus-media/sc/e53dee2a-58e0-48da-a7dc-61f9622d24e5.jpg).
+The **1.5 A nominal / 1.7 A peak** row has **S4 ON, S5 ON, S6 OFF**. This is
+a supported reference setting, not a record of the installed DIP positions.
+The label does not explicitly name its nominal-current column RMS.
+
+**Do not apply a blanket sinusoidal RMS conversion to holding torque.** At a
+fixed position the electrical angle stops advancing, so each coil has a fixed
+regulated current command, with PWM ripple around it. Toshiba's
+[TB6600HG datasheet](https://toshiba.semicon-storage.com/info/TB6600HG_datasheet_en_20160610.pdf?did=14683&prodName=TB6600HG),
+p. 7, specifies full-step phase-current magnitudes of **100% in both phases**.
+The [TB67S109A datasheet](https://toshiba.semicon-storage.com/info/TB67S109AFTG_datasheet_en_20250605.pdf?did=14642&prodName=TB67S109AFTG),
+initial-angle table on p. 17, also gives **100%/100% for full-step**, and
+**71%/71% for the initial quarter-through-1/32 microstep position**. The
+selected angle and excitation mode determine the stationary phase-current
+combination; a rotating sine's time-average RMS is not sufficient to predict
+the holding torque.
+
+The TB6600HG datasheet also explains that its current is peak-detected and
+the average is lower than that threshold. Thus the EASON table's **1.5 A
+nominal / 1.7 A peak** pair could concern current regulation; it does not by
+itself identify an RMS pair or establish a higher motion-only current. No
+driver-specific holding-torque derating or current-based payload capacity is
+inferred from those two labels. Retain **0.45 N·m as the motor's rated holding
+reference**, contingent on the corresponding phase excitation/current.
+
+The EASON listing does not identify the installed IC beyond its module name.
+Its advertised **1/32 microstepping and ADMD** match TB67S109A features;
+TB6600HG supports only up to 1/16. **TB67S109A-family is therefore a feature
+match, not a confirmed chip identification.** No EASON-specific readable chip
+marking, circuit diagram or teardown was located. The chip datasheets establish
+the relevant behaviour, not which IC is physically present in this unit.
+
+EASON advertises automatic standby with lower motor heating, but gives no
+delay or current fraction. TB67S109A describes clocked angle/current control
+and ADMD switching decay; it does not establish an automatic no-pulse current
+reduction for the EASON module. TB6600HG has a TQ input for 100%/30% current
+selection, but its presence likewise does not prove an EASON timer or reduction
+factor. Neither half-current hold nor a specific reduction is assumed here.
+
+The exact motor's [manufacturer torque–speed curve](https://files.omc-stepperonline.com/17HS15-1504S-X1_Torque_Curve.pdf)
+states **DM542T, 24 V, 1.69 A, 2000 pulses/revolution**. It is a speed sweep
+at one current, not a current sweep. Its current label does not specify RMS
+or peak. The [original DM542T manual](https://www.omc-stepperonline.com/download/DM542T.pdf)
+pairs **1.69 A RMS with 2.37 A peak**, which suggests an RMS convention for
+the curve but does not prove it. These conditions differ from the 12 V EASON
+setup. No exact-motor measured current-sweep or 12 V EASON torque curve was
+located; no numerical speed limit is inferred from the 24 V curve.
+
+#### Holders shifted to one side
+
+For the endpoint torque budget, use E. Martin's centre-of-mass load model:
+the **shifted group includes all three holders, their tubes/mice, and the rail
+carriages**. Treat this group as a point load between the motor-side supports.
+All remaining moving hardware is balanced and contributes equally to both
+sides. At maximum shift, use the user's approximate **70/30 split for the
+shifted group only**. This is an endpoint-reaction planning approximation,
+not a measured motor-torque split or a geometry-derived travel-limit result.
+
+If the support span is `L` and the shifted-group COM is at `x` from the far
+support, moment balance gives `R_near=m_s*g*x/L`, `R_far=m_s*g*(1-x/L)`.
+Thus 70/30 corresponds to `x=0.70*L`, or 0.20 of the span from the midpoint.
+The total 3 kg does not all move to that COM: with shifted mass `m_s` and
+balanced mass `m_b=3-m_s`, the motor-side equivalent supported masses are
+`m_near=m_b/2+0.70*m_s=1.5+0.20*m_s` and
+`m_far=m_b/2+0.30*m_s=1.5-0.20*m_s`, in kg. Their sum stays 3 kg.
+
+Using `g=9.80665 m/s²`, `r=0.00638 m`, assumed `eta=0.80` and the requested
+2× margin, the heavier-side torque budget is
+`T_near=2*g*r*(1.5+0.20*m_s)/eta`
+`=0.234624+0.0312832*m_s N·m`. The lighter side is
+`T_far=0.234624-0.0312832*m_s N·m`. **Only the shifted group gets 70/30**;
+applying the imbalance to all 3 kg overstates the endpoint case when some
+hardware remains balanced.
+
+| Shifted group mass (kg) | Balanced hardware (kg) | Heavier-side equivalent mass (kg) | Heavier torque with 2× margin (N·m) |
+|---:|---:|---:|---:|
+| 0.225, empty holders only; omits carriages/contents | 2.775 | 1.545 | 0.242 |
+| 0.5, illustrative | 2.5 | 1.6 | 0.250 |
+| 1.0, illustrative | 2.0 | 1.7 | 0.266 |
+| 1.5, illustrative | 1.5 | 1.8 | 0.282 |
+| 3.0, conservative bound with all mass shifted | 0 | 2.1 | **0.328** |
+
+The shifted-group mass has not been weighed; the CAD's default material
+assignments do not establish printed-part or animal masses. Nevertheless,
+`m_s≤3 kg` bounds the heavier side at **2.1 kg-equivalent = 20.59 N**, giving
+**0.164237 N·m before margin**, or **0.328474 N·m with 2× margin**. Any
+balanced portion lowers this value. The bound compares to **0.45 N·m rated
+holding**, giving approximately **2.74× static gravity margin** in the
+all-mass-shifted bound, before additional drag or dynamics, if the actual
+excitation supplies the rated holding torque.
+
+For a completely shifted 70/30 load and no balanced hardware, a conditional
+2× total-mass limit is `m_max=T_available*eta/(2*0.70*g*r)`:
+**4.11 kg at the rated 0.45 N·m**. This is a
+holding-based planning limit under the stated approximation, not a measured
+12 V running payload capacity. No private receipt or account details are
+published.
 
 Holder mass cross-check: the user supplied surface area `A=55,227 mm²`, solid
 CAD volume `V=98,627 mm³`, two walls of `0.45+0.42=0.87 mm`, and 15% infill.

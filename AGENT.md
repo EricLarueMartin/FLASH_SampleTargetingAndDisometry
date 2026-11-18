@@ -8,6 +8,36 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-17 — STEPPERONLINE assumption, EASON current and endpoint allowance
+
+- Status: sourced analysis and slide 6 update prepared for authorized Pages
+  publication. No hardware or driver settings changed.
+- Per Eric, assume STEPPERONLINE 17HS15-1504S-X1, 0.45 N·m holding at
+  1.5 A/phase. Removed the alternative Twotrees comparison from the slide.
+- Identified the cheaper purchased EASON TB6600 driver from the saved record;
+  checked its public seller photographs. Eric specifies a 12 V, 5 A supply.
+  The label has a 1.5 A nominal / 1.7 A peak setting. Checked Toshiba excitation
+  tables: holding uses fixed phase-current commands, so no blanket sine-RMS
+  torque derating is justified. Retained 0.45 N·m as rated holding reference.
+  The installed IC, actual phase current and standby reduction are unknown;
+  advertised 1/32 and ADMD features suggest TB67S109A, without proving identity.
+- Located the exact motor's manufacturer speed curve: DM542T, 24 V,
+  1.69 A, 2000 pulses/revolution. No current sweep or matching 12 V EASON
+  curve found; no running speed/torque rating is invented from it.
+- For the endpoint load budget, Eric specifies treating loaded holders and
+  rail carriages as a shifted COM with approximately 70/30 endpoint reactions;
+  all other moving hardware remains balanced 50/50. With shifted mass m_s,
+  heavier-side equivalent mass is 1.5+0.2*m_s kg and the 2× torque budget is
+  0.234624+0.0312832*m_s N·m. Since m_s cannot exceed the assumed 3 kg total,
+  the conservative upper bound is 0.3285 N·m, not the full-weight one-motor case.
+  Exact shifted mass and endpoint geometry remain unmeasured. Documented this
+  as the user's COM planning approximation and preserved current caveats.
+- Files: docs/slides/2026-11-dosecam-film/index.html;
+  docs/analysis/20261116_film_comparison/README.md; this log.
+- Validation: primary-source and independent physics/arithmetic review,
+  seven-slide/local-link and Git whitespace checks, slide layout review.
+- Rollback: revert this documentation commit. No device or application rollback.
+
 ## 2026-11-17 — sourced torque estimate and three-holder CoreXY v23
 
 - Status: documentation and CAD preview verified locally in day/night mode;
