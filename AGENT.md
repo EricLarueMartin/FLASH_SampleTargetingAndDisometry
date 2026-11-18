@@ -8,6 +8,27 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-17 — estimated loaded-holder and carriage masses
+
+- Status: sourced slide 6 and calculation update prepared for authorized Pages
+  publication. No device operations or changes to driver settings.
+- Estimated the shifted group from 3 x 75 g printed holders, 9 x 30 g adult
+  mice (JAX representative C57BL/6J weight), 9 x 15 g empty capped 50 mL
+  tubes (SARSTEDT product mass 14.9 g), and 2 x 92 g MGN15H carriages
+  (HIWIN catalog). Total shifted mass is 0.814 kg; balanced mass is 2.186 kg
+  within the unchanged 3 kg assumed total. Reference models remain estimates.
+- Applied Eric's 70/30 split only to the shifted group, and 50/50 to the rest.
+  Equivalent loads are 1.6628 and 1.3372 kg. At r=6.38 mm and assumed 80%
+  efficiency, torque with 2x margin is 0.2601 and 0.2092 N·m, rounded to
+  0.26 / 0.21 on the slide. Preserved the 0.45 N·m rated holding reference.
+- Added primary mass citations on the slide and a sourced mass table plus
+  arithmetic in the analysis notes. No private purchasing details published.
+- Files: docs/slides/2026-11-dosecam-film/index.html;
+  docs/analysis/20261116_film_comparison/README.md; this log.
+- Validation: source review, independent mass/load arithmetic, local-link and
+  seven-slide checks, Git whitespace checks and slide layout review.
+- Rollback: revert this documentation commit; no hardware/application rollback.
+
 ## 2026-11-17 — STEPPERONLINE assumption, EASON current and endpoint allowance
 
 - Status: sourced analysis and slide 6 update prepared for authorized Pages

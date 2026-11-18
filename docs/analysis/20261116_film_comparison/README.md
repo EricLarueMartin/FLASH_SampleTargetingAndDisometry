@@ -174,29 +174,45 @@ Using `g=9.80665 m/s²`, `r=0.00638 m`, assumed `eta=0.80` and the requested
 applying the imbalance to all 3 kg overstates the endpoint case when some
 hardware remains balanced.
 
-| Shifted group mass (kg) | Balanced hardware (kg) | Heavier-side equivalent mass (kg) | Heavier torque with 2× margin (N·m) |
-|---:|---:|---:|---:|
-| 0.225, empty holders only; omits carriages/contents | 2.775 | 1.545 | 0.242 |
-| 0.5, illustrative | 2.5 | 1.6 | 0.250 |
-| 1.0, illustrative | 2.0 | 1.7 | 0.266 |
-| 1.5, illustrative | 1.5 | 1.8 | 0.282 |
-| 3.0, conservative bound with all mass shifted | 0 | 2.1 | **0.328** |
+Use the following **estimated shifted-group masses**, rather than assigning
+all 3 kg to that group:
 
-The shifted-group mass has not been weighed; the CAD's default material
-assignments do not establish printed-part or animal masses. Nevertheless,
-`m_s≤3 kg` bounds the heavier side at **2.1 kg-equivalent = 20.59 N**, giving
-**0.164237 N·m before margin**, or **0.328474 N·m with 2× margin**. Any
-balanced portion lowers this value. The bound compares to **0.45 N·m rated
-holding**, giving approximately **2.74× static gravity margin** in the
-all-mass-shifted bound, before additional drag or dynamics, if the actual
-excitation supplies the rated holding torque.
+| Component | Count | Planning mass each | Combined mass | Basis |
+|---|---:|---:|---:|---|
+| Printed holders | 3 | 75 g | 225 g | E. Martin's estimate and geometry check below |
+| Adult mice | 9 | 30 g | 270 g | [JAX C57BL/6J body-weight data](https://www.jax.org/jax-mice-and-services/strain-data-sheet-pages/body-weight-chart-000664): 12-week males average 29.3 ± 2.3 g |
+| Empty 50 mL plastic tubes with caps | 9 | 15 g | 135 g | [SARSTEDT 62.548.101](https://sustainability.sarstedt.com/en/US/c/life-science/sample-handling/reagent-and-centrifuge-tubes/p/screw-cap-tubes-with-conical-base/62.548.101): 50 mL PP conical tube, HDPE cap included, product weight 14.9 g; rounded to 15 g |
+| MGN15H rail carriages | 2 | 92 g | 184 g | [HIWIN technical catalog](https://hiwin.com/wp-content/uploads/2026/08/HIWIN-Linear-Guideway-Catalog-1.pdf#page=91), printed p. 88 / PDF p. 91: MGN15H block weight 0.092 kg |
+| **Shifted group** | | | **814 g = 0.814 kg** | |
 
-For a completely shifted 70/30 load and no balanced hardware, a conditional
-2× total-mass limit is `m_max=T_available*eta/(2*0.70*g*r)`:
-**4.11 kg at the rated 0.45 N·m**. This is a
-holding-based planning limit under the stated approximation, not a measured
-12 V running payload capacity. No private receipt or account details are
-published.
+The mouse value is a representative adult planning assumption, not a universal
+adult weight or an identification of the actual cohort. JAX's same table gives
+12-week females 21.7 ± 1.5 g and 24-week males 35.3 ± 3.9 g. The tube and
+carriage entries are manufacturer reference models, not confirmed identities
+or measured masses of the installed parts. The two-carriage count comes from
+the user's stated rail configuration. The 1 m rail itself and other balanced
+hardware remain in the balanced portion; the rail is not added to the shifted
+group. No liquid mass is added to tubes holding mice.
+
+The remaining balanced mass is `3-0.814=2.186 kg`. At maximum shift:
+
+- Heavier side: `2.186/2+0.70*0.814 = 1.6628 kg-equivalent`.
+- Lighter side: `2.186/2+0.30*0.814 = 1.3372 kg-equivalent`.
+
+With the same `r=6.38 mm`, assumed `eta=0.80` and requested 2× margin,
+`T=2*m_equivalent*g*r/eta` gives **0.2601 N·m on the heavier motor** and
+**0.2092 N·m on the lighter motor**, rounded on slide 6 to **0.26 and
+0.21 N·m**, respectively. Before the 2× margin, they are approximately
+**0.1300 and 0.1046 N·m**. The loads sum to the original 3 kg; the shifted
+group is included in that total, not added on top of it.
+
+The heavier-side estimate compares to **0.45 N·m rated holding**, giving
+approximately **3.46× static gravity margin** before additional drag or
+dynamics, if the actual excitation supplies rated holding torque. Changing
+the mouse estimate from 30 g to 20–40 g each changes the heavier-side 2×
+torque by only about ±0.0028 N·m. These remain gravity-load planning estimates,
+not measured 12 V running payload capacities. No private receipt or account
+details are published.
 
 Holder mass cross-check: the user supplied surface area `A=55,227 mm²`, solid
 CAD volume `V=98,627 mm³`, two walls of `0.45+0.42=0.87 mm`, and 15% infill.
