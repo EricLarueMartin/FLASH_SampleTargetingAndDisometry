@@ -65,16 +65,16 @@
   <h1>Four beam pulses: camera fits and film dosimetry</h1>
   <figure class="frame-figure"><img src="img/frames.png" alt="Four background-subtracted beam images on a common color scale, with 1-sigma solid and 2-sigma dashed Gaussian fit ellipses. Pulse 1 B1: film 40.94 Gy; pulse 2 A1: 39.61 Gy; pulse 3 A2: 39.75 Gy; pulse 4 A3: 39.70 Gy."><figcaption>Same net-DN scale; 3 × 3 median for display. Cyan ellipses: fitted 1σ (solid) and 2σ (dashed). Prompt sensor hits are masked in the fit.</figcaption></figure>
   <table class="comparison-table">
-    <thead><tr><th>Pulse → film well</th><th>Fit peak (DN)</th><th>Camera peak (Gy)</th><th>EBT-XD peak (Gy)</th><th>Camera − film</th></tr></thead>
+    <thead><tr><th>Pulse → film well</th><th>Fit peak ± 1σ (DN)</th><th>Camera peak (Gy)</th><th>EBT-XD peak (Gy)</th><th>Camera − film</th></tr></thead>
     <tbody>
-    <tr><td>1 → B1</td><td>42.24</td><td>39.99</td><td><b>40.94</b></td><td>−2.3%</td></tr>
-    <tr><td>2 → A1</td><td>42.92</td><td>40.63</td><td><b>39.61</b></td><td>+2.6%</td></tr>
-    <tr><td>3 → A2</td><td>42.45</td><td>40.19</td><td><b>39.75</b></td><td>+1.1%</td></tr>
-    <tr><td>4 → A3</td><td>41.40</td><td>39.19</td><td><b>39.70</b></td><td>−1.3%</td></tr>
+    <tr><td>1 → B1</td><td>42.24 ± 0.16</td><td>39.99</td><td><b>40.94</b></td><td>−2.3%</td></tr>
+    <tr><td>2 → A1</td><td>42.92 ± 0.17</td><td>40.63</td><td><b>39.61</b></td><td>+2.6%</td></tr>
+    <tr><td>3 → A2</td><td>42.45 ± 0.15</td><td>40.19</td><td><b>39.75</b></td><td>+1.1%</td></tr>
+    <tr><td>4 → A3</td><td>41.40 ± 0.15</td><td>39.19</td><td><b>39.70</b></td><td>−1.3%</td></tr>
     </tbody>
   </table>
   <p class="comparison-summary"><b>Calibration: 1.0563 DN/Gy</b> = mean fit peak / mean film dose. Camera/film ratio sample SD: <b>2.2%</b> (n = 4). Spot σ ≈ 20 × 35 px; centroid moves ~9 px.</p>
-  <p class="sources">Measured data and methods: <a href="../../analysis/20261116_film_comparison/README.md" target="_blank">comparison analysis</a> · <a href="../../analysis/20261116_film_comparison/scripts/crosscal.csv" target="_blank">fit parameters</a> · <a href="../../analysis/20261116_film_comparison/scripts/figs.py" target="_blank">figure source</a>.<br>Film read by J. Sherman using a 24 h curve; peak = maximum over a 10 px window. Frame → well order: B1, A1, A2, A3. Single dose level; zero intercept assumed.</p>
+  <p class="sources">Measured data and methods: <a href="../../analysis/20261116_film_comparison/README.md" target="_blank">comparison analysis</a> · <a href="../../analysis/20261116_film_comparison/scripts/peak_fit_uncertainty.csv" target="_blank">nominal camera fit errors</a> · <a href="../../analysis/20261116_film_comparison/scripts/figs.py" target="_blank">figure source</a>.<br>Camera errors: residual-scaled covariance, reconstructed from archived fit parameters; nominal 1σ with independent-pixel approximation. Film read by J. Sherman; supplied uncertainties treated as standard (1σ). Frame → well order: B1, A1, A2, A3. Calibration unchanged.</p>
 </section>
 
 <section id="scatter">
@@ -83,17 +83,16 @@
   <table class="error-table">
     <thead><tr><th>Source</th><th>Size / status</th><th>Evidence and limitation</th></tr></thead>
     <tbody>
-    <tr><td><b>Camera photon statistics</b></td><td><b>~0.10%</b> fitted peak</td><td>Ideal Poisson Gaussian floor; N ≈ 1.93 million e⁻ at a 10.7 e⁻/DN gain proxy. 8–12 e⁻/DN gives 0.097–0.118%. <a href="https://softwareservices.flir.com/FFY-U3-16S2-DL/latest/EMVA/EMVA.html" target="_blank" rel="noopener">[1]</a></td></tr>
-    <tr><td><b>Read noise / residual hits</b></td><td>~0.2–0.4%</td><td>Fit residual estimate, dependent on correlations; measured dark noise is 0.58 DN rms per pixel.</td></tr>
+    <tr><td><b>Camera peak fit — combined statistics</b></td><td><b>0.35–0.39%</b> nominal 1σ</td><td>Residual-scaled parameter covariance already includes photon, read/background and other residual noise. No separate photon or read term is added. <a href="../../analysis/20261116_film_comparison/scripts/peak_fit_uncertainty.csv" target="_blank">[1]</a></td></tr>
     <tr><td><b>Masking / fit choices</b></td><td>~1% sensitivity</td><td>Amplitude shifts 1–2% between mask thresholds; much may be common across pulses.</td></tr>
     <tr><td><b>PC / Al-tape target</b></td><td>Likely nonuniform</td><td>Tape surface, contact and local reflectivity can vary across the target. The ~9 px spot drift can therefore change collected light at the same dose; the size of this effect is unmeasured.</td></tr>
     <tr><td><b>Gate timing</b></td><td>Not expected to contribute appreciably</td><td>Delay and duration scans reached full-signal plateaus; operating margins are well beyond expected jitter (operator check).</td></tr>
-    <tr><td><b>Film pixel / peak noise</b></td><td>1.9–2.4% per pixel</td><td>Window-maximum error depends on smoothing and correlations; pixel noise cannot be divided by √N for a selected maximum.</td></tr>
+    <tr><td><b>Supplied film uncertainty</b></td><td><b>1.9–2.4% (1σ)</b></td><td>Reported with the film data; treated as standard uncertainties (k = 1).</td></tr>
     <tr><td><b>Film calibration / rate response</b></td><td>Mixed evidence</td><td>Some EBT-XD studies report UHDR overresponse <a href="https://doi.org/10.3389/fphy.2025.1474416" target="_blank" rel="noopener">[2a]</a><a href="https://doi.org/10.3390/app15148101" target="_blank" rel="noopener">[2b]</a>, others no significant dependence within tested ranges <a href="https://doi.org/10.1002/acm2.13270" target="_blank" rel="noopener">[2c]</a><a href="https://doi.org/10.1016/j.ejmp.2026.105723" target="_blank" rel="noopener">[2d]</a>. No rate-related bias is established for this run.</td></tr>
     </tbody>
   </table>
-  <p class="takeaway">The <b>Al-tape target is likely nonuniform</b>: spot motion can change the optical response. The observed <b>2.2%</b> camera/film scatter is much larger than the ideal photon-statistics floor; these data do not isolate each contribution.</p>
-  <p class="sources">Local estimates: <a href="../../analysis/20261116_film_comparison/README.md" target="_blank">comparison analysis</a>. [1] <a href="https://softwareservices.flir.com/FFY-U3-16S2-DL/latest/EMVA/EMVA.html" target="_blank" rel="noopener">Teledyne FLIR IMX296 mono EMVA</a> (gain proxy, not this module’s calibration).<br>EBT-XD overresponse: [2a] <a href="https://doi.org/10.3389/fphy.2025.1474416" target="_blank" rel="noopener">Del Sarto et al. (2025)</a>, [2b] <a href="https://doi.org/10.3390/app15148101" target="_blank" rel="noopener">Cayley et al. (2025)</a>. No significant dependence: [2c] <a href="https://doi.org/10.1002/acm2.13270" target="_blank" rel="noopener">Szpala et al. (2021)</a>, [2d] <a href="https://doi.org/10.1016/j.ejmp.2026.105723" target="_blank" rel="noopener">Schott et al. (2026)</a>.<br>Studies use different beam conditions and methods. Schott tests 1.06–3.27 Gy/pulse. All film wells are treated on the same basis.</p>
+  <p class="takeaway"><b>Photon and read/background noise are counted once, in the combined camera fit error.</b> Masking sensitivity and target nonuniformity remain separate effects; these rows are not summed as independent uncertainties.</p>
+  <p class="sources">[1] <a href="../../analysis/20261116_film_comparison/scripts/fit_noise_audit.json" target="_blank">noise-accounting audit</a> · <a href="../../analysis/20261116_film_comparison/README.md#camera-peak-fit-error-and-noise-accounting" target="_blank">method, assumptions and component checks</a>. Nominal covariance assumes independent pixels; actual background is correlated.<br>EBT-XD overresponse: [2a] <a href="https://doi.org/10.3389/fphy.2025.1474416" target="_blank" rel="noopener">Del Sarto et al. (2025)</a>, [2b] <a href="https://doi.org/10.3390/app15148101" target="_blank" rel="noopener">Cayley et al. (2025)</a>. No significant dependence: [2c] <a href="https://doi.org/10.1002/acm2.13270" target="_blank" rel="noopener">Szpala et al. (2021)</a>, [2d] <a href="https://doi.org/10.1016/j.ejmp.2026.105723" target="_blank" rel="noopener">Schott et al. (2026)</a>.<br>Studies use different beam conditions and methods. No film-row correction or rate-related bias is assigned to this run.</p>
 </section>
 
 <section id="geometry">

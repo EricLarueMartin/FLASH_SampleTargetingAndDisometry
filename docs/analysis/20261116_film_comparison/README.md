@@ -3,8 +3,10 @@
 Data: `PolyAlDosCal_20261013_161112_732305_000006.raw` (4 frames, delay 200 µs, gate 100 µs,
 gain 1, 10-bit), 0.5 mm polycarbonate sheet backed with aluminum tape. Background reference:
 median of the 34 frames of `Alanine_20261013_145026_730724_000002.raw` (same gate, 100 µs delay,
-beam outside the gate). Film: EBT-XD lot 06092501, well_041, 24 h curve, peak = max over a
-10 px window (Julia Sherman, 2026-10-18/21). Frame → well order **B1, A1, A2, A3** is taken as correct for this comparison
+beam outside the gate). Film: EBT-XD lot 06092501, well_041, 24 h curve, reported
+peak doses and uncertainties supplied by Julia Sherman (2026-10-18/21).
+The supplied 1.9–2.4% film uncertainties are treated as standard uncertainties
+(1σ, k = 1), per E. Martin on 2026-11-17. Frame → well order **B1, A1, A2, A3** is taken as correct for this comparison
 (per E. Martin, 2026-11-16).
 
 Figures: `frames.png` (the four pulses, same colour scale, fitted 1σ/2σ ellipses),
@@ -250,38 +252,100 @@ film peak 40.00 Gy. Camera amplitudes are the deployed-code fits in
 - Camera A1→A3 falls monotonically (42.92 → 42.45 → 41.40 DN) while the spot centroid drifts
   ~9 px right/up.
 
-## Where the scatter comes from (1σ, per pulse, % of dose)
+## Uncertainty and sensitivity summary
 
 | Source | Estimate | Basis |
 |---|---|---|
-| Photon statistics, fitted peak | ~0.102%; 0.097–0.118% over gain sensitivity interval | 1.93 M photoelectrons at 10.7 e-/DN; ideal Poisson Gaussian floor, not total fit uncertainty; [vendor proxy](https://softwareservices.flir.com/FFY-U3-16S2-DL/latest/EMVA/EMVA.html) |
-| Read noise + prompt sensor hits, fitted peak | ≈0.2–0.4 % | Fit statistical error from residuals (0.05 DN ≈ 0.12 % white-noise; ~0.36 % with correlated-noise estimate) |
+| Camera peak fit, combined statistics | **0.35–0.39% nominal 1σ** | Residual-scaled covariance of the archived fits; photon, read/background and other residual noise are already included. No separate photon/read term is added; see the [audit](scripts/fit_noise_audit.json) |
 | Hit-masking / fit-method choice | ~1 % (mostly common-mode) | Amplitude moves 1–2 % between masking thresholds (`scripts/robust.py`) |
 | PC / Al-tape target | Likely nonuniform; contribution unmeasured | Tape surface, contact and local reflectivity can vary. The ~9 px spot drift can sample a different optical response; no quantitative target uncertainty has been established |
 | Gate timing | Not expected to contribute appreciably | Operator scanned delay and duration to full-signal plateaus, then selected operating margins much larger than expected jitter; no numerical percent bound assigned |
-| Film: per-pixel noise | 1.9–2.4%; window-maximum uncertainty unresolved | Window definition, smoothing and correlations are required; cannot infer the maximum error by averaging |
-| Film: absolute accuracy at ~40 Gy/pulse | Not validated | Common calibration uncertainty plus possible rate bias; see [research](RESEARCH.md#5-ebt-xd-at-40-gy). Existing 3% code allowance remains provisional |
+| Supplied film uncertainty | **1.9–2.4% (1σ)** | Reported with the film data; treated as standard uncertainties (k = 1), per E. Martin. No separate film fit uncertainty is calculated here |
+| Film calibration / rate response | Mixed evidence; minor caveat | Studies disagree within different tested conditions; no rate-related bias is established for this run. See [research](RESEARCH.md#5-ebt-xd-at-40-gy) |
 
-Reading: the ideal photon shot-noise floor is far below the observed scatter.
-The aluminum-tape target is likely nonuniform, so spot motion can change the
-collected light even at the same dose. Variation can also include analysis and
-real beam changes; four frames do not establish their individual contributions.
-No film-row effect is assigned or subtracted.
+The camera fit term is one combined contribution, not the quadrature sum of
+the empirical covariance and the component model checks below. Masking-method
+sensitivity and target nonuniformity are not established independent random
+terms, so no total is formed by summing these rows. No film-row effect is
+assigned or subtracted.
+
+## Camera peak-fit error and noise accounting
+
+The current fitter minimizes unweighted DN residuals with a `soft_l1` robust
+loss; it does **not** assign each pixel a Poisson-plus-read variance. Its reported
+parameter covariance uses the plain model Jacobian at the solution:
+`C = s² * inv(J.T @ J)`, where `s² = sum(residual²)/(N_pixels-7)`.
+The fitted peak's nominal standard error is `sqrt(C[0,0])`. The ROI-border
+noise estimate is used for the reported reduced-chi-squared diagnostic, not
+as a pixel weighting map. Source: `dose_cam/beam_fit.py`, `fit_gaussian()` and
+`_param_errors()`.
+
+Reconstructing exactly this covariance from the archived four baseline-fit
+parameters, ROI dimensions and residual RMS gives:
+
+| Well | Fitted peak (DN) | Nominal peak SE (DN) | Relative SE | Recorded reduced chi-squared |
+|---|---:|---:|---:|---:|
+| B1 | 42.2357 | 0.1602 | 0.379% | 1.2519 |
+| A1 | 42.9171 | 0.1664 | 0.388% | 1.2262 |
+| A2 | 42.4502 | 0.1480 | 0.349% | 1.0593 |
+| A3 | 41.4009 | 0.1531 | 0.370% | 1.0006 |
+
+No new peak fit or calibration is performed. See the reproducible
+[audit script](scripts/fit_noise_audit.py), [machine-readable audit](scripts/fit_noise_audit.json)
+and [peak-error CSV](scripts/peak_fit_uncertainty.csv). These errors correspond
+to the same archived amplitudes shown on the comparison slide. No separate
+correlation correction is applied to this nominal covariance.
+
+This covariance is an **independent-pixel approximation**, not an exact
+robust-estimator/spatial-covariance calculation. It also does not jointly
+propagate the polynomial-baseline fit. Hence the slide calls these errors
+**nominal 1σ**, rather than a validated full camera accuracy.
+
+### Component checks, not additional budget terms
+
+At the **10.7 e-/DN gain proxy**, the four fitted spots contain **1.82–2.04
+million signal electrons**, over equivalent Gaussian areas `2*pi*sx*sy` of
+approximately **3970–4482 pixels**. Peak pixels contain approximately
+**443–459 electrons**, with **1.97–2.00 DN** photon RMS. The full 1.58-million
+pixel sensor area is not the area occupied by the beam spot.
+
+For a linearized plain least-squares amplitude influence vector
+`h = J * inv(J.T @ J) * e_A`, propagate photon variance as
+`u_A,ph² = sum(h_i² * signal_i/gain)`. This gives **0.121–0.127%** peak SE,
+including the free spot-shape parameters. It is different from the ideal
+Poisson-weighted information floor in the next section.
+
+The 34 no-beam Alanine frames give **0.5078 DN pixel RMS** using the existing
+four-iteration 3.5-sigma-clipped consecutive-pair variance method. This is a
+measured background/dark value including quantization and correlated
+background, not a pure electronic-read-noise calibration. Its independent-white
+pixel projection would be only approximately **0.036–0.038%** peak SE.
+Projection of the actual frames after the same 40 DN positive-hit despiking
+and quadratic baseline subtraction instead gives **0.124–0.133%** peak SE,
+showing the importance of spatial/temporal structure.
+
+Combining those conditional photon and measured-background projections gives
+approximately **0.18%** as a diagnostic. They do not uniquely partition the
+observed signal-frame residuals: gain is a manufacturer-camera proxy, the
+background sample is finite and taken with the beam outside the gate, and
+conditioning/model residuals add other effects. **None of these diagnostic
+values is added to the 0.35–0.39% empirical fit-covariance contribution.**
 
 ## Photon-count noise
 
 Use **10.7 e-/DN** as a proxy from the Teledyne FLIR monochrome IMX296 EMVA data,
 with **8–12 e-/DN** as an engineering sensitivity interval. The manufacturer
 reports a 10-bit ADC, 10,276-electron saturation and 4.69-electron read noise.
-Our gain is not measured. With quantization added separately, the proxy predicts
-0.525 DN dark noise, compared with measured 0.58 DN; some EMVA definitions already
-include quantization. A photon-transfer curve is still required.
+Our gain is not measured. The rechecked background RMS is 0.508 DN and already
+includes quantization and correlated background; no separate quantization term
+is added to it. A photon-transfer curve is still required to calibrate gain.
 
 For the measured 180,000 DN integrated spot, N = 1.926 million electrons. Shot
 noise is 4.72% on a 42 DN peak pixel, 0.472% for an ideal constant-peak 10 x 10
-camera window, and 0.072% for the whole spot. The ideal free-shape Gaussian peak
-error is 1.42/sqrt(N) = **0.102%**; over g = 8–12 it is **0.097–0.118%**.
-These are model floors and do not include sensor hits or a fitted background.
+camera window, and 0.072% for the whole spot. The ideal Poisson-weighted
+free-shape Gaussian peak floor is 1.42/sqrt(N) = **0.102%**; over g = 8–12
+it is **0.097–0.118%**. These idealized values are context, not additional
+contributions to the residual-based fit error used on the slide.
 
 The light-mechanism and Fano-factor assertions in the earlier version were
 removed. The user requested dropping the Fano-factor discussion. Neither that

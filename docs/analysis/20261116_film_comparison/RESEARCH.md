@@ -38,15 +38,18 @@ The evidence does not establish a lower bound on its camera fraction. Strong UV
 attenuation, foil facets, adhesive fluorescence, and secondary-electron light can
 change the result. No measured uncertainty distribution exists for these effects.
 
-**Camera gain:** use **10.7 e-/DN** as a manufacturer-camera proxy, with **8–12 e-/DN**
-as an engineering sensitivity interval, not a calibrated uncertainty. Fitted-peak
-shot noise is approximately **0.102%**, or **0.097–0.118%** over that interval.
+**Camera noise accounting:** the four archived peak fits have **0.35–0.39%
+nominal 1σ** errors from residual-scaled covariance. This is one combined
+contribution: photon and read/background noise are not added again. Gain-dependent
+component projections are diagnostics; see the reproducible
+[audit](https://github.com/EricLarueMartin/FLASH_SampleTargetingAndDisometry/blob/main/docs/analysis/20261116_film_comparison/scripts/fit_noise_audit.json).
+Use **10.7 e-/DN** only as a manufacturer-camera gain proxy, with **8–12 e-/DN**
+as a sensitivity interval, not a calibrated uncertainty.
 
-**Film:** no transferable, defensible 1-sigma absolute uncertainty for this
-particular 40 Gy/pulse exposure was found. A few-percent conventional uncertainty
-does not bound a possible FLASH bias. Preserve the code's provisional values
-until the film team provides an apparatus-specific budget and rate validation;
-do not advertise the existing 3.19% total as established accuracy.
+**Film:** use the supplied **1.9–2.4%** uncertainties as **standard uncertainties
+(1σ, k = 1)** for this comparison, per E. Martin on 2026-11-17. No separate
+film peak-fit uncertainty is calculated here. The mixed literature on rate
+response remains a minor caveat; no rate-related bias is established for this run.
 
 ## 1. Evidence for intrinsic PC scintillation
 
@@ -250,27 +253,51 @@ source calibrates our e-/DN or proves that its ADC clip point equals full well.
 In particular, a tuning noise-model coefficient is not a conversion-gain
 measurement. These web versions are not verified as the installed Pi versions.
 
-Use **10.7 e-/DN**, bounded by an **8–12 sensitivity interval** spanning the
-manufacturer proxy and dark-noise consistency estimate. It is not a statistical
-confidence interval. At 10.7 e-/DN, 4.69 e- read noise plus 1/sqrt(12) DN
-quantization noise gives **0.525 DN**, close to measured 0.58 DN. Some published
-EMVA dark-noise definitions already include quantization; then adding it again
-is conservative and the prediction is 0.438 DN. The comparison does not pin
-gain uniquely. Assigning every excess variance to the read noise gives about
-9.3 e-/DN; the earlier 4–5 estimate relied on an unsupported 2-electron noise.
+Use **10.7 e-/DN** with an **8–12 sensitivity interval**, not a statistical
+confidence interval. The existing background-pair method, reapplied to all
+34 Alanine frames, gives **0.5078 DN** per-pixel background RMS. This already
+includes quantization and correlated background effects; no separate
+quantization term is added to it. Dark frames alone do not calibrate conversion
+gain. The vendor gain is from another camera using IMX296, not this module.
 
 | Statistic | At 10.7 e-/DN | Across 8–12 e-/DN |
 |---|---:|---:|
 | Peak pixel, 42 DN | 449 e-; 4.72% shot noise | 4.45–5.46% |
 | 10 x 10 pixel ideal window, 4200 DN | 44,940 e-; 0.472% | 0.445–0.546% |
 | Whole spot, 180,000 DN | 1.926 million e-; 0.0721% | 0.0680–0.0833% |
-| Free-shape Gaussian peak, 1.42/sqrt(N) | 0.102% | 0.0966–0.118% |
+| Ideal Poisson-weighted Gaussian peak floor, 1.42/sqrt(N) | 0.102% | 0.0966–0.118% |
 
-The 10 x 10 camera window is a hypothetical constant-peak approximation; the
-film team's “10 px window maximum” is a different estimator. Do not equate
-the two. The fit expression assumes an ideal Poisson Gaussian, effectively full
-spatial support and no fitted background penalty. It is a shot-noise floor,
-not the total statistical fit uncertainty.
+The 10 x 10 camera window is a hypothetical constant-peak approximation.
+The ideal peak floor assumes a Poisson-weighted Gaussian, effectively full
+spatial support and no fitted background penalty. It is not the uncertainty
+of the actual unweighted robust fit, nor an additional budget term.
+
+### Residual-covariance error and component audit
+
+The fitter uses unweighted DN residuals with `soft_l1` loss. Reported errors
+use the plain model Jacobian and `C=s²*inv(J.T@J)`, where
+`s²=sum(residual²)/(N_pixels-7)`. The amplitude standard error is
+`sqrt(C[0,0])`. Archived baseline-fit parameters and residual RMS reproduce
+**0.1602, 0.1664, 0.1480 and 0.1531 DN**, or **0.379, 0.388, 0.349 and
+0.370%**, for B1/A1/A2/A3. No peak is refitted. This is a nominal
+independent-pixel covariance, not an exact robust/spatial-covariance treatment.
+
+At the gain proxy, the measured spot occupies approximately **3970–4482
+equivalent Gaussian pixels**, with **443–459 electrons per peak pixel**.
+Thus approximately two million electrons are localized in the spot, rather
+than spread uniformly over the full sensor.
+
+The same amplitude influence vector propagates independent photon noise to
+**0.121–0.127%** peak SE. Projection of all 34 background frames after the same
+40 DN positive-hit despiking and quadratic baseline subtraction gives
+**0.124–0.133%** from background variability, including its correlations.
+Their conditional quadrature diagnostic is approximately **0.18%**. Gain is
+not calibrated and these no-beam backgrounds do not uniquely partition the
+signal-frame residuals, so the slide uses the **combined 0.35–0.39% nominal
+fit error**. Neither component diagnostic is added to it. Masking sensitivity
+also is not assumed independent for a quadrature total. The
+[audit script and outputs](https://github.com/EricLarueMartin/FLASH_SampleTargetingAndDisometry/tree/main/docs/analysis/20261116_film_comparison/scripts)
+preserve the calculation and assumptions.
 
 Under the Poisson model, shot noise is too small to explain the observed scatter.
 Common variations in beam charge or target response remain possible.
@@ -314,13 +341,10 @@ does not validate ours. At 40 Gy in a 1–4 us pulse, our instantaneous rate wou
 be 10–40 MGy/s, an extrapolation beyond that study. Gate duration is not beam
 pulse duration. Our beam pulse width needs independent confirmation.
 
-The literature supports using film for spatial dosimetry with careful validation,
-but **does not justify assuming exact rate independence or a 3% absolute budget
-at 40 Gy/pulse**. The proper deliverable is an unresolved experimental uncertainty,
-not an invented precise 1-sigma value. Conditional calibration totals from
-sqrt(1.09^2 + u_film^2) are 3.29% for a 3.1% film input, or 5.12% for 5%; neither
-includes a separate rate bias or establishes that stat/systematic terms are independent.
-The original code values 3.0% and 3.19% remain provisional and unchanged.
+The literature uses different beam conditions and measurement methods and
+reports mixed evidence on rate dependence. No rate correction is assigned to
+this run. The comparison uses the supplied film standard uncertainties below;
+the historical code allowances are unchanged by this presentation update.
 
 ### Film treatment in this comparison
 
@@ -328,8 +352,9 @@ All film wells use the same calibration and are assumed comparable, as instructe
 by Eric on 2026-11-16. No row-dependent offset, uncertainty term or dose correction
 is assigned. The measured film values and 1.0563 DN/Gy camera calibration are unchanged.
 
-The reported 1.9–2.4% per-pixel dose noise cannot establish 0.2–0.5% uncertainty
-for a selected maximum without the window's area, smoothing and correlations.
+The supplied **1.9–2.4% film uncertainties are treated as standard uncertainties
+(1σ, k = 1)**, as instructed by Eric on 2026-11-17. The film data were supplied;
+no independent film peak fit or new statistical uncertainty is calculated here.
 Four pulse/well pairs cannot separate real beam
 variation, camera response and target effects. The recorded frame/well mapping is taken
 as correct for this analysis, as instructed by Eric on 2026-11-16.
@@ -340,11 +365,10 @@ No scintillation-versus-Cherenkov separation measurement is planned. The
 presentation’s optical conclusion is the expected internal reflection of the
 primary cone, with the ideal-geometry qualification stated.
 
-1. Obtain the film peak-estimator definition, calibration traceability,
-   rate-validation information and a k=1 absolute uncertainty budget.
-2. Obtain dark + uniform-light flat sequences for a photon-transfer curve on the
-   mono module at gain 1 and the same raw format.
-3. Repeat >=10 pulses on a stationary target patch with an independent charge
+1. Obtain uniform-light flat sequences for a photon-transfer curve on the
+   mono module at gain 1 and the same raw format; existing background frames
+   alone do not calibrate conversion gain.
+2. Repeat >=10 pulses on a stationary target patch with an independent charge
    monitor, and add a second dose level. The recorded frame/well order is accepted.
 
 ## Sources and audit trail

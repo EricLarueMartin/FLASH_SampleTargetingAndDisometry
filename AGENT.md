@@ -8,6 +8,50 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-17 — camera fit-error and noise-accounting audit
+
+- Status: read-only reanalysis of archived parameters and background captures;
+  documentation update prepared for authorized Pages publication. No refitting,
+  camera implementation changes, calibration changes or device operations.
+- Reconstructed the exact current plain-Jacobian residual-scaled covariance
+  for the four plotted baseline fits. Peak standard errors are 0.1602, 0.1664,
+  0.1480 and 0.1531 DN (0.379, 0.388, 0.349 and 0.370%). Added nominal 1-sigma
+  errors to the comparison table and a reproducible script/CSV/JSON audit.
+- Replaced separate photon/read rows with one combined 0.35–0.39% nominal
+  camera fit contribution. These residual-based errors already combine noise;
+  photon/background diagnostics are not added again. Masking sensitivity is
+  not assumed independent for a quadrature total. Documented covariance limits.
+- At the gain proxy, independent photon projection is about 0.12–0.13%.
+  Background projection from 34 Alanine frames, after the same 40 DN median
+  despiking and quadratic baseline, is about 0.12–0.13%. Their ~0.18% conditional
+  diagnostic is not added to the combined fit term. Rechecked pixel-background
+  RMS is 0.5078 DN; quantization is already included in this measured quantity.
+- Files: docs/slides/2026-11-dosecam-film/{index.html,research.html};
+  docs/analysis/20261116_film_comparison/{README.md,RESEARCH.md,
+  scripts/fit_noise_audit.py,scripts/fit_noise_audit.json,
+  scripts/peak_fit_uncertainty.csv}; this log.
+- Validation: two independent numerical/source audits, script covariance match
+  to beam_fit._param_errors, background conditioning/projection checks,
+  companion regeneration, local links, Git whitespace and browser layout QA.
+- Rollback: revert this documentation/analysis commit; no hardware rollback.
+
+## 2026-11-17 — supplied film uncertainties treated as standard uncertainties
+
+- Status: presentation/notes correction prepared for authorized Pages
+  publication. No measurement values, calibration constants or device changes.
+- Per Eric, treat the supplied 1.9–2.4% film uncertainties as standard
+  uncertainties (1 sigma, k=1). Renamed the film row on the error-sources
+  slide and removed the pixel/selected-maximum discussion. No independent
+  film fit error or goodness-of-fit value is inferred from camera fit outputs.
+- Updated the film-data footnote and current analysis/research notes to the
+  same convention; regenerated the companion research HTML. Rate-response
+  literature remains mixed evidence and a minor caveat for these measurements.
+- Files: docs/slides/2026-11-dosecam-film/{index.html,research.html};
+  docs/analysis/20261116_film_comparison/{README.md,RESEARCH.md}; this log.
+- Validation: supplied-data/source review, matching uncertainty wording,
+  companion regeneration, local links, Git whitespace and slide layout checks.
+- Rollback: revert this documentation commit; no application/hardware rollback.
+
 ## 2026-11-17 — itemized complete moving-mass budget
 
 - Status: sourced slide 6 and analysis revision prepared for authorized Pages
