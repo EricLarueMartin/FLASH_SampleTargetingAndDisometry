@@ -46,10 +46,12 @@ component projections are diagnostics; see the reproducible
 Use **10.7 e-/DN** only as a manufacturer-camera gain proxy, with **8–12 e-/DN**
 as a sensitivity interval, not a calibrated uncertainty.
 
-**Film:** use the supplied **1.9–2.4%** uncertainties as **standard uncertainties
-(1σ, k = 1)** for this comparison, per E. Martin on 2026-11-17. No separate
-film peak-fit uncertainty is calculated here. The mixed literature on rate
-response remains a minor caveat; no rate-related bias is established for this run.
+**Film, updated 2026-11-18:** the supplied workbook reports **intensity SD**, not
+a complete dose uncertainty. The earlier interpretation of 1.9–2.4% as supplied
+standard dose uncertainties is superseded. **~3% (k = 1)** is a protocol-dependent
+literature benchmark, not an established uncertainty for our 40 Gy readings.
+No independent film peak-fit error is available. The mixed rate-response
+literature remains a minor caveat; no rate-related bias is established for this run.
 
 ## 1. Evidence for intrinsic PC scintillation
 
@@ -343,8 +345,74 @@ pulse duration. Our beam pulse width needs independent confirmation.
 
 The literature uses different beam conditions and measurement methods and
 reports mixed evidence on rate dependence. No rate correction is assigned to
-this run. The comparison uses the supplied film standard uncertainties below;
-the historical code allowances are unchanged by this presentation update.
+this run. The workbook audit and absolute-dose benchmark below replace the
+earlier film-uncertainty assumption; historical code allowances are unchanged.
+
+### Workbook audit and absolute-dose uncertainty (2026-11-18)
+
+Eric supplied `Film41_Scintillation.xlsx` on 2026-11-18. Read-only ZIP/XML
+inspection found one `ROIs` sheet, numeric values and no cell formulas. Its
+headers separate `Mean_Intensity`, `Standard_Deviation`, `Optical_Density` and
+`Dose_Gy`; there is **no dose uncertainty column, calibration covariance, or
+definition of the SD estimator**. The calibration is labelled EBTXD lot 06092501,
+24 hr (Sep-2026), using `Global_I0 = 45459.659129`. All six ROI rows say
+`Statistic = max`, `Window_px = 10`. That metadata does not establish a fitted
+film-peak standard error. The workbook was not changed or copied into the repository.
+
+The first four ROI doses match the four comparison film values (ROI 4, 1, 2, 3
+in pulse order). The intensity entries are:
+
+| Workbook cells / ROI | Mean intensity | Intensity SD | SD / intensity | Dose (Gy) |
+|---|---:|---:|---:|---:|
+| G3:J3 / ROI 1 | 14412.62 | 158.766125 | 1.102% | 39.612909 |
+| G4:J4 / ROI 2 | 14384.71 | 176.901462 | 1.230% | 39.745937 |
+| G5:J5 / ROI 3 | 14393.88 | 176.246973 | 1.224% | 39.702168 |
+| G6:J6 / ROI 4 | 14139.85 | 199.909645 | 1.414% | 40.937639 |
+
+The optical densities agree with `OD = log10(I0 / I)`. Propagation through a
+dose calibration `D = f(OD)` requires its derivative and parameter covariance:
+`u_OD = u_I / (I ln(10))` if I0 is fixed, then `u_D,reading = |f'(OD)| u_OD`.
+Uncertainty in I0 and calibration parameters must also be included, with their
+covariances where relevant. The workbook does not supply these. A local slope
+inferred from neighbouring dose/OD pairs is consistent with the historical
+1.9–2.4% dose-spread range, but does **not** turn that spread into a verified
+standard error or a complete absolute-dose uncertainty.
+
+If this is spatial pixel SD, it can contain real dose gradients, film
+nonuniformity and scanner noise. It need not be purely statistical. The file
+does not specify whether pixels, window means or repeated scans generated SD;
+no SD-to-SEM reduction is made here.
+
+Published budgets establish performance of calibrated film/scanner protocols,
+rather than a universal EBT-XD absolute-accuracy specification:
+
+[Jung et al. (2025), Table 4, doi:10.1002/mp.70022](https://doi.org/10.1002/mp.70022):
+  24-hour red-channel electron-FLASH budget at ~22 Gy, **3.5% (k = 1)**,
+  including assumed **2.0% beam stability**. The other grouped terms are
+  reference dosimetry 0.9%, calibration fit 2.1%, scanner uniformity 0.5%, and
+  film reading 1.6%. Our quadrature calculation excluding delivery stability is
+  `sqrt(0.9² + 2.1² + 0.5² + 1.6²) = 2.83%`. This illustrates a combined film
+  benchmark without attributing shared delivery fluctuations to a simultaneous
+  camera/film comparison; it is not a validation at 40 Gy for this scanner.
+
+[Raj et al. (2024), Table 1, doi:10.1002/pro6.1236](https://doi.org/10.1002/pro6.1236):
+  red/green combined **1.52% (k = 1)**, approximately **3% expanded (k = 2)**,
+  for a 24-hour protocol tested over 0.5–30 Gy. Their budget excludes lateral
+  scanner response, with films near the scanner centre. This is achievable
+  protocol performance, not a matching 40 Gy uncertainty or a universal limit.
+
+[AAPM TG-235 (2020), §6.H, doi:10.1002/mp.14497](https://doi.org/10.1002/mp.14497):
+  each setup needs its own uncertainty evaluation, including reference-dose
+  calibration, scanner properties, film uniformity and calibration fitting.
+  Its example values are k = 1 unless stated otherwise. Manufacturer response
+  uniformity specifications do not establish the whole absolute-dose budget.
+
+The slide therefore uses **~3% (k = 1) as a provisional literature benchmark**.
+It does not assign measured film error bars from that benchmark. A full
+published total already contains reading and nonuniformity terms: **do not add
+that total in quadrature with the workbook SD**. A common calibration-scale
+uncertainty affects absolute camera calibration and is correlated across the
+four wells; it does not behave as independent scatter between those wells.
 
 ### Film treatment in this comparison
 
@@ -352,9 +420,10 @@ All film wells use the same calibration and are assumed comparable, as instructe
 by Eric on 2026-11-16. No row-dependent offset, uncertainty term or dose correction
 is assigned. The measured film values and 1.0563 DN/Gy camera calibration are unchanged.
 
-The supplied **1.9–2.4% film uncertainties are treated as standard uncertainties
-(1σ, k = 1)**, as instructed by Eric on 2026-11-17. The film data were supplied;
-no independent film peak fit or new statistical uncertainty is calculated here.
+The 2026-11-18 workbook audit above supersedes the 2026-11-17 assumption that
+the historical 1.9–2.4% range represented supplied standard dose uncertainties.
+No independent film peak-fit uncertainty or complete scanner-specific dose
+uncertainty is calculated here.
 Four pulse/well pairs cannot separate real beam
 variation, camera response and target effects. The recorded frame/well mapping is taken
 as correct for this analysis, as instructed by Eric on 2026-11-16.

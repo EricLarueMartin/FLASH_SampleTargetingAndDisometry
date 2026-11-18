@@ -8,6 +8,24 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-18 — film workbook SD and absolute-dose uncertainty
+
+- Status: read-only workbook/source audit and presentation correction prepared
+  for the authorized Pages publication workflow; no measurement, calibration,
+  application or hardware changes. Input workbook is unchanged and unpublished.
+- Film41_Scintillation.xlsx supplies intensity SD, not a complete standard-dose
+  uncertainty budget. Replaced the prior supplied 1.9–2.4% interpretation with
+  ~3% k=1 as an explicitly provisional literature benchmark. No film error bars
+  or total from overlapping uncertainty contributions are invented.
+- Cited primary EBT-XD budgets (Jung 2025 and Raj 2024) and AAPM TG-235. The
+  ~2.8% illustration excludes Jung's 2% delivery-stability term. Documented
+  protocol/dose limits, SD semantics and shared calibration-scale covariance.
+- Files: docs/slides/2026-11-dosecam-film/{index.html,research.html};
+  docs/analysis/20261116_film_comparison/{README.md,RESEARCH.md}; this log.
+- Validation: workbook cell/OD checks, primary budget review, source arithmetic,
+  companion regeneration, local links, Git whitespace and slide-layout checks.
+- Rollback: revert this documentation commit; no device rollback.
+
 ## 2026-11-17 — camera fit-error and noise-accounting audit
 
 - Status: read-only reanalysis of archived parameters and background captures;

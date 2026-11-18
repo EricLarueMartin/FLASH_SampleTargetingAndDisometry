@@ -4,9 +4,13 @@ Data: `PolyAlDosCal_20261013_161112_732305_000006.raw` (4 frames, delay 200 µs,
 gain 1, 10-bit), 0.5 mm polycarbonate sheet backed with aluminum tape. Background reference:
 median of the 34 frames of `Alanine_20261013_145026_730724_000002.raw` (same gate, 100 µs delay,
 beam outside the gate). Film: EBT-XD lot 06092501, well_041, 24 h curve, reported
-peak doses and uncertainties supplied by Julia Sherman (2026-10-18/21).
-The supplied 1.9–2.4% film uncertainties are treated as standard uncertainties
-(1σ, k = 1), per E. Martin on 2026-11-17. Frame → well order **B1, A1, A2, A3** is taken as correct for this comparison
+peak doses supplied by Julia Sherman (2026-10-18/21). On 2026-11-18 Eric supplied
+`Film41_Scintillation.xlsx`: it contains intensity standard deviations, not a
+complete dose-uncertainty budget. This supersedes the earlier assumption that
+1.9–2.4% represented supplied standard dose uncertainties. The slide uses **~3%
+(k = 1) only as a literature benchmark**, not a verified uncertainty for these
+40 Gy measurements; see [workbook audit and published budgets](RESEARCH.md#workbook-audit-and-absolute-dose-uncertainty-2026-11-18).
+Frame → well order **B1, A1, A2, A3** is taken as correct for this comparison
 (per E. Martin, 2026-11-16).
 
 Figures: `frames.png` (the four pulses, same colour scale, fitted 1σ/2σ ellipses),
@@ -260,14 +264,17 @@ film peak 40.00 Gy. Camera amplitudes are the deployed-code fits in
 | Hit-masking / fit-method choice | ~1 % (mostly common-mode) | Amplitude moves 1–2 % between masking thresholds (`scripts/robust.py`) |
 | PC / Al-tape target | Likely nonuniform; contribution unmeasured | Tape surface, contact and local reflectivity can vary. The ~9 px spot drift can sample a different optical response; no quantitative target uncertainty has been established |
 | Gate timing | Not expected to contribute appreciably | Operator scanned delay and duration to full-signal plateaus, then selected operating margins much larger than expected jitter; no numerical percent bound assigned |
-| Supplied film uncertainty | **1.9–2.4% (1σ)** | Reported with the film data; treated as standard uncertainties (k = 1), per E. Martin. No separate film fit uncertainty is calculated here |
-| Film calibration / rate response | Mixed evidence; minor caveat | Studies disagree within different tested conditions; no rate-related bias is established for this run. See [research](RESEARCH.md#5-ebt-xd-at-40-gy) |
+| Film dose reference | **~3% (k = 1) literature benchmark** | The workbook supplies intensity SD, not the complete dose uncertainty. A published EBT-XD budget gives ~2.8% excluding delivery stability; protocol dependent, not verified at our 40 Gy. See [audit and sources](RESEARCH.md#workbook-audit-and-absolute-dose-uncertainty-2026-11-18) |
+| Film rate response | Mixed evidence; minor caveat | Studies disagree within different tested conditions; no rate-related bias is established for this run. See [research](RESEARCH.md#5-ebt-xd-at-40-gy) |
 
 The camera fit term is one combined contribution, not the quadrature sum of
 the empirical covariance and the component model checks below. Masking-method
 sensitivity and target nonuniformity are not established independent random
 terms, so no total is formed by summing these rows. No film-row effect is
-assigned or subtracted.
+assigned or subtracted. A film-calibration scale error is shared across the
+wells: it affects the absolute DoseCam calibration, not independent well-to-well
+scatter. Do not add a whole published film uncertainty budget to the workbook
+intensity SD; their reading/nonuniformity contributions can overlap.
 
 ## Camera peak-fit error and noise accounting
 
