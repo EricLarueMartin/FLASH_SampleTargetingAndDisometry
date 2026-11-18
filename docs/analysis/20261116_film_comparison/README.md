@@ -72,147 +72,99 @@ belt-kinematics name; physical user coordinates remain X and Z.
 
 ### CoreXY torque estimate
 
-Slide 6 assumes a **3 kg total moving load**, including three printed holders
-at approximately **75 g each (225 g combined)**, per E. Martin's revised estimate
-on 17 November. This replaces the earlier 125 g-per-holder estimate; the total
-design load remains 3 kg and the holders are not added to it a second time.
+Slide 6 uses an **itemized moving-mass estimate of 2.42936 kg**, rounded to
+**2.43 kg**, from the components listed by E. Martin. The shifted holder group
+is **0.814 kg** and the balanced moving hardware is **1.61536 kg**. The
+user-reported printed bearing brackets contribute 24 g in total. Small
+hardware allowances are identified below.
 
-For standard symmetric direct-drive CoreXY with equal load sharing in a pure
-vertical move, each motor's near-static gravity torque is `m*g*r/(2*eta)`.
-With `m=3 kg`, `g=9.80665 m/s²`, CAD belt-path radius `r≈0.00638 m` and assumed
-drive efficiency `eta=0.80`, this is **0.117312 N·m per motor**. Applying the
-user-requested **2× design margin** gives the balanced-load reference
-**0.234624 N·m per motor**. The endpoint allowance below adds the shifted
-group's unequal contribution. Acceleration, additional drag, belt preload
-and actual motor/driver speed-torque performance remain to be checked.
+For the endpoint torque budget, use the user's centre-of-mass model: the
+three holders, their tubes/mice and the two rail carriages form one shifted
+group, shared approximately **70/30** at maximum displacement. All other
+listed moving hardware is balanced and shared **50/50**. This is the requested
+endpoint-reaction planning approximation; the actual assembly has not been
+weighed or tested for running torque.
 
-Per E. Martin, assume the **STEPPERONLINE 17HS15-1504S-X1** motor. Its
-[manufacturer specifications](https://www.omc-stepperonline.com/3pcs-nema-17-bipolar-45ncm-63-74oz-in-1-5a-42x42x39mm-4-wires-w-1m-pin-connector-3-17hs15-1504s-x1)
-and [datasheet](https://omc-stepperonline.com/download/17HS15-1504S-X1.pdf) give
-**45 N·cm = 0.45 N·m holding torque at 1.5 A/phase**. This replaces the
-two-family motor comparison. Holding torque is a stationary value; see
-[Oriental Motor's distinction](https://www.orientalmotor.co.in/in/tech/reference/stepping-motor03).
-
-#### Driver current and the published motor curve
-
-The saved purchase record identifies three **EASON TB6600, 4 A, 9–42 V,
-up to 1/32 microstepping** drivers. E. Martin specifies a **12 V, 5 A supply**;
-its 5 A rating is supply capacity, not motor phase current. The public
-[EASON seller listing](https://www.amazon.com/dp/B08SG7L54W) provides a
-[photograph of the printed current table](https://m.media-amazon.com/images/I/61eN8srpbKL._SL1000_.jpg)
-and a [separate DIP table](https://m.media-amazon.com/images/S/aplus-media/sc/e53dee2a-58e0-48da-a7dc-61f9622d24e5.jpg).
-The **1.5 A nominal / 1.7 A peak** row has **S4 ON, S5 ON, S6 OFF**. This is
-a supported reference setting, not a record of the installed DIP positions.
-The label does not explicitly name its nominal-current column RMS.
-
-**Do not apply a blanket sinusoidal RMS conversion to holding torque.** At a
-fixed position the electrical angle stops advancing, so each coil has a fixed
-regulated current command, with PWM ripple around it. Toshiba's
-[TB6600HG datasheet](https://toshiba.semicon-storage.com/info/TB6600HG_datasheet_en_20160610.pdf?did=14683&prodName=TB6600HG),
-p. 7, specifies full-step phase-current magnitudes of **100% in both phases**.
-The [TB67S109A datasheet](https://toshiba.semicon-storage.com/info/TB67S109AFTG_datasheet_en_20250605.pdf?did=14642&prodName=TB67S109AFTG),
-initial-angle table on p. 17, also gives **100%/100% for full-step**, and
-**71%/71% for the initial quarter-through-1/32 microstep position**. The
-selected angle and excitation mode determine the stationary phase-current
-combination; a rotating sine's time-average RMS is not sufficient to predict
-the holding torque.
-
-The TB6600HG datasheet also explains that its current is peak-detected and
-the average is lower than that threshold. Thus the EASON table's **1.5 A
-nominal / 1.7 A peak** pair could concern current regulation; it does not by
-itself identify an RMS pair or establish a higher motion-only current. No
-driver-specific holding-torque derating or current-based payload capacity is
-inferred from those two labels. Retain **0.45 N·m as the motor's rated holding
-reference**, contingent on the corresponding phase excitation/current.
-
-The EASON listing does not identify the installed IC beyond its module name.
-Its advertised **1/32 microstepping and ADMD** match TB67S109A features;
-TB6600HG supports only up to 1/16. **TB67S109A-family is therefore a feature
-match, not a confirmed chip identification.** No EASON-specific readable chip
-marking, circuit diagram or teardown was located. The chip datasheets establish
-the relevant behaviour, not which IC is physically present in this unit.
-
-EASON advertises automatic standby with lower motor heating, but gives no
-delay or current fraction. TB67S109A describes clocked angle/current control
-and ADMD switching decay; it does not establish an automatic no-pulse current
-reduction for the EASON module. TB6600HG has a TQ input for 100%/30% current
-selection, but its presence likewise does not prove an EASON timer or reduction
-factor. Neither half-current hold nor a specific reduction is assumed here.
-
-The exact motor's [manufacturer torque–speed curve](https://files.omc-stepperonline.com/17HS15-1504S-X1_Torque_Curve.pdf)
-states **DM542T, 24 V, 1.69 A, 2000 pulses/revolution**. It is a speed sweep
-at one current, not a current sweep. Its current label does not specify RMS
-or peak. The [original DM542T manual](https://www.omc-stepperonline.com/download/DM542T.pdf)
-pairs **1.69 A RMS with 2.37 A peak**, which suggests an RMS convention for
-the curve but does not prove it. These conditions differ from the 12 V EASON
-setup. No exact-motor measured current-sweep or 12 V EASON torque curve was
-located; no numerical speed limit is inferred from the 24 V curve.
-
-#### Holders shifted to one side
-
-For the endpoint torque budget, use E. Martin's centre-of-mass load model:
-the **shifted group includes all three holders, their tubes/mice, and the rail
-carriages**. Treat this group as a point load between the motor-side supports.
-All remaining moving hardware is balanced and contributes equally to both
-sides. At maximum shift, use the user's approximate **70/30 split for the
-shifted group only**. This is an endpoint-reaction planning approximation,
-not a measured motor-torque split or a geometry-derived travel-limit result.
-
-If the support span is `L` and the shifted-group COM is at `x` from the far
-support, moment balance gives `R_near=m_s*g*x/L`, `R_far=m_s*g*(1-x/L)`.
-Thus 70/30 corresponds to `x=0.70*L`, or 0.20 of the span from the midpoint.
-The total 3 kg does not all move to that COM: with shifted mass `m_s` and
-balanced mass `m_b=3-m_s`, the motor-side equivalent supported masses are
-`m_near=m_b/2+0.70*m_s=1.5+0.20*m_s` and
-`m_far=m_b/2+0.30*m_s=1.5-0.20*m_s`, in kg. Their sum stays 3 kg.
-
-Using `g=9.80665 m/s²`, `r=0.00638 m`, assumed `eta=0.80` and the requested
-2× margin, the heavier-side torque budget is
-`T_near=2*g*r*(1.5+0.20*m_s)/eta`
-`=0.234624+0.0312832*m_s N·m`. The lighter side is
-`T_far=0.234624-0.0312832*m_s N·m`. **Only the shifted group gets 70/30**;
-applying the imbalance to all 3 kg overstates the endpoint case when some
-hardware remains balanced.
-
-Use the following **estimated shifted-group masses**, rather than assigning
-all 3 kg to that group:
+#### Shifted holder group
 
 | Component | Count | Planning mass each | Combined mass | Basis |
 |---|---:|---:|---:|---|
 | Printed holders | 3 | 75 g | 225 g | E. Martin's estimate and geometry check below |
 | Adult mice | 9 | 30 g | 270 g | [JAX C57BL/6J body-weight data](https://www.jax.org/jax-mice-and-services/strain-data-sheet-pages/body-weight-chart-000664): 12-week males average 29.3 ± 2.3 g |
-| Empty 50 mL plastic tubes with caps | 9 | 15 g | 135 g | [SARSTEDT 62.548.101](https://sustainability.sarstedt.com/en/US/c/life-science/sample-handling/reagent-and-centrifuge-tubes/p/screw-cap-tubes-with-conical-base/62.548.101): 50 mL PP conical tube, HDPE cap included, product weight 14.9 g; rounded to 15 g |
-| MGN15H rail carriages | 2 | 92 g | 184 g | [HIWIN technical catalog](https://hiwin.com/wp-content/uploads/2026/08/HIWIN-Linear-Guideway-Catalog-1.pdf#page=91), printed p. 88 / PDF p. 91: MGN15H block weight 0.092 kg |
+| Empty 50 mL plastic tubes with caps | 9 | 15 g | 135 g | [SARSTEDT 62.548.101](https://sustainability.sarstedt.com/en/US/c/life-science/sample-handling/reagent-and-centrifuge-tubes/p/screw-cap-tubes-with-conical-base/62.548.101): product weight 14.9 g, rounded to 15 g |
+| MGN15H rail carriages | 2 | 92 g | 184 g | [HIWIN technical catalog](https://hiwin.com/wp-content/uploads/2026/08/HIWIN-Linear-Guideway-Catalog-1.pdf#page=91), printed p. 88 / PDF p. 91: block weight 0.092 kg |
 | **Shifted group** | | | **814 g = 0.814 kg** | |
 
-The mouse value is a representative adult planning assumption, not a universal
-adult weight or an identification of the actual cohort. JAX's same table gives
-12-week females 21.7 ± 1.5 g and 24-week males 35.3 ± 3.9 g. The tube and
-carriage entries are manufacturer reference models, not confirmed identities
-or measured masses of the installed parts. The two-carriage count comes from
-the user's stated rail configuration. The 1 m rail itself and other balanced
-hardware remain in the balanced portion; the rail is not added to the shifted
-group. No liquid mass is added to tubes holding mice.
+The mouse value is a representative adult planning assumption. JAX's same
+reference gives 12-week females 21.7 ± 1.5 g and 24-week males 35.3 ± 3.9 g.
+Tube and carriage masses use reference models; the actual installed models
+and animal cohort are not identified. Counts follow the user's configuration.
 
-The remaining balanced mass is `3-0.814=2.186 kg`. At maximum shift:
+#### Balanced moving hardware
 
-- Heavier side: `2.186/2+0.70*0.814 = 1.6628 kg-equivalent`.
-- Lighter side: `2.186/2+0.30*0.814 = 1.3372 kg-equivalent`.
+| Component | Quantity | Mass basis | Combined mass | Source / status |
+|---|---:|---:|---:|---|
+| MakerBeamXL extrusion | 1200 mm total | 0.297 g/mm | 356.4 g | [MakerBeam manufacturer specifications](https://www.makerbeam.com/blogs/makerbeam/specifications-makerbeam-and-openbeam/) for the 15 × 15 mm XL profile |
+| MGN15 rail | 1000 mm | 1.06 kg/m | 1060 g | [HIWIN catalog](https://hiwin.com/wp-content/uploads/2026/08/HIWIN-Linear-Guideway-Catalog-1.pdf#page=91), same table as the MGN15H blocks |
+| Small GT2 idler pulleys | 4 | 5 g allowance each | 20 g | Rounded reference allowance; a [Purecrea 20-tooth, 6 mm belt-width idler](https://www.bastelgarage.ch/gt2-idler-pulley-for-20-teeth-3mm-bore) is listed at 3.7 g; actual pulley model unconfirmed |
+| 2GT belt | 3.2 m | Assume 6 mm width; 1.3 g/(mm width × m length) | 24.96 g | [Gates U508 unit-mass table](https://www.gates.com/content/dam/documents-library/catalogs/U508-manual-kr.pdf); 3.2 × 6 × 1.3 |
+| LM8UU bearings | 4 | 17 g each | 68 g | [ISK manufacturer specification](https://iskbearing.com/product-details/lm8uu), 8 × 15 × 24 mm |
+| Printed bearing brackets | All | 24 g total | 24 g | E. Martin's reported printed mass |
+| MakerBeamXL steel L / right-angle brackets | 4 | 13 g reference allowance each | 52 g | [OEM steel bracket, article 101732](https://www.makerbeam.com/makerbeam-makerbeam-xl-right-angle-bracket-12p.html); [distributor product datasheet](https://www.berrybase.at/en/product-datasheet/019bc1e6847770ffa036fba1d40740db/create) lists 13 g for the 45 × 45 × 1.5 mm bracket; actual bracket variant unconfirmed |
+| Additional fasteners | All | 10 g allowance | 10 g | Planning allowance for the user's additional few grams |
+| **Balanced hardware** | | | **1615.36 g = 1.61536 kg** | |
 
-With the same `r=6.38 mm`, assumed `eta=0.80` and requested 2× margin,
-`T=2*m_equivalent*g*r/eta` gives **0.2601 N·m on the heavier motor** and
-**0.2092 N·m on the lighter motor**, rounded on slide 6 to **0.26 and
-0.21 N·m**, respectively. Before the 2× margin, they are approximately
-**0.1300 and 0.1046 N·m**. The loads sum to the original 3 kg; the shifted
-group is included in that total, not added on top of it.
+These quantities comprise the user's listed moving hardware. The rail is
+counted once in the balanced group, and its two carriages once in the shifted
+group. The complete estimated moving mass is therefore
+`0.814 + 1.61536 = 2.42936 kg`.
 
-The heavier-side estimate compares to **0.45 N·m rated holding**, giving
-approximately **3.46× static gravity margin** before additional drag or
-dynamics, if the actual excitation supplies rated holding torque. Changing
-the mouse estimate from 30 g to 20–40 g each changes the heavier-side 2×
-torque by only about ±0.0028 N·m. These remain gravity-load planning estimates,
-not measured 12 V running payload capacities. No private receipt or account
-details are published.
+#### Endpoint load and torque calculation
+
+For support span `L` and shifted-group COM at `x` from the far support,
+moment balance gives `R_near=m_s*g*x/L` and
+`R_far=m_s*g*(1-x/L)`. The user's 70/30 estimate corresponds to `x=0.70*L`.
+With balanced mass `m_b` and shifted mass `m_s`, use:
+
+- Heavier side: `m_near=m_b/2+0.70*m_s = 1.37748 kg-equivalent`.
+- Lighter side: `m_far=m_b/2+0.30*m_s = 1.05188 kg-equivalent`.
+
+Their sum is the complete **2.42936 kg** moving mass. The endpoint forces are
+approximately **13.51 N and 10.32 N**.
+
+Using `g=9.80665 m/s²`, CAD belt-path radius `r=0.00638 m`, assumed drive
+efficiency `eta=0.80` and the requested **2× margin**, calculate
+`T_required=2*m_equivalent*g*r/eta`:
+
+| Motor side | Gravity torque before margin | Required torque with 2× margin |
+|---|---:|---:|
+| Heavier | 0.107730 N·m | **0.215460 N·m**, rounded to **0.22 N·m** |
+| Lighter | 0.082265 N·m | **0.164531 N·m**, rounded to **0.16 N·m** |
+
+Against the **0.45 N·m rated holding** reference, the heavier side has
+approximately **4.18× static gravity margin**, provided the actual phase
+excitation delivers that holding torque. Acceleration, additional drag, belt
+preload and motor/driver speed-torque performance remain to be checked.
+Changing the mouse assumption from 30 g to 20–40 g each changes the heavier
+motor's 2× requirement by about ±0.0099 N·m with the balanced inventory fixed.
+Small hardware allowances are much less influential than the rail and profile
+masses. These are gravity-load estimates, not measured running payload ratings.
+
+#### Motor and driver reference
+
+Per E. Martin, assume **STEPPERONLINE 17HS15-1504S-X1**. Its
+[manufacturer specifications](https://www.omc-stepperonline.com/3pcs-nema-17-bipolar-45ncm-63-74oz-in-1-5a-42x42x39mm-4-wires-w-1m-pin-connector-3-17hs15-1504s-x1)
+and [datasheet](https://omc-stepperonline.com/download/17HS15-1504S-X1.pdf) give
+**45 N·cm = 0.45 N·m rated holding torque at 1.5 A/phase**. The purchased driver
+is the [EASON TB6600 module](https://www.amazon.com/dp/B08SG7L54W), with the
+user-specified **12 V / 5 A supply**. Its label includes a 1.5 A current setting;
+actual phase-current calibration and standby behaviour are unverified.
+
+The exact motor's [manufacturer torque–speed curve](https://files.omc-stepperonline.com/17HS15-1504S-X1_Torque_Curve.pdf)
+states **DM542T, 24 V, 1.69 A and 2000 pulses/revolution**. It is a speed sweep
+under those conditions, which differ from the 12 V EASON setup. The rated
+holding reference does not establish available running torque or a speed limit.
+No private purchase receipts or account details are published.
 
 Holder mass cross-check: the user supplied surface area `A=55,227 mm²`, solid
 CAD volume `V=98,627 mm³`, two walls of `0.45+0.42=0.87 mm`, and 15% infill.

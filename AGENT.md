@@ -8,6 +8,29 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-17 — itemized complete moving-mass budget
+
+- Status: sourced slide 6 and analysis revision prepared for authorized Pages
+  publication. No device operations or driver-setting changes.
+- Replaced the 3 kg assumption with the user's complete moving inventory.
+  Shifted holders/contents/carriages remain 814 g. Balanced hardware totals
+  1615.36 g: 1200 mm MakerBeamXL 356.4 g; 1 m MGN15 rail 1060 g;
+  4 pulleys 20 g allowance; 3.2 m x 6 mm 2GT belt 24.96 g; 4 LM8UU 68 g;
+  printed bearing brackets 24 g reported by Eric; 4 steel L brackets 52 g
+  reference allowance; additional fasteners 10 g allowance.
+- Complete moving estimate is 2429.36 g (~2.43 kg). Under the requested
+  70/30 shifted-group and 50/50 balanced-group model, equivalent loads are
+  1.37748 / 1.05188 kg. With 80% efficiency, 6.38 mm pulley radius and 2x
+  margin, required torques are 0.215460 / 0.164531 N·m (~0.22 / 0.16).
+- Added all component mass sources/allowances and removed the unnecessary
+  driver-excitation discussion from the presentation and current analysis.
+  Kept the 0.45 N·m rated holding reference and the published curve conditions.
+- Files: docs/slides/2026-11-dosecam-film/index.html;
+  docs/analysis/20261116_film_comparison/README.md; this log.
+- Validation: independent calculator/source review, load conservation, local
+  links and seven-slide checks, Git whitespace checks and browser layout QA.
+- Rollback: revert this documentation commit; no hardware/application rollback.
+
 ## 2026-11-17 — estimated loaded-holder and carriage masses
 
 - Status: sourced slide 6 and calculation update prepared for authorized Pages
