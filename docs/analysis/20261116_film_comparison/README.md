@@ -63,22 +63,25 @@ exposure with 100 µs delay. It is not a 100 µs dosimetry pulse image.
 
 ## Rig upgrade slides
 
-Slide 6 uses an unchanged embedded PNG from `hardware/cad/FLASH Core XY.f3z`:
-nested model `be8cead4-aaac-45fb-b7e0-ac6393ba87d1.f3d`, member
-`FusionAssetName[Active]/Previews/big.png`. The archive identifies FLASH Core XY,
-version 23, created 17 November 2026 at 18:15 EST. The 1024×1024 image is copied byte for byte
-to the deck's `img/corexy_cad.png`; SHA-256:
-`61e1e402747028d2de66927c96650e4e73b30828b68a814704044025d1e1c63e`.
-The slide crops surrounding white space for display. It is a CAD preview of
-the rail/belt assembly and three holders, not an installed-stage photograph.
-The updated model includes the user's MakerBeam dummy and linked
-`LM8UUonMakerBeamXL` v3 bracket component. Bracket fit and strength have not
-been assessed for the presentation. The repository CAD matches the updated
-`FLASH/FLASH Core XY.f3z` export byte for byte; archive SHA-256:
-`34c3a2f023a999bdfcf550c61bba87ddbf163a7a9297ad3eabb01be80cceda88`.
-Containment inside a frame and reduced susceptibility to bumps
-are the user's design goals, not measured performance claims. CoreXY is the
-belt-kinematics name; physical user coordinates remain X and Z.
+Slide 6 shows the 18 November 2026 CoreXY assembly. Its two source files are the
+[editable Fusion archive](../../../hardware/cad/Configuration%201.f3z) and the
+[CoreXY v0.7 STEP export](../../../hardware/cad/FLASH_CoreXYv0.7.step).
+The Fusion manifest identifies the root design as `Configuration 1`, version 53,
+saved at 16:43 EST. The STEP header records the v0.7 export at 16:50 EST.
+The earlier `FLASH Core XY.f3z` is a separate Fusion design, version 23.
+
+The slide uses Fusion’s embedded 1024 × 1024 assembly preview. In the archive,
+open the manifest root `93d0989c-3dc7-4747-92fb-4aa2e840ff6a.f3d`, then
+`FusionAssetName[Active]/Previews/big.png`. The deck crops whitespace for display.
+SHA-256 of the extracted PNG is
+`1dac27aae2c792b27b2105a8fe602175f0ab288483e7847a9881b74b1d3b189f`.
+
+The STEP assembly contains three holder occurrences, two MGN15H carriages, two
+`LM8UUonMakerBeamXL100mm` mounts, M3 sleeved bolts, 8 mm rod attachments, a
+base support and MakerBeamXL right-angle brackets. The 2.43 kg calculation below
+uses the operator’s planned moving hardware and loaded holders. The CAD includes
+fixed parts as well. Keeping movement inside the frame is intended to reduce
+accidental bumps. Physical user coordinates are X and Z.
 
 ### CoreXY torque estimate
 

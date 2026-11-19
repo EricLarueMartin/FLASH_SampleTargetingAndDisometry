@@ -8,6 +8,18 @@ Read `README.md` first (layout and install paths), then the logs in `docs/histor
 
 Append new entries here (newest first) with date, status (verified / not verified / deployed), files, and rollback.
 
+## 2026-11-18 — CoreXY v0.7 assembly on slide 6
+
+- Verified the local Fusion manifest, root preview checksum, STEP assembly
+  occurrences and source file hashes against the parent FLASH exports.
+- Added `hardware/cad/Configuration 1.f3z` and `hardware/cad/FLASH_CoreXYv0.7.step`.
+  Updated slide 6 in `docs/slides/2026-11-dosecam-film/index.html`, its
+  `img/corexy_cad.png` and the CAD provenance in the film-comparison README.
+- The new assembly shows the 100 mm bearing mounts and 8 mm rod attachments.
+  The load estimate continues to describe the operator’s planned moving parts.
+- Rollback by restoring the preceding slide image, caption and provenance and
+  removing the two newly added exports. The v23 archive remains available.
+
 ## 2026-11-18 — proposed DoseCam slides after uncertainty review
 
 - Local preview verified in the browser with the outline and both color modes.

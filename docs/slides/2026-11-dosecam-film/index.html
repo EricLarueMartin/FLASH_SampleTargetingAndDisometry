@@ -162,15 +162,15 @@
   <h1>Keep the motion inside a frame</h1>
   <div class="columns corexy-layout">
     <figure class="corexy-figure">
-      <svg viewBox="20 175 985 670" role="img" aria-label="Updated FLASH Core XY v23 CAD preview showing three holders on the central rail, the frame assembly, two motors, MakerBeam dummy and proposed LM8UU mounting brackets.">
-        <image href="img/corexy_cad.png?v=23" width="1024" height="1024"/>
+      <svg viewBox="20 175 985 640" role="img" aria-label="CoreXY v0.7 assembly with three sample holders on the crossrail, two stepper motors, and rod and bearing mounts at the ends of the rail.">
+        <image href="img/corexy_cad.png?v=0.7" width="1024" height="1024"/>
       </svg>
-      <figcaption>FLASH Core XY v23 · 17 Nov 2026. Three holders at ~75 g each (~225 g total), included in the itemized moving-mass estimate.</figcaption>
+      <figcaption>CoreXY v0.7 · 18 Nov 2026. The three holders ride on the crossrail. The updated frame includes 100 mm LM8UU mounts and attachments for the 8 mm rods.</figcaption>
     </figure>
     <div class="upgrade-copy">
       <p>Replace the actuator with <b>CoreXY motion inside a fixed frame</b>, reducing exposure to bumps that could shift the target.</p>
       <div class="torque-estimate">
-        <h2>Estimated moving mass ~2.43 kg · 2× margin</h2>
+        <h2>Planned moving load ~2.43 kg · 2× margin</h2>
         <p class="torque-result"><b>~0.22 N·m if one motor carries the heavier side</b></p>
         <p class="torque-assumptions"><b>Shifted group ~0.814 kg:</b> 3 × 75 g holders, 9 × 30 g mice <a href="https://www.jax.org/jax-mice-and-services/strain-data-sheet-pages/body-weight-chart-000664" target="_blank" rel="noopener">[10]</a>, 9 × 15 g capped tubes <a href="https://sustainability.sarstedt.com/en/US/c/life-science/sample-handling/reagent-and-centrifuge-tubes/p/screw-cap-tubes-with-conical-base/62.548.101" target="_blank" rel="noopener">[11]</a> and 2 × 92 g MGN15H carriages <a href="https://hiwin.com/wp-content/uploads/2026/08/HIWIN-Linear-Guideway-Catalog-1.pdf#page=91" target="_blank" rel="noopener">[12]</a>, shared 70/30.</p>
         <p class="torque-assumptions"><b>Balanced hardware ~1.615 kg:</b> 1 m rail (1.060 kg) <a href="https://hiwin.com/wp-content/uploads/2026/08/HIWIN-Linear-Guideway-Catalog-1.pdf#page=91" target="_blank" rel="noopener">[12]</a>, 1.2 m MakerBeamXL (0.356 kg) <a href="https://www.makerbeam.com/blogs/makerbeam/specifications-makerbeam-and-openbeam/" target="_blank" rel="noopener">[13]</a>, 4 pulleys, 3.2 m belt, 4 LM8UU, 24 g printed bearing brackets, 4 L brackets and fasteners (~0.199 kg combined) <a href="../../analysis/20261116_film_comparison/README.md#balanced-moving-hardware" target="_blank">[9]</a>, shared 50/50.</p>
@@ -179,7 +179,7 @@
       </div>
     </div>
   </div>
-  <p class="sources"><a href="https://github.com/EricLarueMartin/FLASH_SampleTargetingAndDisometry/blob/main/hardware/cad/FLASH%20Core%20XY.f3z" target="_blank" rel="noopener">CAD source</a> · [9] <a href="../../analysis/20261116_film_comparison/README.md#corexy-torque-estimate" target="_blank">complete mass ledger, primary sources and torque calculation</a> · [6] <a href="https://www.omc-stepperonline.com/3pcs-nema-17-bipolar-45ncm-63-74oz-in-1-5a-42x42x39mm-4-wires-w-1m-pin-connector-3-17hs15-1504s-x1" target="_blank" rel="noopener">motor specifications</a> · [7] <a href="https://files.omc-stepperonline.com/17HS15-1504S-X1_Torque_Curve.pdf" target="_blank" rel="noopener">torque–speed curve</a>.<br>Masses are estimates except the user-reported 24 g printed brackets. Small pulleys, L brackets and fasteners use stated allowances. 70/30 endpoint sharing and 80% efficiency are assumptions. The motor rating is holding torque.</p>
+  <p class="sources"><a href="https://github.com/EricLarueMartin/FLASH_SampleTargetingAndDisometry/blob/main/docs/analysis/20261116_film_comparison/README.md#rig-upgrade-slides" target="_blank" rel="noopener">Fusion and STEP export details</a> · [9] <a href="../../analysis/20261116_film_comparison/README.md#corexy-torque-estimate" target="_blank">complete mass ledger, primary sources and torque calculation</a> · [6] <a href="https://www.omc-stepperonline.com/3pcs-nema-17-bipolar-45ncm-63-74oz-in-1-5a-42x42x39mm-4-wires-w-1m-pin-connector-3-17hs15-1504s-x1" target="_blank" rel="noopener">motor specifications</a> · [7] <a href="https://files.omc-stepperonline.com/17HS15-1504S-X1_Torque_Curve.pdf" target="_blank" rel="noopener">torque–speed curve</a>.<br>Masses are estimates except the user-reported 24 g printed brackets. Small pulleys, L brackets and fasteners use stated allowances. 70/30 endpoint sharing and 80% efficiency are assumptions. The motor rating is holding torque.</p>
 </section>
 
 <section id="automation">
